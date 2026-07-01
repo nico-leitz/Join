@@ -22,6 +22,13 @@
 - Beim Daily wird in die Main gepushed/gemerged (Nach Absprache)
 - Änderungen müssen immer vorher abgesprochen werden
 
+## Commitstruktur
+- Commit struktur: Beispiel feat(layout): add basic layout
+- Aufbau vor der klammer feat/fix/docs/refactor
+- In der Klammer () steht der Bereich
+- nach dem doppelpunkt klare Bennenung mit add/create/harden/correct/adapt etc.
+- danach die Änderung angeben
+
 # Projektplanung (Trello)
 - Grundstruktur wird nicht verändert (ggf. nach Absprache)
 - Auf keinen Fall unabgesprochen Task hin und her schieben (oder anderen wegnehmen)
