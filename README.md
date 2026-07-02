@@ -1,59 +1,63 @@
-# Join
+# Skills
+- Basti: Struktur, Logik und Datenbanken, API's
+- Kevin: Design, Logik
+- Oliver:
+- Nico: Struktur, Logik, Datenbanken, API's, SCSS
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.18.
+# GitHub Manifest
+- repo clonen
+- Main Branch - (Produktiv)
+- Jede Person bekommt einen eigenen Branch (Entwicklung)
+- ! Wichtig: Vor Arbeitsantritt immer Pullen (Pflicht Pull nach den Dailies/Merging)
+- ! Sicherstellen das nach dem Daily wirklich jeder auf dem gleichen Stand ist !
+- ! Config-Dateien nur nach Absprache anfassen
 
-## Development server
+## Wie werden Reviews gehandhabt
+- Sind Pflicht!
+- Jeder sollte sich für die Reviews 30min (pro Tag) Zeit nehmen
+- Merging wird im Daily besprochen (Gerne vorab Notizen machen)
+- 6 Augen Prinzip (First Check + Second Check)
 
-To start a local development server, run:
+## Nach welchen Regeln wird in die Main gepushed
+- Beim Daily wird in die Main gepushed/gemerged (Nach Absprache)
+- Änderungen müssen immer vorher abgesprochen werden
 
-```bash
-ng serve
-```
+## Commitstruktur
+- Commit struktur: Beispiel feat(layout): add basic layout
+- Aufbau vor der klammer feat/fix/docs/refactor
+- In der Klammer () steht der Bereich
+- nach dem doppelpunkt klare Bennenung mit add/create/harden/correct/adapt etc.
+- danach die Änderung angeben
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+# Projektplanung (Trello)
+- Grundstruktur wird nicht verändert (ggf. nach Absprache)
+- Auf keinen Fall unabgesprochen Task hin und her schieben (oder anderen wegnehmen)
+- Nicht mehr als an 2 Tasks gleichzeitig arbeiten
+- Täglich Updaten
 
-## Code scaffolding
+## Wie werden Aufgaben verteilt
+- Werden innerhalb der Gruppe abgesprochen (im Daily)
+- Realistische Aufgaben Verteilung (Nach Skills und Zeit)
+- Aufgaben sollen auf alle Entwickler gleichmäßig aufgeteilt werden
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+# Tests (Wenn noch Zeit ist oder jemand interesse daran hat)
 
-```bash
-ng generate component component-name
-```
+# Allgemeines und Infos: 
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Zeiten für Dailies und Calls
+- Montags, Mittwoch, Freitags -> 11:00 Uhr Daily
+- Dienstags, Donnerstags -> 11:00 Uhr Gruppencall
 
-```bash
-ng generate --help
-```
+## Sprintphasen
 
-## Building
+- Phase 1: Implementierung des Kontaktbereichs sowie der Datenbankanbindung inklusive responsiver Navigation (vorerst ohne funktionale Logik, Stichtag: Donnerstag, der 09.).
 
-To build the project run:
+- Phase 2: Entwicklung der Funktion zum Anlegen von Tasks sowie die Implementierung der Drag-and-Drop-Funktionalität für das Board.
 
-```bash
-ng build
-```
+- Phase 3: Fertigstellung der Zusammenfassung (Summary) und des Login-Bereichs.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+# Verpflichtend für alle:
+- MVP ist immer die erste Priorität (Features Last)
+- Angular Poster kaufen und 3 mal am Tag praisen
+- Spaß haben!
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
