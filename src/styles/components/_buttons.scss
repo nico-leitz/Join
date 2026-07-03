@@ -1,0 +1,32 @@
+button {
+    background-color: var(--button-primary-bg);
+    border: none;
+    border-radius: 8px;
+    color: var(--button-primary-color);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 24px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--button-primary-bg-hover);
+}
+
+.button_clean {
+    background-color: transparent;
+    border: 1px solid var(--button-primary-bg);
+    color: var(--button-primary-color);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 24px;
+    transition: background-color 0.3s ease;
+}
+
+.button_clean:hover {
+    background-color: var(--button-primary-bg-hover);
+    border: 1px solid var(--button-primary-bg-hover);
+    color: var(--button-primary-color-hover);
+}
