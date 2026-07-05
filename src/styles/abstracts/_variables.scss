@@ -1,29 +1,26 @@
-:root {
-    --primary-color: #F6F7F8;
-    --secondary-color: #ffffff;
-    --accent-color: #2A3647; //Für den Side Bar Hintergrund
+// Farben
+$primary-color: #F6F7F8;
+$secondary-color: #ffffff;
+$accent-color: #2A3647;
 
-    // Buttons
+// Buttons
+$button-primary-bg: $accent-color;
+$button-hover-bg: #29ABE2;
+$button-selected-bg: rgba(0, 0, 0, 0.25);
 
-    --button-primary-bg: var(--accent-color);
-    --button-hover-bg: #29ABE2;
-    --button-selected-bg: #00000040;
-
-    // contact BG
-
-    --contact-bg: #FF7A00;
-    --contact-bg-two: #FF5EB3;
-    --contact-bg-three: #6E52FF;
-    --contact-bg-four: #9327FF;
-    --contact-bg-five: #00BEE8;
-    --contact-bg-six: #1FD7C1;
-    --contact-bg-seven: #FF745E;
-    --contact-bg-eight: #FFA35E;
-    --contact-bg-nine: #FC71FF;
-    --contact-bg-ten: #FFC701;
-    --contact-bg-eleven: #0038FF;
-    --contact-bg-twelve: #C3FF2B;
-    --contact-bg-thirteen: #FFE62B;
-    --contact-bg-fourteen: #FF4646;
-    --contact-bg-fifteen: #FFBB2B;
-}
+// Contact Backgrounds
+$contact-bg: #FF7A00;
+$contact-bg-two: #FF5EB3;
+$contact-bg-three: #6E52FF;
+$contact-bg-four: #9327FF;
+$contact-bg-five: #00BEE8;
+$contact-bg-six: #1FD7C1;
+$contact-bg-seven: #FF745E;
+$contact-bg-eight: #FFA35E;
+$contact-bg-nine: #FC71FF;
+$contact-bg-ten: #FFC701;
+$contact-bg-eleven: #0038FF;
+$contact-bg-twelve: #C3FF2B;
+$contact-bg-thirteen: #FFE62B;
+$contact-bg-fourteen: #FF4646;
+$contact-bg-fifteen: #FFBB2B;
