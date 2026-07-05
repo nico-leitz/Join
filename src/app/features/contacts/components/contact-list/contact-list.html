@@ -1,5 +1,22 @@
-@for(contact of contacts; track contact.id) {
-    <p>{{ contact.firstName }}</p>
-    <p>{{ contact.lastName }}</p>
-    <p>{{ contact.email }}</p>
-}
+<button class="contact__button">Add new contact</button>
+
+<div class="contact__wrapper">
+  <div class="contact__scroll_container">
+    @for (contact of contacts; track contact.id; let i = $index) {
+      @if (i === 0 || contact.firstName[0] !== contacts[i - 1].firstName[0]) {
+        <div class="contact__letter_header">{{ contact.firstName[0] }}</div>
+      }
+
+      <div class="contact__item">
+        <div class="contact__badge">
+          {{ getInitials(contact.firstName, contact.lastName) }}
+        </div>
+
+        <div class="contact__info">
+          <p class="contact__name">{{ contact.firstName }} {{ contact.lastName }}</p>
+          <p class="contact__email">{{ contact.email }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>
