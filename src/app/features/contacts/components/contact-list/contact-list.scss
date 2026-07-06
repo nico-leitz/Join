@@ -1,0 +1,80 @@
+@use 'abstracts/variables' as var;
+
+.contact {
+  &__button {
+    background-color: var.$accent-color;
+    color: white;
+    width: 100%;
+    max-width: 20rem;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: var.$button-hover-bg;
+    }
+  }
+
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 80px);
+    max-width: 20rem;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  &__scroll_container {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 10px;
+    flex: 1;
+  }
+
+  &__letter_header {
+    font-weight: bold;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+    margin-top: 15px;
+    margin-bottom: 10px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var.$contact-bg-five;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border: 2px solid white;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  &__email {
+    margin: 0;
+    font-size: 14px;
+    color: var.$contact-bg-five;
+  }
+}
