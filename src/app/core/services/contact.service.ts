@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { supabase } from '../supabase/supabase';
+import { Injectable, inject} from '@angular/core';
+import { SupabaseService } from '../supabase/supabase';
 import {
   Contact,
   ContactRow,
@@ -12,7 +12,7 @@ import {
 })
 export class ContactService {
   private readonly tableName = 'contacts';
-  private readonly supabase = supabase;
+  private readonly supabase = inject(SupabaseService).client;
 
   async getContacts(): Promise<Contact[]> {
     const { data, error } = await this.supabase
