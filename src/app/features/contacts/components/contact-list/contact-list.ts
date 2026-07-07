@@ -20,6 +20,7 @@ export class ContactList {
       const getContacts = await this.contactService.getContacts();
       const sortedContact = await this.sortContacts(getContacts);
       this.contacts.set(sortedContact);
+      
     } catch (error) {
       console.error('Fehler beim Laden der Kontakte in der Liste:', error);
     }
