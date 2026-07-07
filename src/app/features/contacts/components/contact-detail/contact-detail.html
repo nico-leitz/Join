@@ -1,46 +1,42 @@
 <div class="detail">
-  
   <header class="detail__header">
     <h1 class="detail__title">Contacts</h1>
     <div class="detail__divider"></div>
     <span class="detail__subtitle">Better with a team</span>
   </header>
 
-  <div class="detail__profile">
-    
-    <div class="detail__badge" [style.background-color]="">
-      HM
-    </div>
+  @if (contact(); as contact) {
+    <div class="detail__profile">
+      <div class="detail__badge">
+        {{ getInitials(contact.firstName, contact.lastName) }}
+      </div>
 
-    <div class="detail__name-section">
-      <h2 class="detail__name">Hans Müller</h2>
-      
-      <div class="detail__actions">
-        <button class="action-btn">
-          <span class="icon">✏️</span> Edit
-        </button>
-        <button class="action-btn">
-          <span class="icon">🗑️</span> Delete
-        </button>
+      <div class="detail__name-section">
+        <h2 class="detail__name">{{ contact.firstName }} {{ contact.lastName }}</h2>
+
+        <div class="detail__actions">
+          <button class="action-btn"><span class="icon">✏️</span> Edit</button>
+          <button (click)="contactService.deleteContact(contact.id)" class="action-btn">
+            <span class="icon">🗑️</span> Delete
+          </button>
+        </div>
       </div>
     </div>
 
-  </div>
+    <div class="detail__info-section">
+      <h3 class="detail__info-title">Contact Information</h3>
 
-  <div class="detail__info-section">
-    <h3 class="detail__info-title">Contact Information</h3>
-    
-    <div class="info-group">
-      <span class="info-label">Email</span>
-      <a [href]="'mailto:'" class="info-value info-link">
-        test email
-      </a>
+      <div class="info-group">
+        <span class="info-label">Email</span>
+        <a [href]="'mailto:' + contact.email" class="info-value info-link">
+          {{ contact.email }}
+        </a>
+      </div>
+
+      <div class="info-group">
+        <span class="info-label">Phone</span>
+        <span class="info-value">{{ contact.phone || 'No phone number' }}</span>
+      </div>
     </div>
-
-    <div class="info-group">
-      <span class="info-label">Phone</span>
-      <span class="info-value">test phone</span>
-    </div>
-  </div>
-
+  }
 </div>

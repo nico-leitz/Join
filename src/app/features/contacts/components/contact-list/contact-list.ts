@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ContactService } from '../../../../core/services/contact.service';
 import { Contact } from '../../../../core/models/contact.model';
 import { SupabaseService } from '../../../../core/supabase/supabase';
@@ -9,21 +9,24 @@ import { SupabaseService } from '../../../../core/supabase/supabase';
   templateUrl: './contact-list.html',
   styleUrl: './contact-list.scss',
 })
-export class ContactList {
+export class ContactList implements OnInit {
   supabase = inject(SupabaseService);
   contactService = inject(ContactService);
 
-  contacts = signal<Contact[]>([]);
+  contacts = this.contactService.allContacts;
 
   async ngOnInit() {
     try {
       const getContacts = await this.contactService.getContacts();
       const sortedContact = await this.sortContacts(getContacts);
       this.contacts.set(sortedContact);
-      
     } catch (error) {
       console.error('Fehler beim Laden der Kontakte in der Liste:', error);
     }
+  }
+
+  getContact(contact: Contact) {
+    this.contactService.selectedContact.set(contact);
   }
 
   sortContacts(contactsArray: Contact[]) {
