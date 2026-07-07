@@ -10,7 +10,7 @@
         </div>
       }
 
-      <div class="contact__item">
+      <div (click)="getContact(contact)" class="contact__item">
         <div class="contact__badge">
           {{ getInitials(contact.firstName || '', contact.lastName || '') }}
         </div>
