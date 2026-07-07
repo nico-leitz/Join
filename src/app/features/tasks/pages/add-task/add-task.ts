@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { Sidebar } from '../../../../layout/sidebar/sidebar';
 
 @Component({
   selector: 'app-add-task',
-  imports: [Sidebar],
+  imports: [],
   templateUrl: './add-task.html',
   styleUrl: './add-task.scss',
 })
