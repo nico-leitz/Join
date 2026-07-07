@@ -2,14 +2,17 @@
 
 <div class="contact__wrapper">
   <div class="contact__scroll_container">
-    @for (contact of contacts; track contact.id; let i = $index) {
-      @if (i === 0 || contact.firstName[0] !== contacts[i - 1].firstName[0]) {
-        <div class="contact__letter_header">{{ contact.firstName[0] }}</div>
+    @for (contact of contacts(); track contact.id; let i = $index) {
+      
+      @if (i === 0 || (contact.firstName?.[0] !== contacts()[i - 1]?.firstName?.[0])) {
+        <div class="contact__letter_header">
+          {{ contact.firstName?.[0] || '?' }}
+        </div>
       }
 
       <div class="contact__item">
         <div class="contact__badge">
-          {{ getInitials(contact.firstName, contact.lastName) }}
+          {{ getInitials(contact.firstName || '', contact.lastName || '') }}
         </div>
 
         <div class="contact__info">
