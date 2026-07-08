@@ -1,81 +1,122 @@
-@use 'abstracts/variables' as var;
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 32px 36px;
+}
 
 .contact {
   &__button {
-    background-color: var.$accent-color;
-    color: white;
     width: 100%;
-    max-width: 20rem;
+    min-height: 48px;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+    background-color: var(--color-primary, #2a3647);
+    color: var(--color-text-light, #ffffff);
     padding: 12px 24px;
     border-radius: 8px;
     border: none;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    margin-bottom: 1rem;
     transition: background-color 0.3s ease;
-    flex-shrink: 0;
 
     &:hover {
-      background-color: var.$button-hover-bg;
+      background-color: var(--color-primary-hover, #29abe2);
     }
   }
 
   &__wrapper {
     display: flex;
-    flex-direction: column;
-    height: calc(100dvh - 80px);
-    max-width: 20rem;
+    flex: 1;
+    min-height: 0;
     width: 100%;
+    flex-direction: column;
     overflow: hidden;
   }
 
-  &__scroll_container {
-    height: 100%;
-    overflow-y: auto;
-    padding-right: 10px;
+  &__scroll-container {
     flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
   }
 
-  &__letter_header {
-    font-weight: bold;
-    padding: 10px 0;
-    border-bottom: 1px solid #ccc;
-    margin-top: 15px;
-    margin-bottom: 10px;
+  &__letter-header {
+    margin: 18px 0 8px;
+    padding: 0 0 14px 36px;
+    border-bottom: 1px solid #d1d1d1;
+    color: #000000;
+    font-size: 16px;
+    font-weight: 400;
   }
 
   &__item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    width: 100%;
+    gap: 16px;
+    min-height: 72px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
   }
 
   &__badge {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var.$contact-bg-five;
-    color: white;
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-weight: bold;
-    border: 2px solid white;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
     flex-shrink: 0;
+    border: 2px solid var(--color-bg-light, #ffffff);
+    border-radius: 50%;
+    color: var(--color-text-light, #ffffff);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &__info {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
   }
 
   &__name {
-    margin: 0;
+    overflow: hidden;
+    color: #000000;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__email {
-    margin: 0;
+    overflow: hidden;
+    color: var(--contact-email-color, #007cee);
     font-size: 14px;
-    color: var.$contact-bg-five;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__status {
+    margin: 0;
+    color: var(--color-primary, #2a3647);
+  }
+
+  &__status--error {
+    color: #d00000;
   }
 }
