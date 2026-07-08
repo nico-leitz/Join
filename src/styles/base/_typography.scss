@@ -6,18 +6,17 @@ p {
 }
 
 h1 {
-  font-size: clamp(64px, 8.88vw, 128px);
+  font-size: clamp(40px, 6vw, 64px);
   font-weight: 700;
 }
 
 h2 {
-  font-size: clamp(40px, 5.5vw, 80px);
+  font-size: clamp(32px, 4vw, 48px);
   font-weight: 700;
 }
 
 h3 {
-  font-family: var(--font-accent);
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: clamp(20px, 3vw, 28px);
   font-weight: 700;
 }
 
