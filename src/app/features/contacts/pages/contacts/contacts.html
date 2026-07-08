@@ -1,5 +1,30 @@
-<div class="flexbox">
-<app-sidebar></app-sidebar>
-<app-contact-list></app-contact-list>
-<app-contact-detail></app-contact-detail>
-</div>
+<section class="contacts-page">
+  <app-contact-list
+    (createContactRequested)="openCreateDialog()"
+  ></app-contact-list>
+
+  <app-contact-detail
+    (editContactRequested)="openEditDialog($event)"
+  ></app-contact-detail>
+
+  @if (isCreateDialogOpen()) {
+    <app-contact-create-dialog
+      (cancelled)="closeCreateDialog()"
+      (submitted)="createContact($event)"
+    ></app-contact-create-dialog>
+  }
+
+  @if (isEditDialogOpen() && selectedContact()) {
+    <app-contact-edit-dialog
+      [contact]="selectedContact()!"
+      (cancelled)="closeEditDialog()"
+      (submitted)="updateContact($event)"
+    ></app-contact-edit-dialog>
+  }
+
+  @if (successMessage()) {
+    <app-contact-success-overlay
+      [message]="successMessage()"
+    ></app-contact-success-overlay>
+  }
+</section>

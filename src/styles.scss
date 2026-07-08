@@ -1,9 +1,1 @@
-/* You can add global styles to this file, and also import other style files */
-body {
-    background-color: var(--primary-color);
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-    max-height: 100vh;
-}
+@use './styles/main';

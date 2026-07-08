@@ -1,12 +1,45 @@
-<section class="sidebar-component">
-    <img class="sidebarLogo" src="./assets/sidebar/icons/join-logo.svg">
-    <nav class = "navBar">
-        <a routerLink='summary' class="nav-entry"><img class="nav-icon" src="./assets/sidebar/icons/nav-summary-icon.svg">Summary</a>
-        <a routerLink='addTask' class="nav-entry"><img class="nav-icon" src="./assets/sidebar/icons/nav-addTask-icon.svg">Add Task</a>
-        <a routerLink='board' class="nav-entry"><img class="nav-icon" src="./assets/sidebar/icons/nav-board-icon.svg">Board</a>
-        <a routerLink='contacts' class="nav-entry"><img class="nav-icon" src="./assets/sidebar/icons/nav-contacts-icon.svg">Contacts</a>
-    </nav>
-    <article>
+<aside class="sidebar">
+  <img
+    class="sidebar__logo"
+    src="./assets/sidebar/icons/join-logo.svg"
+    alt="Join Logo"
+  />
 
-    </article>
-</section>
+  <nav class="sidebar__nav" aria-label="Main navigation">
+    <a
+      class="sidebar__link"
+      routerLink="/summary"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-summary-icon.svg" alt="" />
+      <span>Summary</span>
+    </a>
+
+    <a
+      class="sidebar__link"
+      routerLink="/add-task"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-addTask-icon.svg" alt="" />
+      <span>Add Task</span>
+    </a>
+
+    <a
+      class="sidebar__link"
+      routerLink="/board"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-board-icon.svg" alt="" />
+      <span>Board</span>
+    </a>
+
+    <a
+      class="sidebar__link"
+      routerLink="/contacts"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-contacts-icon.svg" alt="" />
+      <span>Contacts</span>
+    </a>
+  </nav>
+</aside>

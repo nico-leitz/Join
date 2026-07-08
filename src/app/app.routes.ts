@@ -5,24 +5,17 @@ import { Board } from './features/board/pages/board/board';
 import { Contacts } from './features/contacts/pages/contacts/contacts';
 
 export const routes: Routes = [
-    {
-        path: "",
-        component: Summary
-    },
-    {
-        path: "summary",
-        component: Summary
-    },
-    {
-        path: "addTask",
-        component: AddTask
-    },
-    {
-        path: "board",
-        component: Board
-    },
-    {
-        path: "contacts",
-        component: Contacts
-    }
+  {
+    path: '',
+    redirectTo: 'contacts',
+    pathMatch: 'full',
+  },
+  {
+    path: 'contacts',
+    component: Contacts,
+  },
+  {
+    path: '**',
+    redirectTo: 'contacts',
+  },
 ];
