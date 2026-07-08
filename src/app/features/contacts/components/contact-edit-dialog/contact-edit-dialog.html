@@ -1,0 +1,54 @@
+<div class="contact-dialog-backdrop">
+  <section class="contact-dialog" aria-label="Edit contact dialog">
+    <div class="contact-dialog__side">
+      <div class="contact-dialog__logo">J</div>
+      <h2>Edit contact</h2>
+    </div>
+
+    <form
+      class="contact-dialog__form"
+      [formGroup]="contactForm"
+      (ngSubmit)="submitForm()"
+    >
+      <button
+        class="contact-dialog__close"
+        type="button"
+        (click)="cancel()"
+        aria-label="Close dialog"
+      >
+        ×
+      </button>
+
+      <div
+        class="contact-dialog__avatar"
+        [style.background-color]="contact().badgeColor"
+      >
+        {{ getInitials() }}
+      </div>
+
+      <label>
+        <span class="sr-only">Name</span>
+        <input type="text" formControlName="fullName" placeholder="Name" />
+      </label>
+
+      <label>
+        <span class="sr-only">Email</span>
+        <input type="email" formControlName="email" placeholder="Email" />
+      </label>
+
+      <label>
+        <span class="sr-only">Phone</span>
+        <input type="tel" formControlName="phone" placeholder="Phone" />
+      </label>
+
+      <div class="contact-dialog__actions">
+        <button class="button button-clean" type="button">
+          Delete
+        </button>
+        <button class="button button-primary" type="submit">
+          Save
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
