@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { SupabaseService } from '../../../../core/supabase/supabase';
+import { Component, inject, output } from '@angular/core';
+import { Contact } from '../../../../core/models/contact.model';
 import { ContactService } from '../../../../core/services/contact.service';
 
 @Component({
@@ -9,12 +9,21 @@ import { ContactService } from '../../../../core/services/contact.service';
   styleUrl: './contact-detail.scss',
 })
 export class ContactDetail {
-  supabase = inject(SupabaseService);
-  contactService = inject(ContactService);
+  editContactRequested = output<Contact>();
+
+  private readonly contactService = inject(ContactService);
 
   contact = this.contactService.selectedContact;
 
   getInitials(firstName: string, lastName: string): string {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    return this.contactService.getInitials(firstName, lastName);
+  }
+
+  openEditDialog(contact: Contact): void {
+    this.editContactRequested.emit(contact);
+  }
+
+  async deleteContact(contactId: string): Promise<void> {
+    await this.contactService.deleteContact(contactId);
   }
 }
