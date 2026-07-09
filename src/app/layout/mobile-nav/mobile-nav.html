@@ -1,1 +1,45 @@
-<p>mobile-nav works!</p>
+<aside class="sidebar">
+  <img
+    class="sidebar__logo"
+    src="./assets/sidebar/icons/join-logo.svg"
+    alt="Join Logo"
+  />
+
+  <nav class="sidebar__nav" aria-label="Main navigation">
+    <a
+      class="sidebar__link"
+      routerLink="/summary"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-summary-icon.svg" alt="" />
+      <span>Summary</span>
+    </a>
+
+    <a
+      class="sidebar__link"
+      routerLink="/add-task"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-addTask-icon.svg" alt="" />
+      <span>Add Task</span>
+    </a>
+
+    <a
+      class="sidebar__link"
+      routerLink="/board"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-board-icon.svg" alt="" />
+      <span>Board</span>
+    </a>
+
+    <a
+      class="sidebar__link"
+      routerLink="/contacts"
+      routerLinkActive="sidebar__link--active"
+    >
+      <img src="./assets/sidebar/icons/nav-contacts-icon.svg" alt="" />
+      <span>Contacts</span>
+    </a>
+  </nav>
+</aside>
