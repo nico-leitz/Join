@@ -11,6 +11,8 @@ import {
   CreateContact,
   UpdateContact,
 } from '../../../../core/models/contact.model';
+import { Sidebar } from "../../../../layout/sidebar/sidebar";
+import { Header } from '../../../../layout/header/header';
 
 @Component({
   selector: 'app-contacts',
@@ -20,7 +22,9 @@ import {
     ContactEditDialog,
     ContactSuccessOverlay,
     ContactDetail,
-  ],
+    Sidebar,
+    Header
+],
   templateUrl: './contacts.html',
   styleUrl: './contacts.scss',
 })

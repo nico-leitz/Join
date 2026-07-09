@@ -1,41 +1,36 @@
-<div class="detail">
-  <header class="detail__header">
-    <h1 class="detail__title">Contacts</h1>
-    <div class="detail__divider"></div>
-    <span class="detail__subtitle">Better with a team</span>
-  </header>
+@if (contact(); as activeContact) {
+  <div class="detail" [class.detail--visible_mobile]="true">
+    <header class="detail__header">
+      <div class="detail__header_left">
+        <div class="detail__title_row">
+          <h1 class="detail__title">Contacts</h1>
+          <div class="detail__divider"></div>
+        </div>
+        <span class="detail__subtitle">Better with a team</span>
+      </div>
+      
+      <img 
+        src="assets/contact-details/arrow-left.svg" 
+        alt="Back" 
+        class="detail__back_arrow" 
+        (click)="goBack()"
+      />
+    </header>
 
-  @if (contact(); as contact) {
     <div class="detail__profile">
-      <div
-        class="detail__badge"
-        [style.background-color]="contact.badgeColor"
-      >
-        {{ getInitials(contact.firstName, contact.lastName) }}
+      <div class="detail__badge" [style.background-color]="activeContact.badgeColor">
+        {{ getInitials(activeContact.firstName, activeContact.lastName) }}
       </div>
 
       <div class="detail__name-section">
-        <h2 class="detail__name">
-          {{ contact.firstName }} {{ contact.lastName }}
-        </h2>
+        <h2 class="detail__name">{{ activeContact.firstName }} {{ activeContact.lastName }}</h2>
 
         <div class="detail__actions">
-          <button
-            class="action-btn"
-            type="button"
-            (click)="openEditDialog(contact)"
-          >
-            <span class="icon">✏️</span>
-            Edit
+          <button class="detail__action-btn" type="button" (click)="openEditDialog(activeContact)">
+            <span class="detail__icon">✏️</span> Edit
           </button>
-
-          <button
-            class="action-btn"
-            type="button"
-            (click)="deleteContact(contact.id)"
-          >
-            <span class="icon">🗑️</span>
-            Delete
+          <button class="detail__action-btn" type="button" (click)="deleteContact(activeContact.id)">
+            <span class="detail__icon">🗑️</span> Delete
           </button>
         </div>
       </div>
@@ -43,20 +38,16 @@
 
     <div class="detail__info-section">
       <h3 class="detail__info-title">Contact Information</h3>
-
-      <div class="info-group">
-        <span class="info-label">Email</span>
-        <a [href]="'mailto:' + contact.email" class="info-value info-link">
-          {{ contact.email }}
+      <div class="detail__info-group">
+        <span class="detail__info-label">Email</span>
+        <a [href]="'mailto:' + activeContact.email" class="detail__info-value detail__info-link">
+          {{ activeContact.email }}
         </a>
       </div>
-
-      <div class="info-group">
-        <span class="info-label">Phone</span>
-        <span class="info-value">
-          {{ contact.phone || 'No phone number' }}
-        </span>
+      <div class="detail__info-group">
+        <span class="detail__info-label">Phone</span>
+        <span class="detail__info-value">{{ activeContact.phone || 'No phone number' }}</span>
       </div>
     </div>
-  }
-</div>
+  </div>
+}
