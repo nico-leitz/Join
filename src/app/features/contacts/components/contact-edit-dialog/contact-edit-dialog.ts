@@ -1,4 +1,4 @@
-import { Component, input, OnInit, output } from '@angular/core';
+import { Component, input, OnInit, output, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -14,10 +14,13 @@ import { Contact, UpdateContact } from '../../../../core/models/contact.model';
   styleUrl: './contact-edit-dialog.scss',
 })
 export class ContactEditDialog implements OnInit {
+  private readonly closeAnimationMs = 220;
+
   contact = input.required<Contact>();
 
   cancelled = output<void>();
   submitted = output<UpdateContact>();
+  isClosing = signal(false);
 
   contactForm = new FormGroup({
     fullName: new FormControl('', {
@@ -38,7 +41,14 @@ export class ContactEditDialog implements OnInit {
   }
 
   cancel(): void {
-    this.cancelled.emit();
+    if (this.isClosing()) {
+      return;
+    }
+
+    this.isClosing.set(true);
+    window.setTimeout(() => {
+      this.cancelled.emit();
+    }, this.closeAnimationMs);
   }
 
   submitForm(): void {

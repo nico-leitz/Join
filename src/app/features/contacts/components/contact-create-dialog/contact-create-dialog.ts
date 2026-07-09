@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -14,8 +14,11 @@ import { CreateContact } from '../../../../core/models/contact.model';
   styleUrl: './contact-create-dialog.scss',
 })
 export class ContactCreateDialog {
+  private readonly closeAnimationMs = 220;
+
   cancelled = output<void>();
   submitted = output<CreateContact>();
+  isClosing = signal(false);
 
   contactForm = new FormGroup({
     fullName: new FormControl('', {
@@ -32,7 +35,14 @@ export class ContactCreateDialog {
   });
 
   cancel(): void {
-    this.cancelled.emit();
+    if (this.isClosing()) {
+      return;
+    }
+
+    this.isClosing.set(true);
+    window.setTimeout(() => {
+      this.cancelled.emit();
+    }, this.closeAnimationMs);
   }
 
   submitForm(): void {

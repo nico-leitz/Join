@@ -1,5 +1,5 @@
-<div class="contact-dialog-backdrop">
-  <section class="contact-dialog" aria-label="Add contact dialog">
+<div class="contact-dialog-backdrop" [class.contact-dialog-backdrop--closing]="isClosing()" (click)="cancel()">
+  <section class="contact-dialog" [class.contact-dialog--closing]="isClosing()" aria-label="Add contact dialog" (click)="$event.stopPropagation()">
     <div class="contact-dialog__side">
       <div class="contact-dialog__logo">J</div>
       <h2>Add contact</h2>
@@ -42,7 +42,7 @@
           Cancel
         </button>
         <button class="button button-primary" type="submit">
-          Create contact
+          Create contact ✓
         </button>
       </div>
     </form>
