@@ -12,7 +12,8 @@ export class ContactList implements OnInit {
   createContactRequested = output<void>();
 
   private readonly contactService = inject(ContactService);
-
+  
+  contact = this.contactService.selectedContact
   contacts = this.contactService.allContacts;
   isLoading = signal(true);
   errorMessage = signal('');
@@ -65,4 +66,6 @@ export class ContactList implements OnInit {
 
     return currentLetter !== previousLetter;
   }
+
+  
 }

@@ -1,26 +1,63 @@
 @use '../../../styles/abstracts/breakpoints' as bp;
 
 .header_BG {
+  display: flex;
   width: 100%;
-  height: 100px;
-  background-color: var(--color-bg-light, #ffffff);
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  background-color: #ffffff;
+  box-shadow: 0 0.125rem 0.375rem -0.0625rem rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
 .header_wrapper {
-  position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   height: 100%;
-  padding: 0 40px;
-  box-sizing: border-box;
-}
 
-.header_wrapper p {
-  margin: 0;
-  color: var(--color-primary, #2a3647);
-  font-size: 20px;
+  padding: 0 1rem;
+  @media (min-width: bp.$breakpoint-mobile-m) {
+    padding: 0 1.25rem;
+  }
+  @media (min-width: bp.$breakpoints-mobile-l) {
+    padding: 0 1.5rem;
+  }
+  @media (min-width: bp.$breakpoint-tablet-sm) {
+    padding: 0 1.75rem;
+  }
+  @media (min-width: bp.$breakpoints-tablet-l) {
+    padding: 0 2rem;
+  }
+  @media (min-width: bp.$breakpoint-tablet-xl) {
+    padding: 0 2.25rem;
+  }
+  @media (min-width: bp.$breakpoint-desktop-s) {
+    padding: 0 2.5rem;
+  }
+  @media (min-width: bp.$breakpoint-desktop-fhd) {
+    padding: 0 3rem;
+  }
+
+  p {
+    margin: 0;
+    font-weight: 600;
+    color: #000000;
+    white-space: nowrap;
+    display: none;
+
+    @media (min-width: bp.$breakpoint-tablet-sm) {
+      display: block;
+      font-size: 1rem;
+    }
+    @media (min-width: bp.$breakpoint-tablet-xl) {
+      font-size: 1.125rem;
+    }
+    @media (min-width: bp.$breakpoint-desktop-fhd) {
+      font-size: 1.25rem;
+    }
+  }
 }
 
 .mobile_logo {
@@ -28,25 +65,46 @@
 }
 
 .header_icons {
-  position: absolute;
-  right: 40px;
-  top: 50%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  width: 105px;
-  height: 60px;
-  gap: 16px;
-  transform: translateY(-50%);
+  gap: 0.75rem;
+
+  @media (min-width: bp.$breakpoints-mobile-l) {
+    gap: 0.875rem;
+  }
+  @media (min-width: bp.$breakpoint-tablet-sm) {
+    gap: 1rem;
+  }
+  @media (min-width: bp.$breakpoint-desktop-s) {
+    gap: 1.25rem;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.7;
+      transform: scale(1.05);
+    }
+  }
 }
 
-.header_icons img {
-  display: block;
-}
-
-.help_icon {
-  width: 20px;
-  height: 20px;
+.help_icon img {
+  width: 1.25rem;
+  height: 1.25rem;
+  @media (min-width: bp.$breakpoint-tablet-sm) {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  @media (min-width: bp.$breakpoint-desktop-s) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
 }
 
 .settings_icon {

@@ -1,12 +1,8 @@
-<button
-  class="button button-primary contact__button"
-  type="button"
-  (click)="openCreateDialog()"
->
+<button class="button button-primary contact__button" type="button" (click)="openCreateDialog()">
   Add new contact
 </button>
 
-<div class="contact__wrapper">
+<div class="contact__wrapper" [class.contact__wrapper--hidden-mobile]="contact()">
   @if (isLoading()) {
     <p class="contact__status">Kontakte werden geladen...</p>
   } @else if (errorMessage()) {
@@ -20,22 +16,13 @@
           </div>
         }
 
-        <button
-          class="contact__item"
-          type="button"
-          (click)="getContact(contact)"
-        >
-          <span
-            class="contact__badge"
-            [style.background-color]="contact.badgeColor"
-          >
+        <button class="contact__item" type="button" (click)="getContact(contact)">
+          <span class="contact__badge" [style.background-color]="contact.badgeColor">
             {{ getInitials(contact.firstName, contact.lastName) }}
           </span>
 
           <span class="contact__info">
-            <span class="contact__name">
-              {{ contact.firstName }} {{ contact.lastName }}
-            </span>
+            <span class="contact__name"> {{ contact.firstName }} {{ contact.lastName }} </span>
             <span class="contact__email">{{ contact.email }}</span>
           </span>
         </button>
