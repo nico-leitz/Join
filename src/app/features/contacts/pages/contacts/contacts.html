@@ -1,30 +1,34 @@
 <section class="contacts-page">
-  <app-contact-list
-    (createContactRequested)="openCreateDialog()"
-  ></app-contact-list>
+  <app-sidebar></app-sidebar>
 
-  <app-contact-detail
-    (editContactRequested)="openEditDialog($event)"
-  ></app-contact-detail>
+  <div class="right-wrapper">
+    <app-header></app-header>
 
-  @if (isCreateDialogOpen()) {
-    <app-contact-create-dialog
-      (cancelled)="closeCreateDialog()"
-      (submitted)="createContact($event)"
-    ></app-contact-create-dialog>
-  }
+    <div class="contacts_inner">
+      <div class="content-wrapper">
+        <app-contact-list (createContactRequested)="openCreateDialog()"></app-contact-list>
 
-  @if (isEditDialogOpen() && selectedContact()) {
-    <app-contact-edit-dialog
-      [contact]="selectedContact()!"
-      (cancelled)="closeEditDialog()"
-      (submitted)="updateContact($event)"
-    ></app-contact-edit-dialog>
-  }
+        <app-contact-detail (editContactRequested)="openEditDialog($event)"></app-contact-detail>
+      </div>
+    </div>
 
-  @if (successMessage()) {
-    <app-contact-success-overlay
-      [message]="successMessage()"
-    ></app-contact-success-overlay>
-  }
+    @if (isCreateDialogOpen()) {
+      <app-contact-create-dialog
+        (cancelled)="closeCreateDialog()"
+        (submitted)="createContact($event)"
+      ></app-contact-create-dialog>
+    }
+
+    @if (isEditDialogOpen() && selectedContact()) {
+      <app-contact-edit-dialog
+        [contact]="selectedContact()!"
+        (cancelled)="closeEditDialog()"
+        (submitted)="updateContact($event)"
+      ></app-contact-edit-dialog>
+    }
+
+    @if (successMessage()) {
+      <app-contact-success-overlay [message]="successMessage()"></app-contact-success-overlay>
+    }
+  </div>
 </section>
