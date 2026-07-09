@@ -1,5 +1,5 @@
 @if (contact(); as activeContact) {
-  <div class="detail" [class.detail--visible_mobile]="true">
+  <div class="detail" [class.detail--visible_mobile]="true" (click)="closeMobileActionMenu()">
     <header class="detail__header">
       <div class="detail__header_left">
         <div class="detail__title_row">
@@ -48,6 +48,34 @@
         <span class="detail__info-label">Phone</span>
         <span class="detail__info-value">{{ activeContact.phone || 'No phone number' }}</span>
       </div>
+    </div>
+
+    <div class="detail__mobile-menu" (click)="$event.stopPropagation()">
+      @if (isMobileActionMenuOpen() || isMobileActionMenuClosing()) {
+        <div
+          class="detail__mobile-menu-panel"
+          [class.detail__mobile-menu-panel--closing]="isMobileActionMenuClosing()"
+          role="menu"
+          aria-label="Contact actions"
+        >
+          <button class="detail__mobile-menu-item" type="button" (click)="editFromMobileMenu(activeContact)">
+            Edit
+          </button>
+          <button class="detail__mobile-menu-item" type="button" (click)="deleteFromMobileMenu(activeContact.id)">
+            Delete
+          </button>
+        </div>
+      }
+
+      <button
+        class="detail__mobile-menu-trigger"
+        type="button"
+        aria-label="Open contact actions"
+        [attr.aria-expanded]="isMobileActionMenuOpen()"
+        (click)="toggleMobileActionMenu()"
+      >
+        <img src="assets/contact-details/menucontact.svg" alt="" aria-hidden="true" />
+      </button>
     </div>
   </div>
 }

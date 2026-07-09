@@ -1,5 +1,5 @@
-<div class="contact-dialog-backdrop">
-  <section class="contact-dialog" aria-label="Edit contact dialog">
+<div class="contact-dialog-backdrop" [class.contact-dialog-backdrop--closing]="isClosing()" (click)="cancel()">
+  <section class="contact-dialog" [class.contact-dialog--closing]="isClosing()" aria-label="Edit contact dialog" (click)="$event.stopPropagation()">
     <div class="contact-dialog__side">
       <div class="contact-dialog__logo">J</div>
       <h2>Edit contact</h2>

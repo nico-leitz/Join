@@ -17,7 +17,7 @@
       display: block;
       width: 100%;
       flex-shrink: 0;
-      background-color: var(--color-primary, #2a3647);
+      background-color: transparent;
       color: #ffffff;
       border-radius: 0.5rem;
       border: none;
@@ -38,21 +38,29 @@
     display: flex;
     position: fixed;
     bottom: 6rem;
-    right: 1.5rem;
-    width: 3.5rem;
-    height: 3.5rem;
+    right: 10px;
+    width: 4rem;
+    height: 4rem;
     border-radius: 50%;
-    background-color: var(--color-primary, #2a3647);
-    color: #ffffff;
+    background-color: transparent;
     border: none;
-    font-size: 1.5rem;
+    padding: 0;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
     cursor: pointer;
+    z-index: 150;
     @media (min-width: bp.$breakpoint-tablet-sm) {
       display: none;
     }
+  }
+
+  &__fab-icon {
+    display: block;
+    width: 4rem;
+    height: 4rem;
+    object-fit: contain;
+    pointer-events: none;
   }
 
   &__wrapper {

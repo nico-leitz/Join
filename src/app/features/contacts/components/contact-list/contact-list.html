@@ -2,6 +2,15 @@
   Add new contact
 </button>
 
+<button class="contact__fab" type="button" (click)="openCreateDialog()" aria-label="Add new contact">
+  <img
+    class="contact__fab-icon"
+    src="assets/contact-details/addcontactmobile.svg"
+    alt=""
+    aria-hidden="true"
+  />
+</button>
+
 <div class="contact__wrapper" [class.contact__wrapper--hidden-mobile]="contact()">
   @if (isLoading()) {
     <p class="contact__status">Kontakte werden geladen...</p>

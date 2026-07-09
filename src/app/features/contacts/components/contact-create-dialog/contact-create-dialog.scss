@@ -117,6 +117,69 @@
   overflow: hidden;
 }
 
+@media (max-width: 799px) {
+  .contact-dialog-backdrop {
+    animation: contact-dialog-backdrop-fade-in 220ms ease-out both;
+  }
+
+  .contact-dialog-backdrop--closing {
+    animation: contact-dialog-backdrop-fade-out 220ms ease-in both;
+  }
+
+  .contact-dialog {
+    animation: contact-dialog-slide-up 220ms ease-out both;
+    will-change: transform, opacity;
+  }
+
+  .contact-dialog--closing {
+    animation: contact-dialog-slide-down 220ms ease-in both;
+  }
+}
+
+@keyframes contact-dialog-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes contact-dialog-slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes contact-dialog-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contact-dialog-backdrop-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 900px) {
   .contact-dialog {
     width: min(92dvw, 780px);
