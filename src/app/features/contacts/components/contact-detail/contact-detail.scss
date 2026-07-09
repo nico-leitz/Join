@@ -1,5 +1,11 @@
 @use 'abstracts/breakpoints' as bp;
 
+:host {
+  display: block;
+  height: 100%;
+  background-color: var(--color-bg-main, #f6f7f8);
+}
+
 .detail {
   height: 100%;
   padding: 1.5rem;
