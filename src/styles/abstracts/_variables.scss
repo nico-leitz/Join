@@ -1,26 +1,16 @@
-// Farben
-$primary-color: #F6F7F8;
-$secondary-color: #ffffff;
-$accent-color: #2A3647;
+:root {
+  --color-bg-main: #f6f7f8;
+  --color-bg-light: #ffffff;
+  --color-primary: #2a3647;
+  --color-primary-hover: #29abe2;
+  --color-text-main: #000000;
+  --color-text-light: #ffffff;
+  --color-link: #007cee;
 
-// Buttons
-$button-primary-bg: $accent-color;
-$button-hover-bg: #29ABE2;
-$button-selected-bg: rgba(0, 0, 0, 0.25);
+  --font-primary: Arial, sans-serif;
+  --layout-max-width: 1440px;
 
-// Contact Backgrounds
-$contact-bg: #FF7A00;
-$contact-bg-two: #FF5EB3;
-$contact-bg-three: #6E52FF;
-$contact-bg-four: #9327FF;
-$contact-bg-five: #00BEE8;
-$contact-bg-six: #1FD7C1;
-$contact-bg-seven: #FF745E;
-$contact-bg-eight: #FFA35E;
-$contact-bg-nine: #FC71FF;
-$contact-bg-ten: #FFC701;
-$contact-bg-eleven: #0038FF;
-$contact-bg-twelve: #C3FF2B;
-$contact-bg-thirteen: #FFE62B;
-$contact-bg-fourteen: #FF4646;
-$contact-bg-fifteen: #FFBB2B;
+  --button-primary-bg: var(--color-primary);
+  --button-primary-bg-hover: var(--color-primary-hover);
+  --button-primary-color: var(--color-text-light);
+}

@@ -1,18 +1,22 @@
-import { Injectable } from '@angular/core';
-import { supabase } from '../supabase/supabase';
+import { Injectable, inject, signal} from '@angular/core';
+import { SupabaseService } from '../supabase/supabase';
 import {
   Contact,
   ContactRow,
   CreateContact,
   UpdateContact,
 } from '../models/contact.model';
+import { Contacts } from '../../features/contacts/pages/contacts/contacts';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ContactService {
   private readonly tableName = 'contacts';
-  private readonly supabase = supabase;
+  private readonly supabase = inject(SupabaseService).client;
+
+  selectedContact = signal<Contact | null>(null);
+  allContacts = signal<Contact[]>([]);
 
   async getContacts(): Promise<Contact[]> {
     const { data, error } = await this.supabase
@@ -72,13 +76,26 @@ export class ContactService {
   }
 
   async deleteContact(id: string): Promise<void> {
-    const { error } = await this.supabase
-      .from(this.tableName)
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await this.supabase
+        .from(this.tableName)
+        .delete()
+        .eq('id', id);
 
-    if (error) throw error;
-  }
+      if (error) throw error;
+
+      this.allContacts.set(
+        this.allContacts().filter(contact => contact.id !== id)
+      );
+
+      if (this.selectedContact()?.id === id) {
+        this.selectedContact.set(null);
+      }
+
+    } catch (error) {
+      console.error('Deletion error:', error);
+    }
+ }
 
   getInitials(firstName: string, lastName: string): string {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();

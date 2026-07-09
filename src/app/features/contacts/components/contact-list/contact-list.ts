@@ -1,11 +1,6 @@
-import { Component } from '@angular/core';
-
-interface contact {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email?: string;
-}
+import { Component, OnInit, inject, output, signal } from '@angular/core';
+import { Contact } from '../../../../core/models/contact.model';
+import { ContactService } from '../../../../core/services/contact.service';
 
 @Component({
   selector: 'app-contact-list',
@@ -13,47 +8,61 @@ interface contact {
   templateUrl: './contact-list.html',
   styleUrl: './contact-list.scss',
 })
+export class ContactList implements OnInit {
+  createContactRequested = output<void>();
 
-export class ContactList {
-  contacts: contact[] = [
-    { id: 1, firstName: 'Benedikt', lastName: 'Ziegler', email: 'benedikt@gmail.com' },
-    { id: 2, firstName: 'Anton', lastName: 'Mayer', email: 'antonm@gmail.com' },
-    { id: 3, firstName: 'David', lastName: 'Eisenberg', email: 'davidberg@gmail.com' },
-    { id: 4, firstName: 'Anja', lastName: 'Schulz', email: 'schulz@hotmail.com' },
-    { id: 5, firstName: 'Eva', lastName: 'Fischer', email: 'eva@gmail.com' },
-    { id: 6, firstName: 'Emmanuel', lastName: 'Mauer', email: 'emmanuelma@gmail.com' },
-    { id: 7, firstName: 'Marcel', lastName: 'Bauer', email: 'mbauer@web.de' },
-    { id: 8, firstName: 'Leon', lastName: 'Wolf', email: 'leon.wolf@gmx.de' },
-    { id: 9, firstName: 'Sarah', lastName: 'Wagner', email: 's.wagner@outlook.com' },
-    { id: 10, firstName: 'Tobias', lastName: 'Hoffmann', email: 'thoffmann@gmail.com' },
-    { id: 11, firstName: 'Julia', lastName: 'Becker', email: 'j.becker@yahoo.com' },
-    { id: 12, firstName: 'Maximilian', lastName: 'Koch', email: 'max.koch@gmail.com' },
-    { id: 13, firstName: 'Laura', lastName: 'Richter', email: 'laura.r@hotmail.com' },
-    { id: 14, firstName: 'Felix', lastName: 'Klein', email: 'f.klein@web.de' },
-    { id: 15, firstName: 'Anna', lastName: 'Schröder', email: 'anna.schroeder@gmail.com' },
-    { id: 16, firstName: 'Christian', lastName: 'Neumann', email: 'c.neumann@gmx.de' },
-    { id: 17, firstName: 'Maria', lastName: 'Schwarz', email: 'mariaschwarz@outlook.com' },
-    { id: 18, firstName: 'Lukas', lastName: 'Braun', email: 'lukas.braun@yahoo.com' },
-    { id: 19, firstName: 'Sophie', lastName: 'Hofmann', email: 's.hofmann@web.de' },
-    { id: 20, firstName: 'Jonas', lastName: 'Schmitt', email: 'jonas.schmitt@gmail.com' },
-  ];
+  private readonly contactService = inject(ContactService);
 
-  ngOnInit() {
-    this.sortContacts();
+  contacts = this.contactService.allContacts;
+  isLoading = signal(true);
+  errorMessage = signal('');
+
+  async ngOnInit(): Promise<void> {
+    await this.loadContacts();
   }
 
-  sortContacts() {
-    this.contacts = [...this.contacts].sort((a, b) => {
+  async loadContacts(): Promise<void> {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    try {
+      const contacts = await this.contactService.getContacts();
+      const sortedContacts = this.sortContacts(contacts);
+
+      this.contacts.set(sortedContacts);
+    } catch (error) {
+      console.error('Fehler beim Laden der Kontakte in der Liste:', error);
+      this.errorMessage.set('Kontakte konnten nicht geladen werden.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  openCreateDialog(): void {
+    this.createContactRequested.emit();
+  }
+
+  getContact(contact: Contact): void {
+    this.contactService.selectedContact.set(contact);
+  }
+
+  sortContacts(contactsArray: Contact[]): Contact[] {
+    return [...contactsArray].sort((a, b) => {
       return a.firstName.localeCompare(b.firstName);
     });
   }
 
-  getInitials(firstName: string, lastName: string) {
-    if (!firstName || !lastName) return '';
+  getInitials(firstName: string, lastName: string): string {
+    return this.contactService.getInitials(firstName, lastName);
+  }
 
-    const firstInitial = firstName.charAt(0).toUpperCase();
-    const lastInitial = lastName.charAt(0).toUpperCase();
+  shouldShowLetterHeader(index: number): boolean {
+    if (index === 0) return true;
 
-    return firstInitial + lastInitial;
+    const contacts = this.contacts();
+    const currentLetter = contacts[index].firstName.charAt(0).toUpperCase();
+    const previousLetter = contacts[index - 1].firstName.charAt(0).toUpperCase();
+
+    return currentLetter !== previousLetter;
   }
 }

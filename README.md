@@ -1,7 +1,7 @@
 # Skills
 - Basti: Struktur, Logik und Datenbanken, API's
 - Kevin: Design, Logik
-- Oliver:
+- Oliver: Design, Strukutr, SCSS
 - Nico: Struktur, Logik, Datenbanken, API's, SCSS
 
 # GitHub Manifest

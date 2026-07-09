@@ -1,0 +1,14 @@
+.contact-success-overlay {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  z-index: 30;
+  min-width: 280px;
+  transform: translateX(-50%);
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  padding: 16px 24px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}

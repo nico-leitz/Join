@@ -1,22 +1,45 @@
-<button class="contact__button">Add new contact</button>
+<button
+  class="button button-primary contact__button"
+  type="button"
+  (click)="openCreateDialog()"
+>
+  Add new contact
+</button>
 
 <div class="contact__wrapper">
-  <div class="contact__scroll_container">
-    @for (contact of contacts; track contact.id; let i = $index) {
-      @if (i === 0 || contact.firstName[0] !== contacts[i - 1].firstName[0]) {
-        <div class="contact__letter_header">{{ contact.firstName[0] }}</div>
+  @if (isLoading()) {
+    <p class="contact__status">Kontakte werden geladen...</p>
+  } @else if (errorMessage()) {
+    <p class="contact__status contact__status--error">{{ errorMessage() }}</p>
+  } @else {
+    <div class="contact__scroll-container">
+      @for (contact of contacts(); track contact.id; let index = $index) {
+        @if (shouldShowLetterHeader(index)) {
+          <div class="contact__letter-header">
+            {{ contact.firstName.charAt(0).toUpperCase() }}
+          </div>
+        }
+
+        <button
+          class="contact__item"
+          type="button"
+          (click)="getContact(contact)"
+        >
+          <span
+            class="contact__badge"
+            [style.background-color]="contact.badgeColor"
+          >
+            {{ getInitials(contact.firstName, contact.lastName) }}
+          </span>
+
+          <span class="contact__info">
+            <span class="contact__name">
+              {{ contact.firstName }} {{ contact.lastName }}
+            </span>
+            <span class="contact__email">{{ contact.email }}</span>
+          </span>
+        </button>
       }
-
-      <div class="contact__item">
-        <div class="contact__badge">
-          {{ getInitials(contact.firstName, contact.lastName) }}
-        </div>
-
-        <div class="contact__info">
-          <p class="contact__name">{{ contact.firstName }} {{ contact.lastName }}</p>
-          <p class="contact__email">{{ contact.email }}</p>
-        </div>
-      </div>
-    }
-  </div>
+    </div>
+  }
 </div>
