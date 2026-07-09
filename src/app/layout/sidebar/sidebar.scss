@@ -24,7 +24,8 @@
   align-items: center;
   gap: 8px;
   min-height: 48px;
-  padding: 8px 48px;
+  padding-block: 8px;
+  padding-inline: 48px;
   color: #e7e7e7;
   font-size: 16px;
   text-decoration: none;
@@ -38,4 +39,30 @@
 .sidebar__link img {
   width: 24px;
   height: 24px;
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .sidebar__nav {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
+    }
+
+  .sidebar__logo {
+    display: none;
+  }
+
+  .sidebar__link {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding-block: 0;
+    padding-inline: 0;
+  }
 }
