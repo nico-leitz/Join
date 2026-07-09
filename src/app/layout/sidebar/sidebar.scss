@@ -56,10 +56,10 @@
 .sidebar__link {
   display: flex;
   align-items: center;
-  width: 100%;
-  gap: 0.75rem;
-  min-height: 3rem;
-  padding: 0.5rem 1.5rem;
+  gap: 8px;
+  min-height: 48px;
+  padding-block: 8px;
+  padding-inline: 48px;
   color: #e7e7e7;
   font-size: 0.875rem;
   text-decoration: none;
@@ -76,18 +76,33 @@
     gap: 1rem;
   }
 
-  &:hover,
-  &--active {
-    background-color: rgba(0, 0, 0, 0.25);
+.sidebar__link img {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    display: flex;
+    flex-direction: row;
   }
 
-  img {
-    width: 1.25rem;
-    height: 1.25rem;
-
-    @media (min-width: bp.$breakpoint-tablet-sm) {
-      width: 1.5rem;
-      height: 1.5rem;
+  .sidebar__nav {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
     }
+
+  .sidebar__logo {
+    display: none;
+  }
+
+  .sidebar__link {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding-block: 0;
+    padding-inline: 0;
   }
 }
