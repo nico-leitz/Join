@@ -9,11 +9,13 @@ import { ContactService } from '../../../../core/services/contact.service';
   styleUrl: './contact-detail.scss',
 })
 export class ContactDetail {
+  backRequested = output<void>();
   editContactRequested = output<Contact>();
 
   private readonly contactService = inject(ContactService);
 
   contact = this.contactService.selectedContact;
+  contacts = this.contactService.allContacts;
 
   getInitials(firstName: string, lastName: string): string {
     return this.contactService.getInitials(firstName, lastName);
@@ -25,5 +27,11 @@ export class ContactDetail {
 
   async deleteContact(contactId: string): Promise<void> {
     await this.contactService.deleteContact(contactId);
+    this.goBack();
+  }
+
+  goBack(): void {
+    this.contactService.selectedContact.set(null);
+    this.backRequested.emit();
   }
 }
