@@ -1,35 +1,206 @@
-.contact-success-overlay {
+:host {
   position: fixed;
-  top: max(24px, calc(var(--contact-mobile-header-height, 0px) + 16px));
-  left: 50%;
+  inset: 0;
   z-index: 10000;
+  pointer-events: none;
+}
+
+.contact-success-overlay {
+  --success-in-duration: 220ms;
+  --success-visible-delay: 800ms;
+  --success-out-duration: 220ms;
+
+  position: fixed;
+  left: 50dvw;
+  bottom: clamp(96px, 16dvh, 128px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: max-content;
-  max-width: calc(100vw - 32px);
-  min-width: 280px;
-  transform: translateX(-50%);
+  max-width: calc(100dvw - 48px);
+  min-width: 252px;
+  min-height: 58px;
+  padding: 16px 24px;
   border-radius: 12px;
   background: var(--color-primary, #2a3647);
   color: var(--color-text-light, #ffffff);
-  padding: 16px 24px;
+  box-shadow: 0 0 4px 0 #00000026;
+  font-size: 16px;
+  line-height: 1.2;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  font-size: 14px;
+  opacity: 0;
+  transform: translate(calc(-50% + 420px), 72px);
+  will-change: transform, opacity;
+  animation:
+    contact-success-desktop-in var(--success-in-duration) ease-out forwards,
+    contact-success-desktop-out var(--success-out-duration) ease-in
+      calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+}
+
+@keyframes contact-success-desktop-in {
+  from {
+    opacity: 0;
+    transform: translate(calc(-50% + 420px), 72px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes contact-success-desktop-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(calc(-50% + 420px), 0);
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 701px) {
+  .contact-success-overlay {
+    right: clamp(24px, 5vw, 56px);
+    left: auto;
+    bottom: clamp(88px, 15dvh, 120px);
+    min-width: 240px;
+    min-height: 54px;
+    padding: 14px 22px;
+    font-size: 15px;
+    transform: translate(360px, 48px);
+    animation:
+      contact-success-tablet-in var(--success-in-duration) ease-out forwards,
+      contact-success-tablet-out var(--success-out-duration) ease-in
+        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+  }
+}
+
+@keyframes contact-success-tablet-in {
+  from {
+    opacity: 0;
+    transform: translate(360px, 48px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes contact-success-tablet-out {
+  from {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(360px, 0);
+  }
 }
 
 @media (max-width: 700px) {
   .contact-success-overlay {
-    top: max(16px, calc(var(--contact-mobile-header-height, 0px) + 12px));
+    left: 50%;
+    right: auto;
+    bottom: max(
+      96px,
+      calc(var(--contact-mobile-nav-height, 0px) + 72px)
+    );
+    width: min(320px, calc(100dvw - 32px));
     min-width: 0;
-    width: min(320px, calc(100vw - 32px));
+    min-height: 52px;
     padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 14px;
+    transform: translate(-50%, 160px);
+    animation:
+      contact-success-mobile-in var(--success-in-duration) ease-out forwards,
+      contact-success-mobile-out var(--success-out-duration) ease-in
+        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+  }
+}
+
+@keyframes contact-success-mobile-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 160px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes contact-success-mobile-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, 160px);
+  }
+}
+
+@media (max-width: 360px) {
+  .contact-success-overlay {
+    bottom: max(
+      84px,
+      calc(var(--contact-mobile-nav-height, 0px) + 60px)
+    );
+    width: calc(100dvw - 24px);
+    min-height: 48px;
+    padding: 12px 14px;
     font-size: 13px;
   }
 }
 
 @media (max-height: 520px) and (orientation: landscape) {
   .contact-success-overlay {
-    top: 12px;
-    width: min(320px, calc(100vw - 32px));
+    right: 16px;
+    left: auto;
+    bottom: max(
+      28px,
+      calc(var(--contact-mobile-nav-height, 0px) + 24px)
+    );
+    width: min(320px, calc(100dvw - 32px));
+    min-height: 44px;
     padding: 12px 16px;
+    font-size: 13px;
+    transform: translate(340px, 32px);
+    animation:
+      contact-success-landscape-in var(--success-in-duration) ease-out forwards,
+      contact-success-landscape-out var(--success-out-duration) ease-in
+        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+  }
+}
+
+@keyframes contact-success-landscape-in {
+  from {
+    opacity: 0;
+    transform: translate(340px, 32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes contact-success-landscape-out {
+  from {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(340px, 0);
   }
 }
