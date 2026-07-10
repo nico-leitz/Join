@@ -15,6 +15,7 @@ import { CreateContact } from '../../../../core/models/contact.model';
 })
 export class ContactCreateDialog {
   private readonly closeAnimationMs = 220;
+  private readonly phonePattern = /^\+?[0-9]+(?: [0-9]+)?$/;
 
   cancelled = output<void>();
   submitted = output<CreateContact>();
@@ -31,6 +32,7 @@ export class ContactCreateDialog {
     }),
     phone: new FormControl('', {
       nonNullable: true,
+      validators: [Validators.pattern(this.phonePattern)],
     }),
   });
 
@@ -40,18 +42,83 @@ export class ContactCreateDialog {
     }
 
     this.isClosing.set(true);
+
     window.setTimeout(() => {
       this.cancelled.emit();
     }, this.closeAnimationMs);
   }
 
   submitForm(): void {
+    this.sanitizePhoneInput();
+
     if (this.contactForm.invalid) {
       this.contactForm.markAllAsTouched();
       return;
     }
 
     this.submitted.emit(this.createContactPayload());
+  }
+
+  sanitizePhoneInput(): void {
+    const phoneControl = this.contactForm.controls.phone;
+    const sanitizedPhone = this.createSanitizedPhone(phoneControl.value);
+
+    if (phoneControl.value !== sanitizedPhone) {
+      phoneControl.setValue(sanitizedPhone, { emitEvent: false });
+    }
+  }
+
+  hasNameError(): boolean {
+    const control = this.contactForm.controls.fullName;
+    return control.touched && control.invalid;
+  }
+
+  hasEmailError(): boolean {
+    const control = this.contactForm.controls.email;
+    return control.touched && control.invalid;
+  }
+
+  hasPhoneError(): boolean {
+    const control = this.contactForm.controls.phone;
+    return control.touched && control.invalid;
+  }
+
+  getNameErrorMessage(): string {
+    const control = this.contactForm.controls.fullName;
+
+    if (!control.touched || !control.hasError('required')) {
+      return '';
+    }
+
+    return 'Name is required.';
+  }
+
+  getEmailErrorMessage(): string {
+    const control = this.contactForm.controls.email;
+
+    if (!control.touched) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return 'Email is required.';
+    }
+
+    if (control.hasError('email')) {
+      return 'Enter a valid email address.';
+    }
+
+    return '';
+  }
+
+  getPhoneErrorMessage(): string {
+    const control = this.contactForm.controls.phone;
+
+    if (!control.touched || !control.hasError('pattern')) {
+      return '';
+    }
+
+    return 'Only +, numbers and one space are allowed.';
   }
 
   private createContactPayload(): CreateContact {
@@ -64,5 +131,34 @@ export class ContactCreateDialog {
       email: this.contactForm.controls.email.value.trim(),
       phone: this.contactForm.controls.phone.value.trim() || null,
     };
+  }
+
+  private createSanitizedPhone(phone: string): string {
+    const validCharactersOnly = phone.replace(/[^\d+ ]/g, '');
+    const normalizedPlus = this.normalizePhonePlus(validCharactersOnly);
+
+    return this.keepOnlyFirstPhoneSpace(normalizedPlus);
+  }
+
+  private normalizePhonePlus(phone: string): string {
+    if (phone.startsWith('+')) {
+      return `+${phone.slice(1).replace(/\+/g, '')}`;
+    }
+
+    return phone.replace(/\+/g, '');
+  }
+
+  private keepOnlyFirstPhoneSpace(phone: string): string {
+    const singleSpacedPhone = phone.replace(/\s+/g, ' ');
+    const firstSpaceIndex = singleSpacedPhone.indexOf(' ');
+
+    if (firstSpaceIndex === -1) {
+      return singleSpacedPhone;
+    }
+
+    return (
+      singleSpacedPhone.slice(0, firstSpaceIndex + 1) +
+      singleSpacedPhone.slice(firstSpaceIndex + 1).replace(/ /g, '')
+    );
   }
 }
