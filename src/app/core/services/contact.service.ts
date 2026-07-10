@@ -1,4 +1,4 @@
-import { Injectable, inject, signal} from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase';
 import {
   Contact,
@@ -6,7 +6,6 @@ import {
   CreateContact,
   UpdateContact,
 } from '../models/contact.model';
-import { Contacts } from '../../features/contacts/pages/contacts/contacts';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +24,9 @@ export class ContactService {
       .order('first_name', { ascending: true })
       .order('last_name', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return this.mapContactRows(data ?? []);
   }
@@ -37,7 +38,9 @@ export class ContactService {
       .eq('id', id)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return data ? this.mapContactRow(data as ContactRow) : null;
   }
@@ -57,7 +60,9 @@ export class ContactService {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return this.mapContactRow(data as ContactRow);
   }
@@ -70,32 +75,41 @@ export class ContactService {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
-    return this.mapContactRow(data as ContactRow);
-  }
+    const updatedContact = this.mapContactRow(data as ContactRow);
 
-  async deleteContact(id: string): Promise<void> {
-    try {
-      const { error } = await this.supabase
-        .from(this.tableName)
-        .delete()
-        .eq('id', id);
+      this.selectedContact.set(updatedContact);
+      
+      this.allContacts.update(contacts => 
+        contacts.map(contact => contact.id === id ? updatedContact : contact)
+      );
 
       if (error) throw error;
 
-      this.allContacts.set(
-        this.allContacts().filter(contact => contact.id !== id)
-      );
+    return updatedContact
+  }
 
-      if (this.selectedContact()?.id === id) {
-        this.selectedContact.set(null);
-      }
+  async deleteContact(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.tableName)
+      .delete()
+      .eq('id', id);
 
-    } catch (error) {
-      console.error('Deletion error:', error);
+    if (error) {
+      throw error;
     }
- }
+
+    this.allContacts.set(
+      this.allContacts().filter((contact) => contact.id !== id)
+    );
+
+    if (this.selectedContact()?.id === id) {
+      this.selectedContact.set(null);
+    }
+  }
 
   getInitials(firstName: string, lastName: string): string {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -130,7 +144,9 @@ export class ContactService {
       .from(this.tableName)
       .select('badge_color');
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     return new Set((data ?? []).map((contact) => contact.badge_color));
   }

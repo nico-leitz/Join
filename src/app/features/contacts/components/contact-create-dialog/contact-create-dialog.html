@@ -1,9 +1,24 @@
-<div class="contact-dialog-backdrop">
-  <section class="contact-dialog" aria-label="Add contact dialog">
+<div
+  class="contact-dialog-backdrop"
+  [class.contact-dialog-backdrop--closing]="isClosing()"
+  (click)="cancel()"
+>
+  <section
+    class="contact-dialog"
+    [class.contact-dialog--closing]="isClosing()"
+    aria-label="Add contact dialog"
+    (click)="$event.stopPropagation()"
+  >
     <div class="contact-dialog__side">
-      <div class="contact-dialog__logo">J</div>
+      <img
+        class="contact-dialog__logo"
+        src="./assets/contact-details/join-logo.svg"
+        alt="Join Logo"
+      />
+
       <h2>Add contact</h2>
       <p>Tasks are better with a team!</p>
+      <span class="contact-dialog__accent" aria-hidden="true"></span>
     </div>
 
     <form
@@ -22,27 +37,71 @@
 
       <div class="contact-dialog__avatar">?</div>
 
-      <label>
+      <label class="contact-dialog__field">
         <span class="sr-only">Name</span>
-        <input type="text" formControlName="fullName" placeholder="Name" />
+        <input
+          type="text"
+          formControlName="fullName"
+          placeholder="Name"
+          aria-describedby="create-name-error"
+          [class.contact-dialog__input--invalid]="hasNameError()"
+        />
+        <img
+          class="contact-dialog__field-icon"
+          src="./assets/contact-details/person.svg"
+          alt=""
+        />
+        <span class="contact-dialog__error" id="create-name-error">
+          {{ getNameErrorMessage() }}
+        </span>
       </label>
 
-      <label>
+      <label class="contact-dialog__field">
         <span class="sr-only">Email</span>
-        <input type="email" formControlName="email" placeholder="Email" />
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Email"
+          aria-describedby="create-email-error"
+          [class.contact-dialog__input--invalid]="hasEmailError()"
+        />
+        <img
+          class="contact-dialog__field-icon"
+          src="./assets/contact-details/mail.svg"
+          alt=""
+        />
+        <span class="contact-dialog__error" id="create-email-error">
+          {{ getEmailErrorMessage() }}
+        </span>
       </label>
 
-      <label>
+      <label class="contact-dialog__field">
         <span class="sr-only">Phone</span>
-        <input type="tel" formControlName="phone" placeholder="Phone" />
+        <input
+          type="tel"
+          inputmode="tel"
+          formControlName="phone"
+          placeholder="Phone"
+          aria-describedby="create-phone-error"
+          [class.contact-dialog__input--invalid]="hasPhoneError()"
+          (input)="sanitizePhoneInput()"
+        />
+        <img
+          class="contact-dialog__field-icon"
+          src="./assets/contact-details/call.svg"
+          alt=""
+        />
+        <span class="contact-dialog__error" id="create-phone-error">
+          {{ getPhoneErrorMessage() }}
+        </span>
       </label>
 
       <div class="contact-dialog__actions">
         <button class="button button-clean" type="button" (click)="cancel()">
-          Cancel
+          Cancel ×
         </button>
         <button class="button button-primary" type="submit">
-          Create contact
+          Create contact ✓
         </button>
       </div>
     </form>

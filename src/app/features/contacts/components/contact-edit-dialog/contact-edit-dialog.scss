@@ -38,14 +38,23 @@
 }
 
 .contact-dialog__side h2 {
-  margin-bottom: 8px;
+  margin: 0 0 8px;
   font-size: clamp(32px, 4vw, 48px);
 }
 
+.contact-dialog__accent {
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin-top: 6px;
+  background: var(--color-primary-hover, #29abe2);
+}
+
 .contact-dialog__logo {
+  width: 56px;
+  height: auto;
   margin-bottom: 32px;
-  font-size: 40px;
-  font-weight: 700;
+  object-fit: contain;
 }
 
 .contact-dialog__form {
@@ -84,7 +93,9 @@
   font-weight: 700;
 }
 
-.contact-dialog label {
+.contact-dialog__field {
+  position: relative;
+  display: block;
   min-width: 0;
 }
 
@@ -92,9 +103,20 @@
   width: 100%;
   min-width: 0;
   min-height: 40px;
-  padding: 8px 12px;
+  padding: 8px 40px 8px 12px;
   border: 1px solid #a8b3bd;
   border-radius: 8px;
+}
+
+.contact-dialog__field-icon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .contact-dialog__actions {
@@ -110,6 +132,67 @@
   width: 1px;
   height: 1px;
   overflow: hidden;
+}
+
+.contact-dialog-backdrop {
+  animation: contact-dialog-backdrop-fade-in 220ms ease-out both;
+}
+
+.contact-dialog-backdrop--closing {
+  animation: contact-dialog-backdrop-fade-out 220ms ease-in both;
+}
+
+.contact-dialog {
+  animation: contact-dialog-slide-up 220ms ease-out both;
+  will-change: transform, opacity;
+}
+
+.contact-dialog--closing {
+  animation: contact-dialog-slide-down 220ms ease-in both;
+}
+
+@keyframes contact-dialog-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes contact-dialog-slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes contact-dialog-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contact-dialog-backdrop-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 @media (max-width: 900px) {
@@ -172,13 +255,10 @@
     line-height: 1.1;
   }
 
-  .contact-dialog__side h2::after {
-    content: '';
-    display: block;
+  .contact-dialog__accent {
     width: 56px;
     height: 2px;
     margin-top: 8px;
-    background: var(--color-primary-hover, #29abe2);
   }
 
   .contact-dialog__form {
@@ -204,8 +284,14 @@
 
   .contact-dialog input {
     min-height: 32px;
-    padding: 6px 10px;
+    padding: 6px 36px 6px 10px;
     font-size: 14px;
+  }
+
+  .contact-dialog__field-icon {
+    right: 10px;
+    width: 16px;
+    height: 16px;
   }
 
   .contact-dialog__actions {
@@ -312,13 +398,10 @@
     line-height: 1.1;
   }
 
-  .contact-dialog__side h2::after {
-    content: '';
-    display: block;
+  .contact-dialog__accent {
     width: 48px;
     height: 2px;
     margin-top: 8px;
-    background: var(--color-primary-hover, #29abe2);
   }
 
   .contact-dialog__form {
@@ -349,8 +432,13 @@
   .contact-dialog input {
     min-width: 0;
     min-height: 30px;
-    padding: 5px 10px;
+    padding: 5px 34px 5px 10px;
     font-size: 14px;
+  }
+
+  .contact-dialog__field-icon {
+    width: 15px;
+    height: 15px;
   }
 
   .contact-dialog__actions {
@@ -395,5 +483,79 @@
   .contact-dialog {
     transform: scale(0.92);
     transform-origin: center;
+  }
+}
+
+.contact-dialog__field {
+  min-height: 58px;
+}
+
+.contact-dialog__field-icon {
+  top: 20px;
+  transform: translateY(-50%);
+}
+
+.contact-dialog__input--invalid {
+  border-color: #d00000;
+}
+
+.contact-dialog__error {
+  display: block;
+  min-height: 14px;
+  margin-top: 4px;
+  color: #d00000;
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+@media (max-width: 900px) {
+  .contact-dialog__field {
+    min-height: 56px;
+  }
+
+  .contact-dialog__form {
+    gap: 16px 24px;
+  }
+}
+
+@media (max-width: 700px) {
+  .contact-dialog__field {
+    min-height: 50px;
+  }
+
+  .contact-dialog__field-icon {
+    top: 16px;
+  }
+
+  .contact-dialog__error {
+    min-height: 13px;
+    margin-top: 3px;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+  .contact-dialog__form {
+    gap: 8px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) and (max-width: 950px) {
+  .contact-dialog__field {
+    min-height: 45px;
+  }
+
+  .contact-dialog__field-icon {
+    top: 15px;
+  }
+
+  .contact-dialog__error {
+    min-height: 12px;
+    margin-top: 2px;
+    font-size: 10px;
+    line-height: 1.05;
+  }
+
+  .contact-dialog__form {
+    gap: 6px 16px;
   }
 }

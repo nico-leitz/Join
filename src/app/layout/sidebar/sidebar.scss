@@ -1,10 +1,15 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 .sidebar {
   display: flex;
   align-items: center;
   flex-direction: column;
-  width: 232px;
+  width: 100%;
   min-height: 100vh;
-  background-color: var(--color-primary);
+  background-color: var(--color-primary, #2a3647);
 }
 
 .sidebar__logo {
@@ -16,7 +21,8 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 15px;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .sidebar__link {
@@ -25,7 +31,7 @@
   gap: 8px;
   min-height: 48px;
   padding-block: 8px;
-  padding-inline: 48px;
+  padding-inline: 32px;
   color: #e7e7e7;
   font-size: 16px;
   text-decoration: none;
@@ -41,28 +47,84 @@
   height: 24px;
 }
 
-@media (max-width: 640px) {
-  .sidebar {
-    display: flex;
-    flex-direction: row;
+@media (min-width: 1280px) {
+  .sidebar__link {
+    padding-inline: 4rem;
+  }
+}
+
+@media (max-width: 798px) {
+  :host {
+    height: 80px;
   }
 
-  .sidebar__nav {
-    display: flex;
-    flex-direction: row;
+  .sidebar {
     width: 100%;
-    gap: 10px;
-    }
+    min-height: 80px;
+    height: 80px;
+    flex-direction: row;
+    justify-content: center;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.16);
+  }
 
   .sidebar__logo {
     display: none;
   }
 
+  .sidebar__nav {
+    height: 100%;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 0;
+  }
+
   .sidebar__link {
-    display: flex;
-    align-items: center;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    height: calc(100% - 16px);
     flex-direction: column;
-    padding-block: 0;
-    padding-inline: 0;
+    justify-content: center;
+    gap: 4px;
+    margin: 8px 4px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .sidebar__link:hover,
+  .sidebar__link--active {
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar__link img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 380px) {
+  :host {
+    height: 72px;
+  }
+
+  .sidebar {
+    min-height: 72px;
+    height: 72px;
+  }
+
+  .sidebar__link {
+    height: calc(100% - 12px);
+    margin: 6px 3px;
+    font-size: 11px;
+  }
+
+  .sidebar__link img {
+    width: 22px;
+    height: 22px;
   }
 }
