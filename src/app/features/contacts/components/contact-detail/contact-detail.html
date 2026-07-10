@@ -1,22 +1,25 @@
-@if (contact(); as activeContact) {
-  <div class="detail" [class.detail--visible_mobile]="true" (click)="closeMobileActionMenu()">
-    <header class="detail__header">
-      <div class="detail__header_left">
-        <div class="detail__title_row">
-          <h1 class="detail__title">Contacts</h1>
-          <div class="detail__divider"></div>
-        </div>
-        <span class="detail__subtitle">Better with a team</span>
+<div class="detail" [class.detail--visible_mobile]="!!contact()" (click)="closeMobileActionMenu()">
+  
+  <header class="detail__header">
+    <div class="detail__header_left">
+      <div class="detail__title_row">
+        <h1 class="detail__title">Contacts</h1>
+        <div class="detail__divider"></div>
       </div>
-      
+      <span class="detail__subtitle">Better with a team</span>
+    </div>
+    
+    @if (contact()) {
       <img 
         src="assets/contact-details/arrow-left.svg" 
         alt="Back" 
         class="detail__back_arrow" 
         (click)="goBack()"
       />
-    </header>
+    }
+  </header>
 
+  @if (contact(); as activeContact) {
     <div class="detail__profile">
       <div class="detail__badge" [style.background-color]="activeContact.badgeColor">
         {{ getInitials(activeContact.firstName, activeContact.lastName) }}
@@ -24,7 +27,6 @@
 
       <div class="detail__name-section">
         <h2 class="detail__name">{{ activeContact.firstName }} {{ activeContact.lastName }}</h2>
-
         <div class="detail__actions">
           <button class="detail__action-btn" type="button" (click)="openEditDialog(activeContact)">
             <span class="detail__icon">✏️</span> Edit
@@ -52,30 +54,18 @@
 
     <div class="detail__mobile-menu" (click)="$event.stopPropagation()">
       @if (isMobileActionMenuOpen() || isMobileActionMenuClosing()) {
-        <div
-          class="detail__mobile-menu-panel"
-          [class.detail__mobile-menu-panel--closing]="isMobileActionMenuClosing()"
-          role="menu"
-          aria-label="Contact actions"
-        >
-          <button class="detail__mobile-menu-item" type="button" (click)="editFromMobileMenu(activeContact)">
-            Edit
-          </button>
-          <button class="detail__mobile-menu-item" type="button" (click)="deleteFromMobileMenu(activeContact.id)">
-            Delete
-          </button>
+        <div class="detail__mobile-menu-panel" [class.detail__mobile-menu-panel--closing]="isMobileActionMenuClosing()">
+          <button class="detail__mobile-menu-item" type="button" (click)="editFromMobileMenu(activeContact)">Edit</button>
+          <button class="detail__mobile-menu-item" type="button" (click)="deleteFromMobileMenu(activeContact.id)">Delete</button>
         </div>
       }
-
-      <button
-        class="detail__mobile-menu-trigger"
-        type="button"
-        aria-label="Open contact actions"
-        [attr.aria-expanded]="isMobileActionMenuOpen()"
-        (click)="toggleMobileActionMenu()"
-      >
+      <button class="detail__mobile-menu-trigger" type="button" (click)="toggleMobileActionMenu()">
         <img src="assets/contact-details/menucontact.svg" alt="" aria-hidden="true" />
       </button>
     </div>
-  </div>
-}
+  } @else {
+    <div class="detail__placeholder">
+      <p>Bitte wählen Sie einen Kontakt aus, um Details anzuzeigen.</p>
+    </div>
+  }
+</div>

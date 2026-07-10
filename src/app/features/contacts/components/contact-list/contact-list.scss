@@ -14,24 +14,31 @@
   &__button {
     display: none;
     @media (min-width: bp.$breakpoint-tablet-sm) {
-      display: block;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
       width: 100%;
       flex-shrink: 0;
-      background-color: transparent;
+      background-color: var(--color-primary #2a3647);
       color: #ffffff;
       border-radius: 0.5rem;
       border: none;
-      padding: 0.75rem 1.5rem;
+      padding: 1rem 1.5rem;
       font-weight: 700;
       cursor: pointer;
       margin-bottom: 1.5rem;
-      font-size: 1rem;
+      font-size: 1.2rem;
       transition: background-color 0.3s ease;
 
       &:hover {
         background-color: var(--color-primary-hover, #29abe2);
       }
     }
+  }
+
+  &__btn_icon {
+    width: 1.5rem;
   }
 
   &__fab {
