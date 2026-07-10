@@ -6,9 +6,13 @@
 
     <div class="contacts_inner">
       <div class="content-wrapper">
-        <app-contact-list (createContactRequested)="openCreateDialog()"></app-contact-list>
+        <app-contact-list
+          (createContactRequested)="openCreateDialog()"
+        ></app-contact-list>
 
-        <app-contact-detail (editContactRequested)="openEditDialog($event)"></app-contact-detail>
+        <app-contact-detail
+          (editContactRequested)="openEditDialog($event)"
+        ></app-contact-detail>
       </div>
     </div>
 
@@ -24,11 +28,14 @@
         [contact]="selectedContact()!"
         (cancelled)="closeEditDialog()"
         (submitted)="updateContact($event)"
+        (deleted)="deleteContact($event)"
       ></app-contact-edit-dialog>
     }
 
     @if (successMessage()) {
-      <app-contact-success-overlay [message]="successMessage()"></app-contact-success-overlay>
+      <app-contact-success-overlay
+        [message]="successMessage()"
+      ></app-contact-success-overlay>
     }
   </div>
 </section>

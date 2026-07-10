@@ -5,13 +5,13 @@ import { ContactCreateDialog } from '../../components/contact-create-dialog/cont
 import { ContactEditDialog } from '../../components/contact-edit-dialog/contact-edit-dialog';
 import { ContactSuccessOverlay } from '../../components/contact-success-overlay/contact-success-overlay';
 import { ContactService } from '../../../../core/services/contact.service';
-import { ContactDetail } from "../../components/contact-detail/contact-detail";
+import { ContactDetail } from '../../components/contact-detail/contact-detail';
 import {
   Contact,
   CreateContact,
   UpdateContact,
 } from '../../../../core/models/contact.model';
-import { Sidebar } from "../../../../layout/sidebar/sidebar";
+import { Sidebar } from '../../../../layout/sidebar/sidebar';
 import { Header } from '../../../../layout/header/header';
 
 @Component({
@@ -23,8 +23,8 @@ import { Header } from '../../../../layout/header/header';
     ContactSuccessOverlay,
     ContactDetail,
     Sidebar,
-    Header
-],
+    Header,
+  ],
   templateUrl: './contacts.html',
   styleUrl: './contacts.scss',
 })
@@ -76,12 +76,21 @@ export class Contacts implements OnDestroy {
   async updateContact(contact: UpdateContact): Promise<void> {
     const selectedContact = this.selectedContact();
 
-    if (!selectedContact) return;
+    if (!selectedContact) {
+      return;
+    }
 
     await this.contactService.updateContact(selectedContact.id, contact);
     this.closeEditDialog();
     await this.contactList?.loadContacts();
     this.showSuccessMessage('Contact successfully updated');
+  }
+
+  async deleteContact(contactId: string): Promise<void> {
+    await this.contactService.deleteContact(contactId);
+    this.closeEditDialog();
+    await this.contactList?.loadContacts();
+    this.showSuccessMessage('Contact successfully deleted');
   }
 
   hideSuccessMessage(): void {
