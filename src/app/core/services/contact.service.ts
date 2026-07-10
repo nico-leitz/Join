@@ -79,7 +79,15 @@ export class ContactService {
       throw error;
     }
 
-    return this.mapContactRow(data as ContactRow);
+      this.selectedContact.set(updatedContact);
+      
+      this.allContacts.update(contacts => 
+        contacts.map(contact => contact.id === id ? updatedContact : contact)
+      );
+
+      if (error) throw error;
+
+    return updatedContact
   }
 
   async deleteContact(id: string): Promise<void> {
