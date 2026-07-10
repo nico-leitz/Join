@@ -79,6 +79,8 @@ export class ContactService {
       throw error;
     }
 
+    const updatedContact = this.mapContactRow(data as ContactRow);
+
       this.selectedContact.set(updatedContact);
       
       this.allContacts.update(contacts => 
