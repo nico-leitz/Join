@@ -2,18 +2,16 @@
   
   <header class="detail__header">
     <div class="detail__header_left">
-      <div class="detail__title_row">
-        <h1 class="detail__title">Contacts</h1>
-        <div class="detail__divider"></div>
-      </div>
+      <h1 class="detail__title">Contacts</h1>
       <span class="detail__subtitle">Better with a team</span>
+      <div class="detail__divider"></div>
     </div>
-    
+
     @if (contact()) {
-      <img 
-        src="assets/contact-details/arrow-left.svg" 
-        alt="Back" 
-        class="detail__back_arrow" 
+      <img
+        src="assets/contact-details/arrow-left.svg"
+        alt="Back"
+        class="detail__back_arrow"
         (click)="goBack()"
       />
     }
