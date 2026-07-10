@@ -11,6 +11,18 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'summary',
+    component: Summary,
+  },
+  {
+    path: 'add-task',
+    component: AddTask,
+  },
+  {
+    path: 'board',
+    component: Board,
+  },
+  {
     path: 'contacts',
     component: Contacts,
   },

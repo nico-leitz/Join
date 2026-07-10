@@ -10,6 +10,7 @@
       class="sidebar__link"
       routerLink="/summary"
       routerLinkActive="sidebar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >
       <img src="./assets/sidebar/icons/nav-summary-icon.svg" alt="" />
       <span>Summary</span>
@@ -19,6 +20,7 @@
       class="sidebar__link"
       routerLink="/add-task"
       routerLinkActive="sidebar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >
       <img src="./assets/sidebar/icons/nav-addTask-icon.svg" alt="" />
       <span>Add Task</span>
@@ -28,6 +30,7 @@
       class="sidebar__link"
       routerLink="/board"
       routerLinkActive="sidebar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >
       <img src="./assets/sidebar/icons/nav-board-icon.svg" alt="" />
       <span>Board</span>
@@ -37,6 +40,7 @@
       class="sidebar__link"
       routerLink="/contacts"
       routerLinkActive="sidebar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
     >
       <img src="./assets/sidebar/icons/nav-contacts-icon.svg" alt="" />
       <span>Contacts</span>
