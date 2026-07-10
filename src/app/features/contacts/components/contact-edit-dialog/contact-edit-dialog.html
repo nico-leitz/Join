@@ -101,7 +101,11 @@
       </label>
 
       <div class="contact-dialog__actions">
-        <button class="button button-clean" type="button">
+        <button
+          class="button button-clean"
+          type="button"
+          (click)="deleteContact()"
+        >
           Delete
         </button>
         <button class="button button-primary" type="submit">

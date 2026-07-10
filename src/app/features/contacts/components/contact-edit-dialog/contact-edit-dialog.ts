@@ -21,6 +21,8 @@ export class ContactEditDialog implements OnInit {
 
   cancelled = output<void>();
   submitted = output<UpdateContact>();
+  deleted = output<string>();
+
   isClosing = signal(false);
 
   contactForm = new FormGroup({
@@ -63,6 +65,10 @@ export class ContactEditDialog implements OnInit {
     }
 
     this.submitted.emit(this.createContactPayload());
+  }
+
+  deleteContact(): void {
+    this.deleted.emit(this.contact().id);
   }
 
   sanitizePhoneInput(): void {
