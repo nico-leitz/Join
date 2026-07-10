@@ -264,6 +264,14 @@
   }
 }
 
+@media (min-width: 799px) {
+  .detail {
+    &__divider {
+      display: none;
+    }
+  }
+}
+
 @media (max-width: 798px) {
   .detail {
     &__actions {
