@@ -1,7 +1,8 @@
-@mixin flex-center {
+@mixin flexbox($dir: row, $justifyContent: flex-start, $alignItems: stretch) {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: $dir;
+  align-items: $alignItems;
+  justify-content: $justifyContent;
 }
 
 @mixin page-container {
