@@ -1,3 +1,7 @@
+@use 'abstracts/breakpoints' as bp;
+
+$tablet-overlay-min-width: bp.$breakpoint-mobile-m + 1px;
+
 :host {
   position: fixed;
   inset: 0;
@@ -11,30 +15,86 @@
   --success-out-duration: 220ms;
 
   position: fixed;
-  left: 50dvw;
+  left: 50%;
   bottom: clamp(96px, 16dvh, 128px);
   display: flex;
+  width: 326px;
+  height: 74px;
+  max-width: calc(100dvw - 48px);
   align-items: center;
   justify-content: center;
-  width: max-content;
-  max-width: calc(100dvw - 48px);
-  min-width: 252px;
-  min-height: 58px;
-  padding: 16px 24px;
-  border-radius: 12px;
-  background: var(--color-primary, #2a3647);
-  color: var(--color-text-light, #ffffff);
-  box-shadow: 0 0 4px 0 #00000026;
-  font-size: 16px;
-  line-height: 1.2;
+  padding: 0 24px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  box-shadow: var(--shadow-overlay);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: var(--line-height-base);
   text-align: center;
   opacity: 0;
   transform: translate(calc(-50% + 420px), 72px);
-  will-change: transform, opacity;
   animation:
     contact-success-desktop-in var(--success-in-duration) ease-out forwards,
     contact-success-desktop-out var(--success-out-duration) ease-in
       calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+  will-change: transform, opacity;
+}
+
+@media (max-width: 1100px) and (min-width: $tablet-overlay-min-width) {
+  .contact-success-overlay {
+    right: clamp(24px, 5vw, 56px);
+    left: auto;
+    bottom: clamp(88px, 15dvh, 120px);
+    width: 326px;
+    transform: translate(360px, 48px);
+    animation:
+      contact-success-tablet-in var(--success-in-duration) ease-out forwards,
+      contact-success-tablet-out var(--success-out-duration) ease-in
+        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-m) and (orientation: portrait) {
+  .contact-success-overlay {
+    right: auto;
+    left: 50%;
+    bottom: max(96px, calc(var(--contact-mobile-nav-height, 0px) + 72px));
+    width: min(326px, calc(100dvw - 32px));
+    height: 74px;
+    padding-inline: 18px;
+    transform: translate(-50%, 160px);
+    animation:
+      contact-success-mobile-in var(--success-in-duration) ease-out forwards,
+      contact-success-mobile-out var(--success-out-duration) ease-in
+        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-xs) and (orientation: portrait) {
+  .contact-success-overlay {
+    bottom: max(84px, calc(var(--contact-mobile-nav-height, 0px) + 60px));
+    width: calc(100dvw - 24px);
+    height: 64px;
+    padding-inline: 14px;
+    font-size: 18px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .contact-success-overlay {
+    right: 16px;
+    left: auto;
+    bottom: max(28px, calc(var(--contact-mobile-nav-height, 0px) + 24px));
+    width: min(326px, calc(100dvw - 32px));
+    height: 64px;
+    transform: translate(340px, 32px);
+    animation:
+      contact-success-landscape-in var(--success-in-duration) ease-out forwards,
+      contact-success-landscape-out var(--success-out-duration) ease-in
+        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
+  }
 }
 
 @keyframes contact-success-desktop-in {
@@ -58,23 +118,6 @@
   to {
     opacity: 0;
     transform: translate(calc(-50% + 420px), 0);
-  }
-}
-
-@media (max-width: 1100px) and (min-width: 701px) {
-  .contact-success-overlay {
-    right: clamp(24px, 5vw, 56px);
-    left: auto;
-    bottom: clamp(88px, 15dvh, 120px);
-    min-width: 240px;
-    min-height: 54px;
-    padding: 14px 22px;
-    font-size: 15px;
-    transform: translate(360px, 48px);
-    animation:
-      contact-success-tablet-in var(--success-in-duration) ease-out forwards,
-      contact-success-tablet-out var(--success-out-duration) ease-in
-        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
   }
 }
 
@@ -102,28 +145,6 @@
   }
 }
 
-@media (max-width: 700px) {
-  .contact-success-overlay {
-    left: 50%;
-    right: auto;
-    bottom: max(
-      96px,
-      calc(var(--contact-mobile-nav-height, 0px) + 72px)
-    );
-    width: min(320px, calc(100dvw - 32px));
-    min-width: 0;
-    min-height: 52px;
-    padding: 14px 18px;
-    border-radius: 16px;
-    font-size: 14px;
-    transform: translate(-50%, 160px);
-    animation:
-      contact-success-mobile-in var(--success-in-duration) ease-out forwards,
-      contact-success-mobile-out var(--success-out-duration) ease-in
-        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
-  }
-}
-
 @keyframes contact-success-mobile-in {
   from {
     opacity: 0;
@@ -145,39 +166,6 @@
   to {
     opacity: 0;
     transform: translate(-50%, 160px);
-  }
-}
-
-@media (max-width: 360px) {
-  .contact-success-overlay {
-    bottom: max(
-      84px,
-      calc(var(--contact-mobile-nav-height, 0px) + 60px)
-    );
-    width: calc(100dvw - 24px);
-    min-height: 48px;
-    padding: 12px 14px;
-    font-size: 13px;
-  }
-}
-
-@media (max-height: 520px) and (orientation: landscape) {
-  .contact-success-overlay {
-    right: 16px;
-    left: auto;
-    bottom: max(
-      28px,
-      calc(var(--contact-mobile-nav-height, 0px) + 24px)
-    );
-    width: min(320px, calc(100dvw - 32px));
-    min-height: 44px;
-    padding: 12px 16px;
-    font-size: 13px;
-    transform: translate(340px, 32px);
-    animation:
-      contact-success-landscape-in var(--success-in-duration) ease-out forwards,
-      contact-success-landscape-out var(--success-out-duration) ease-in
-        calc(var(--success-in-duration) + var(--success-visible-delay)) forwards;
   }
 }
 

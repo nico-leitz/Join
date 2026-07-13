@@ -1,8 +1,21 @@
 $breakpoint-mobile-s: 320px;
+$breakpoint-mobile-xs: 360px;
 $breakpoint-mobile-m: 480px;
-$breakpoints-mobile-l: 640px;
+$breakpoint-mobile-l: 640px;
+
+$breakpoint-tablet-sm-max: 799px;
 $breakpoint-tablet-sm: 800px;
-$breakpoints-tablet-l: 960px;
+$breakpoint-tablet-l: 960px;
 $breakpoint-tablet-xl: 1120px;
+
 $breakpoint-desktop-s: 1280px;
 $breakpoint-desktop-fhd: 1440px;
+
+$breakpoint-landscape-height-sm: 420px;
+$breakpoint-landscape-height-md: 620px;
+$breakpoint-landscape-width-md: 900px;
+$breakpoint-landscape-width-lg: 1024px;
+
+// Backwards-compatible aliases.
+$breakpoints-mobile-l: $breakpoint-mobile-l;
+$breakpoints-tablet-l: $breakpoint-tablet-l;

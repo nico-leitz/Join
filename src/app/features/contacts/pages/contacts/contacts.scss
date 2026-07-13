@@ -1,15 +1,19 @@
+@use 'abstracts/breakpoints' as bp;
+
 .contacts-page {
-  --mobile-bottom-nav-height: 80px;
+  --contact-header-height: var(--layout-mobile-header-height);
+  --mobile-bottom-nav-height: var(--layout-mobile-bottom-nav-height);
   --contact-mobile-nav-height: var(--mobile-bottom-nav-height);
-  --contact-sidebar-width: 0px;
-  --contact-list-width: 100%;
+  --contact-sidebar-width-current: 0px;
+  --contact-list-width-current: 100%;
 
   position: relative;
   display: flex;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  background-color: var(--color-bg-main, #f6f7f8);
+  background-color: var(--color-bg-main);
+  font-family: var(--font-primary);
 }
 
 .contacts_inner {
@@ -18,7 +22,7 @@
   width: 100%;
   min-width: 0;
   min-height: 0;
-  background-color: #ffffff;
+  background-color: var(--color-bg-main);
 }
 
 app-sidebar {
@@ -35,31 +39,30 @@ app-sidebar {
 
 .right-wrapper {
   display: flex;
-  flex: 1;
   width: 100%;
+  height: 100%;
   min-width: 0;
   min-height: 0;
-  height: 100%;
+  flex: 1;
   flex-direction: column;
   padding-bottom: var(--mobile-bottom-nav-height);
-  box-sizing: border-box;
 }
 
 app-header {
   z-index: 20;
+  display: block;
   width: 100%;
-  min-width: 100%;
-  height: 96px;
+  height: var(--contact-header-height);
   flex-shrink: 0;
 }
 
 .content-wrapper {
   position: relative;
   display: flex;
-  flex: 1;
   width: 100%;
   min-width: 0;
   min-height: 0;
+  flex: 1;
   overflow: hidden;
 }
 
@@ -67,7 +70,7 @@ app-contact-list {
   width: 100%;
   height: 100%;
   flex-shrink: 0;
-  background-color: var(--color-bg-light, #ffffff);
+  background-color: var(--color-bg-light);
 }
 
 app-contact-detail {
@@ -76,26 +79,27 @@ app-contact-detail {
   min-width: 0;
 }
 
-@media (max-width: 380px) {
+@media (max-width: bp.$breakpoint-mobile-xs) {
   .contacts-page {
     --mobile-bottom-nav-height: 72px;
   }
 }
 
-@media (min-width: 799px) {
+@media (min-width: calc(#{bp.$breakpoint-tablet-xl} + 1px)) {
   .contacts-page {
+    --contact-header-height: var(--layout-header-height);
     --mobile-bottom-nav-height: 0px;
     --contact-mobile-nav-height: 0px;
-    --contact-sidebar-width: clamp(196px, 18vw, 250px);
-    --contact-list-width: clamp(280px, 32vw, 400px);
+    --contact-sidebar-width-current: var(--contact-sidebar-width);
+    --contact-list-width-current: var(--contact-list-width);
   }
 
   app-sidebar {
     position: static;
     display: block;
-    width: var(--contact-sidebar-width);
+    width: var(--contact-sidebar-width-current);
     height: 100%;
-    flex: 0 0 var(--contact-sidebar-width);
+    flex: 0 0 var(--contact-sidebar-width-current);
   }
 
   .right-wrapper {
@@ -103,10 +107,9 @@ app-contact-detail {
   }
 
   app-contact-list {
-    width: var(--contact-list-width);
-    flex: 0 0 var(--contact-list-width);
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 4px 0 6px rgba(0, 0, 0, 0.04);
+    width: var(--contact-list-width-current);
+    flex: 0 0 var(--contact-list-width-current);
+    box-shadow: var(--shadow-list);
   }
 
   app-contact-detail {
@@ -116,9 +119,40 @@ app-contact-detail {
   }
 }
 
-@media (min-width: 1280px) {
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
   .contacts-page {
-    --contact-sidebar-width: 250px;
-    --contact-list-width: 400px;
+    --contact-header-height: var(--layout-mobile-landscape-header-height);
+    --mobile-bottom-nav-height: var(--layout-mobile-landscape-bottom-nav-height);
+    --contact-mobile-nav-height: var(--mobile-bottom-nav-height);
+    --contact-sidebar-width-current: 0px;
+    --contact-list-width-current: 100%;
+  }
+
+  app-sidebar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: var(--mobile-bottom-nav-height);
+    flex: 0 0 var(--mobile-bottom-nav-height);
+  }
+
+  .right-wrapper {
+    padding-bottom: var(--mobile-bottom-nav-height);
+  }
+
+  app-contact-list {
+    width: 100%;
+    flex: 0 0 100%;
+    box-shadow: var(--shadow-list);
+  }
+
+  app-contact-detail {
+    width: 100%;
+    height: 100%;
+    flex: 0 0 100%;
+    min-width: 0;
   }
 }

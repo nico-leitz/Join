@@ -67,9 +67,11 @@ export class Contacts implements OnDestroy {
   }
 
   async createContact(contact: CreateContact): Promise<void> {
-    await this.contactService.createContact(contact);
+    const createdContact = await this.contactService.createContact(contact);
+
     this.closeCreateDialog();
     await this.contactList?.loadContacts();
+    this.selectCreatedContact(createdContact);
     this.showSuccessMessage('Contact successfully created');
   }
 
@@ -97,12 +99,20 @@ export class Contacts implements OnDestroy {
     this.successMessage.set('');
   }
 
+  private selectCreatedContact(createdContact: Contact): void {
+    const contactFromList = this.findContactById(createdContact.id);
+    this.contactService.selectedContact.set(contactFromList ?? createdContact);
+  }
+
+  private findContactById(contactId: string): Contact | undefined {
+    return this.contactService.allContacts().find((contact) => {
+      return contact.id === contactId;
+    });
+  }
+
   private showSuccessMessage(message: string): void {
     this.successMessage.set(message);
-
-    setTimeout(() => {
-      this.hideSuccessMessage();
-    }, 2500);
+    window.setTimeout(() => this.hideSuccessMessage(), 2500);
   }
 
   private lockPageScroll(): void {

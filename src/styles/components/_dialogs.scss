@@ -1,0 +1,18 @@
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dialog-card {
+  border-radius: var(--radius-dialog);
+  background: var(--color-bg-light);
+  box-shadow: var(--shadow-overlay);
+}
