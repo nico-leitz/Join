@@ -1,65 +1,148 @@
-<div class="detail" [class.detail--visible_mobile]="!!contact()" (click)="closeMobileActionMenu()">
-  
+<div
+  class="detail"
+  [class.detail--visible_mobile]="!!contact()"
+  (click)="closeMobileActionMenu()"
+>
   <header class="detail__header">
-    <div class="detail__header_left">
+    <div class="detail__header-left">
       <h1 class="detail__title">Contacts</h1>
+      <div class="detail__divider" aria-hidden="true"></div>
       <span class="detail__subtitle">Better with a team</span>
-      <div class="detail__divider"></div>
     </div>
 
     @if (contact()) {
-      <img
-        src="assets/contact-details/arrow-left.svg"
-        alt="Back"
-        class="detail__back_arrow"
+      <button
+        class="detail__back-button"
+        type="button"
+        aria-label="Back to contact list"
         (click)="goBack()"
-      />
+      >
+        <img
+          src="assets/contact-details/arrow-left.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
     }
   </header>
 
   @if (contact(); as activeContact) {
-    <div class="detail__profile">
-      <div class="detail__badge" [style.background-color]="activeContact.badgeColor">
-        {{ getInitials(activeContact.firstName, activeContact.lastName) }}
-      </div>
+    <div class="detail__content">
+      <div class="detail__profile">
+        <div
+          class="detail__badge avatar-badge avatar-badge--large"
+          [style.background-color]="activeContact.badgeColor"
+        >
+          {{ getInitials(activeContact.firstName, activeContact.lastName) }}
+        </div>
 
-      <div class="detail__name-section">
-        <h2 class="detail__name">{{ activeContact.firstName }} {{ activeContact.lastName }}</h2>
-        <div class="detail__actions">
-          <button class="detail__action-btn" type="button" (click)="openEditDialog(activeContact)">
-            <span class="detail__icon">✏️</span> Edit
-          </button>
-          <button class="detail__action-btn" type="button" (click)="deleteContact(activeContact.id)">
-            <span class="detail__icon">🗑️</span> Delete
-          </button>
+        <div class="detail__name-section">
+          <h2 class="detail__name">
+            {{ activeContact.firstName }} {{ activeContact.lastName }}
+          </h2>
+
+          <div class="detail__actions">
+            <button
+              class="detail__action-btn"
+              type="button"
+              (click)="openEditDialog(activeContact)"
+            >
+              <img
+                class="detail__action-icon"
+                src="assets/icons/icons_edit/edit.svg"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>Edit</span>
+            </button>
+
+            <button
+              class="detail__action-btn"
+              type="button"
+              (click)="deleteContact(activeContact.id)"
+            >
+              <img
+                class="detail__action-icon"
+                src="assets/icons/icons_edit/delete.svg"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>Delete</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="detail__info-section">
-      <h3 class="detail__info-title">Contact Information</h3>
-      <div class="detail__info-group">
-        <span class="detail__info-label">Email</span>
-        <a [href]="'mailto:' + activeContact.email" class="detail__info-value detail__info-link">
-          {{ activeContact.email }}
-        </a>
-      </div>
-      <div class="detail__info-group">
-        <span class="detail__info-label">Phone</span>
-        <span class="detail__info-value">{{ activeContact.phone || 'No phone number' }}</span>
-      </div>
-    </div>
+      <section class="detail__info-section" aria-label="Contact information">
+        <h3 class="detail__info-title">Contact Information</h3>
 
-    <div class="detail__mobile-menu" (click)="$event.stopPropagation()">
-      @if (isMobileActionMenuOpen() || isMobileActionMenuClosing()) {
-        <div class="detail__mobile-menu-panel" [class.detail__mobile-menu-panel--closing]="isMobileActionMenuClosing()">
-          <button class="detail__mobile-menu-item" type="button" (click)="editFromMobileMenu(activeContact)">Edit</button>
-          <button class="detail__mobile-menu-item" type="button" (click)="deleteFromMobileMenu(activeContact.id)">Delete</button>
+        <div class="detail__info-group">
+          <span class="detail__info-label">Email</span>
+          <a
+            [href]="'mailto:' + activeContact.email"
+            class="detail__info-value detail__info-link"
+          >
+            {{ activeContact.email }}
+          </a>
         </div>
-      }
-      <button class="detail__mobile-menu-trigger" type="button" (click)="toggleMobileActionMenu()">
-        <img src="assets/contact-details/menucontact.svg" alt="" aria-hidden="true" />
-      </button>
+
+        <div class="detail__info-group">
+          <span class="detail__info-label">Phone</span>
+          <span class="detail__info-value">
+            {{ activeContact.phone || 'No phone number' }}
+          </span>
+        </div>
+      </section>
+
+      <div class="detail__mobile-menu" (click)="$event.stopPropagation()">
+        @if (isMobileActionMenuOpen() || isMobileActionMenuClosing()) {
+          <div
+            class="detail__mobile-menu-panel"
+            [class.detail__mobile-menu-panel--closing]="isMobileActionMenuClosing()"
+          >
+            <button
+              class="detail__mobile-menu-item"
+              type="button"
+              (click)="editFromMobileMenu(activeContact)"
+            >
+              <img
+                class="detail__mobile-menu-item-icon"
+                src="assets/icons/icons_edit/edit.svg"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>Edit</span>
+            </button>
+
+            <button
+              class="detail__mobile-menu-item"
+              type="button"
+              (click)="deleteFromMobileMenu(activeContact.id)"
+            >
+              <img
+                class="detail__mobile-menu-item-icon"
+                src="assets/icons/icons_edit/delete.svg"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>Delete</span>
+            </button>
+          </div>
+        }
+
+        <button
+          class="detail__mobile-menu-trigger"
+          type="button"
+          (click)="toggleMobileActionMenu()"
+          aria-label="Open contact actions"
+        >
+          <img
+            src="assets/contact-details/menucontact.svg"
+            alt=""
+            aria-hidden="true"
+          />
+        </button>
+      </div>
     </div>
   } @else {
     <div class="detail__placeholder">
