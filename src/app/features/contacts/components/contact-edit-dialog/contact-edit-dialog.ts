@@ -1,8 +1,10 @@
 import { Component, input, OnInit, output, signal } from '@angular/core';
 import {
+  AbstractControl,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { Contact, UpdateContact } from '../../../../core/models/contact.model';
@@ -14,21 +16,22 @@ import { Contact, UpdateContact } from '../../../../core/models/contact.model';
   styleUrl: './contact-edit-dialog.scss',
 })
 export class ContactEditDialog implements OnInit {
-  private readonly closeAnimationMs = 220;
-  private readonly phonePattern = /^\+?[0-9]+(?: [0-9]+)?$/;
+  private readonly closeAnimationMs = 200;
+  private readonly fallbackLastName = 'Unknown';
+  private readonly namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿÄÖÜäöüß' -]+$/;
+  private readonly phonePattern = /^\+?[0-9 ]+$/;
 
   contact = input.required<Contact>();
 
   cancelled = output<void>();
   submitted = output<UpdateContact>();
   deleted = output<string>();
-
   isClosing = signal(false);
 
   contactForm = new FormGroup({
     fullName: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required],
+      validators: [Validators.required, this.validateName.bind(this)],
     }),
     email: new FormControl('', {
       nonNullable: true,
@@ -36,7 +39,7 @@ export class ContactEditDialog implements OnInit {
     }),
     phone: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.pattern(this.phonePattern)],
+      validators: [Validators.required, Validators.pattern(this.phonePattern)],
     }),
   });
 
@@ -50,17 +53,15 @@ export class ContactEditDialog implements OnInit {
     }
 
     this.isClosing.set(true);
-
-    window.setTimeout(() => {
-      this.cancelled.emit();
-    }, this.closeAnimationMs);
+    window.setTimeout(() => this.cancelled.emit(), this.closeAnimationMs);
   }
 
   submitForm(): void {
     this.sanitizePhoneInput();
+    this.contactForm.markAllAsTouched();
+    this.contactForm.updateValueAndValidity();
 
     if (this.contactForm.invalid) {
-      this.contactForm.markAllAsTouched();
       return;
     }
 
@@ -81,44 +82,34 @@ export class ContactEditDialog implements OnInit {
   }
 
   hasNameError(): boolean {
-    const control = this.contactForm.controls.fullName;
-    return control.touched && control.invalid;
+    return this.hasTouchedError(this.contactForm.controls.fullName);
   }
 
   hasEmailError(): boolean {
-    const control = this.contactForm.controls.email;
-    return control.touched && control.invalid;
+    return this.hasTouchedError(this.contactForm.controls.email);
   }
 
   hasPhoneError(): boolean {
-    const control = this.contactForm.controls.phone;
-    return control.touched && control.invalid;
+    return this.hasTouchedError(this.contactForm.controls.phone);
   }
 
   getNameErrorMessage(): string {
     const control = this.contactForm.controls.fullName;
 
-    if (!control.touched || !control.hasError('required')) {
-      return '';
-    }
+    if (!control.touched) return '';
+    if (control.hasError('required')) return 'Name is required.';
+    if (control.hasError('nameHasNumber')) return 'Name must not contain numbers.';
+    if (control.hasError('invalidName')) return 'Use letters, spaces, hyphens or apostrophes only.';
 
-    return 'Name is required.';
+    return '';
   }
 
   getEmailErrorMessage(): string {
     const control = this.contactForm.controls.email;
 
-    if (!control.touched) {
-      return '';
-    }
-
-    if (control.hasError('required')) {
-      return 'Email is required.';
-    }
-
-    if (control.hasError('email')) {
-      return 'Enter a valid email address.';
-    }
+    if (!control.touched) return '';
+    if (control.hasError('required')) return 'Email is required.';
+    if (control.hasError('email')) return 'Enter a valid email address.';
 
     return '';
   }
@@ -126,16 +117,15 @@ export class ContactEditDialog implements OnInit {
   getPhoneErrorMessage(): string {
     const control = this.contactForm.controls.phone;
 
-    if (!control.touched || !control.hasError('pattern')) {
-      return '';
-    }
+    if (!control.touched) return '';
+    if (control.hasError('required')) return 'Phone is required.';
+    if (control.hasError('pattern')) return 'Only numbers, spaces and one leading + are allowed.';
 
-    return 'Only +, numbers and one space are allowed.';
+    return '';
   }
 
   getInitials(): string {
     const contact = this.contact();
-
     return `${contact.firstName.charAt(0)}${contact.lastName.charAt(0)}`.toUpperCase();
   }
 
@@ -149,23 +139,35 @@ export class ContactEditDialog implements OnInit {
     });
   }
 
+  private validateName(control: AbstractControl<string>): ValidationErrors | null {
+    const fullName = control.value.trim();
+
+    if (!fullName) return null;
+    if (/\d/.test(fullName)) return { nameHasNumber: true };
+    if (!this.namePattern.test(fullName)) return { invalidName: true };
+
+    return null;
+  }
+
+  private hasTouchedError(control: AbstractControl): boolean {
+    return control.touched && control.invalid;
+  }
+
   private createContactPayload(): UpdateContact {
-    const fullName = this.contactForm.controls.fullName.value.trim();
-    const [firstName, ...lastNameParts] = fullName.split(' ');
+    const fullNameParts = this.contactForm.controls.fullName.value.trim().split(/\s+/);
+    const firstName = fullNameParts.shift() ?? '';
 
     return {
       firstName,
-      lastName: lastNameParts.join(' ') || firstName,
+      lastName: fullNameParts.join(' ') || this.fallbackLastName,
       email: this.contactForm.controls.email.value.trim(),
-      phone: this.contactForm.controls.phone.value.trim() || null,
+      phone: this.contactForm.controls.phone.value.trim(),
     };
   }
 
   private createSanitizedPhone(phone: string): string {
-    const validCharactersOnly = phone.replace(/[^\d+ ]/g, '');
-    const normalizedPlus = this.normalizePhonePlus(validCharactersOnly);
-
-    return this.keepOnlyFirstPhoneSpace(normalizedPlus);
+    const validCharactersOnly = phone.replace(/[^\d+\s]/g, '').replace(/\s+/g, ' ');
+    return this.normalizePhonePlus(validCharactersOnly.trimStart());
   }
 
   private normalizePhonePlus(phone: string): string {
@@ -174,19 +176,5 @@ export class ContactEditDialog implements OnInit {
     }
 
     return phone.replace(/\+/g, '');
-  }
-
-  private keepOnlyFirstPhoneSpace(phone: string): string {
-    const singleSpacedPhone = phone.replace(/\s+/g, ' ');
-    const firstSpaceIndex = singleSpacedPhone.indexOf(' ');
-
-    if (firstSpaceIndex === -1) {
-      return singleSpacedPhone;
-    }
-
-    return (
-      singleSpacedPhone.slice(0, firstSpaceIndex + 1) +
-      singleSpacedPhone.slice(firstSpaceIndex + 1).replace(/ /g, '')
-    );
   }
 }
