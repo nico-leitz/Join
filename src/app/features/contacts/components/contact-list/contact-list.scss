@@ -1,3 +1,5 @@
+@use 'abstracts/breakpoints' as bp;
+
 :host {
   position: relative;
   display: flex;
@@ -5,68 +7,69 @@
   height: 100%;
   min-width: 0;
   flex-direction: column;
+  padding: 32px 24px;
   box-sizing: border-box;
-  padding: 1rem;
+  background: var(--color-bg-light);
+  font-family: var(--font-primary);
 }
 
 .contact {
   &__button {
     display: none;
 
-    @media (min-width: 799px) {
+    @media (min-width: #{bp.$breakpoint-tablet-xl + 1px}) {
       display: flex;
-      align-items: center;
-      justify-content: center;
       width: 100%;
+      height: 56px;
       flex-shrink: 0;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      padding: 1rem 1.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      background-color: var(--color-primary, #2a3647);
-      color: #ffffff;
-      cursor: pointer;
-      font-size: 1rem;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-lg);
       font-weight: 700;
-      transition: background-color 0.3s ease;
-
-      &:hover {
-        background-color: var(--color-primary-hover, #29abe2);
-      }
+      line-height: var(--line-height-base);
     }
   }
 
-  &__btn_icon {
-    width: 1.5rem;
+  &__btn-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
   }
 
   &__fab {
     position: fixed;
-    right: 10px;
-    bottom: calc(var(--contact-mobile-nav-height, 80px) + 16px);
+    right: 16px;
+    bottom: calc(var(--contact-mobile-nav-height, 80px) + 32px);
     z-index: 150;
     display: flex;
+    width: var(--contact-mobile-fab-size);
+    height: var(--contact-mobile-fab-size);
     align-items: center;
     justify-content: center;
-    width: 4rem;
-    height: 4rem;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background-color: transparent;
-    box-shadow: none;
-    cursor: pointer;
+    padding: 12px;
+    border: 1px solid var(--color-primary);
+    border-radius: 46px;
+    background-color: var(--color-primary);
+    box-shadow: var(--shadow-fab);
+    transition:
+      background-color var(--transition-fast),
+      box-shadow var(--transition-fast);
 
-    @media (min-width: 799px) {
+    &:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    @media (min-width: #{bp.$breakpoint-tablet-xl + 1px}) {
       display: none;
     }
   }
 
   &__fab-icon {
-    display: block;
-    width: 4rem;
-    height: 4rem;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
     pointer-events: none;
   }
@@ -81,117 +84,190 @@
     overflow: hidden;
 
     &--hidden-mobile {
-      @media (max-width: 798px) {
-        display: none !important;
+      @media (max-width: bp.$breakpoint-tablet-xl) {
+        display: none;
+      }
+
+      @media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
+        display: none;
       }
     }
   }
 
   &__scroll-container {
     flex: 1;
+    width: 100%;
     min-height: 0;
     overflow-y: auto;
-    padding-right: 0.5rem;
+    padding-right: 0;
   }
 
   &__letter-header {
-    margin: 0.75rem 0 0.5rem;
-    padding: 0 0 0.625rem 1rem;
-    border-bottom: 0.0625rem solid #d1d1d1;
-    color: #000000;
-    font-size: 1.1rem;
+    width: 100%;
+    min-height: 58px;
+    padding: 17px 36px;
+    border-bottom: 1px solid var(--color-border-light);
+    color: var(--color-text-main);
+    font-size: var(--font-size-md);
     font-weight: 400;
-
-    @media (min-width: 799px) {
-      margin: 1.125rem 0 0.5rem;
-      padding: 0 0 0.875rem 1.75rem;
-    }
+    line-height: var(--line-height-base);
   }
 
   &__item {
-    position: relative;
-    z-index: 1;
     display: flex;
+    width: 100%;
+    min-height: 78px;
     align-items: center;
     justify-content: flex-start;
-    width: 100%;
-    min-height: 4.5rem;
-    gap: 1rem;
-    padding: 0.5rem 1rem;
-    border: 0;
-    border-radius: 0.625rem;
-    background: transparent;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    gap: 35px;
+    padding: 15px 24px;
+    border: unset;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-light);
+    text-align: left;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast);
 
     &:hover {
-      background-color: #f0f0f0;
+      background-color: #eeeeee;
     }
 
-    @media (min-width: 799px) {
-      gap: 1.25rem;
-      padding: 0.75rem 1.25rem;
+    &--active,
+    &--active:hover {
+      background-color: var(--color-primary);
     }
 
-    @media (min-width: 1280px) {
-      gap: 2.3rem;
-      padding: 0.75rem 1.5rem;
+    &--active .contact__name {
+      color: var(--color-text-light);
     }
-  }
 
-  &__badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    flex-shrink: 0;
-    border-radius: 50%;
-    color: #ffffff;
-    font-size: 1rem;
-    font-weight: 700;
+    &--active .contact__email {
+      color: var(--color-primary-hover);
+    }
   }
 
   &__info {
     display: flex;
     min-width: 0;
+    flex: 1;
     flex-direction: column;
     justify-content: center;
+    gap: 5px;
   }
 
   &__name {
     overflow: hidden;
-    color: #000000;
-    font-size: 1rem;
-    font-weight: 500;
-    text-align: left;
+    color: var(--color-text-main);
+    font-size: var(--font-size-md);
+    font-weight: 400;
+    line-height: var(--line-height-base);
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    @media (min-width: 1280px) {
-      font-size: 1.1rem;
-    }
   }
 
   &__email {
     overflow: hidden;
-    color: #007cee;
-    font-size: 0.85rem;
+    color: var(--color-link);
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: var(--line-height-base);
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    @media (min-width: 1280px) {
-      font-size: 0.9rem;
-    }
   }
 
   &__status {
-    padding: 1rem;
+    padding: 16px;
+    color: var(--color-text-main);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-base);
     text-align: center;
-    font-size: 1rem;
 
     &--error {
-      color: #ff0000;
+      color: var(--color-error);
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-tablet-xl) {
+  :host {
+    padding: 0;
+    box-shadow: var(--shadow-list);
+  }
+
+  .contact {
+    &__scroll-container {
+      width: 100%;
+      margin-inline: 0;
+      padding: 24px 16px;
+    }
+
+    &__item {
+      width: 100%;
+      gap: clamp(20px, 8vw, 35px);
+      padding: 15px clamp(16px, 5.6vw, 24px);
+    }
+
+    &__letter-header {
+      padding-inline: 36px;
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-xs) {
+  .contact {
+    &__scroll-container {
+      padding: 16px 12px;
+    }
+
+    &__item {
+      gap: 16px;
+      padding-inline: 12px;
+    }
+
+    &__letter-header {
+      padding-inline: 24px;
+    }
+
+    &__fab {
+      right: 12px;
+      bottom: calc(var(--contact-mobile-nav-height, 72px) + 24px);
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
+  :host {
+    padding: 0;
+    box-shadow: var(--shadow-list);
+  }
+
+  .contact {
+    &__button {
+      display: none;
+    }
+
+    &__fab {
+      right: 16px;
+      bottom: calc(var(--contact-mobile-nav-height, 72px) + 20px);
+      display: flex;
+    }
+
+    &__scroll-container {
+      width: 100%;
+      margin-inline: 0;
+      padding: 16px 24px;
+    }
+
+    &__item {
+      width: 100%;
+      gap: clamp(20px, 6vw, 35px);
+      padding: 12px 24px;
+    }
+
+    &__letter-header {
+      min-height: 48px;
+      padding: 12px 36px;
     }
   }
 }
