@@ -1,1 +1,77 @@
-<app-task-card></app-task-card>
+<main class="board">
+  <header class="board__header">
+    <h1 class="board__title">Board</h1>
+
+    <div class="board__controls">
+      <div class="board__search_wrapper">
+        <label for="board_search" class="visually_hidden">Find Task</label>
+        <input
+          type="search"
+          id="board_search"
+          class="board__search_input"
+          placeholder="Find Task"
+        />
+        <div class="board__search_divider"></div>
+        <button class="board__search_btn" aria-label="Search tasks">
+          <img src="assets/img/search-icon.svg" alt="" aria-hidden="true" />
+        </button>
+      </div>
+
+      <button class="board__add_btn">
+        <span class="board__add_btn_text">Add task</span>
+        <img src="assets/img/add-white.svg" alt="" aria-hidden="true" />
+      </button>
+    </div>
+  </header>
+
+  <div class="board__grid">
+    <section class="board__column" aria-labelledby="col_todo">
+      <header class="board__column_header">
+        <h2 id="col_todo" class="board__column_title">To do</h2>
+        <button class="board__column_add_btn" aria-label="Add new task to To do">
+          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
+        </button>
+      </header>
+      <div class="board__column_content">
+        <div class="board__empty_state">No tasks To do</div>
+      </div>
+    </section>
+
+    <section class="board__column" aria-labelledby="col_inprogress">
+      <header class="board__column_header">
+        <h2 id="col_inprogress" class="board__column_title">In progress</h2>
+        <button class="board__column_add_btn" aria-label="Add new task to In progress">
+          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
+        </button>
+      </header>
+      <div class="board__column_content">
+        <div class="board__placeholder_card">In progress placeholder</div>
+        <div class="board__placeholder_card">In progress placeholder</div>
+      </div>
+    </section>
+
+    <section class="board__column" aria-labelledby="col_await">
+      <header class="board__column_header">
+        <h2 id="col_await" class="board__column_title">Await feedback</h2>
+        <button class="board__column_add_btn" aria-label="Add new task to Await feedback">
+          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
+        </button>
+      </header>
+      <div class="board__column_content">
+        <div class="board__placeholder_card">Await feedback placeholder</div>
+      </div>
+    </section>
+
+    <section class="board__column" aria-labelledby="col_done">
+      <header class="board__column_header">
+        <h2 id="col_done" class="board__column_title">Done</h2>
+        <button class="board__column_add_btn" aria-label="Add new task to Done">
+          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
+        </button>
+      </header>
+      <div class="board__column_content">
+        <div class="board__placeholder_card">Done placeholder</div>
+      </div>
+    </section>
+  </div>
+</main>
