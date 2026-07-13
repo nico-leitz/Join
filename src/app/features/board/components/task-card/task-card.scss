@@ -1,0 +1,105 @@
+.task_card {
+  background-color: #FFFFFF;
+  border-radius: 1.5rem;
+  padding: 1rem;
+  width: 15.625rem;
+  box-shadow: 0px 0px 0.625rem 0.1875rem rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  border: 1px solid black;
+
+  &:hover {
+    transform: translateY(-0.3125rem);
+  }
+
+  &__type {
+    background-color: #0038FF;
+    color: #FFFFFF;
+    padding: 0.25rem 1rem;
+    border-radius: 0.5rem;
+    width: fit-content;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  &__title {
+    color: #2A3647;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  &__desc {
+    color: #A8A8A8;
+    font-size: 1rem;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  &__subtasks_wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.625rem;
+  }
+
+  &__progress {
+    flex-grow: 1;
+    height: 0.5rem;
+    background-color: #F4F4F4;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  &__progress_fill {
+    height: 100%;
+    background-color: #4589FF;
+    border-radius: 0.5rem;
+    transition: width 0.3s ease;
+  }
+
+  &__subtasks_text {
+    font-size: 0.75rem;
+    color: #000000;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__badges {
+    display: flex;
+  }
+
+  &__badge {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #FFFFFF;
+    font-size: 0.75rem;
+    border: 0.125rem solid #FFFFFF;
+    
+    &:not(:first-child) {
+      margin-left: -0.5rem;
+    }
+  }
+
+  &__priority {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
