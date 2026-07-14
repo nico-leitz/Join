@@ -14,6 +14,41 @@ export class TaskService {
   isLoading = signal(false);
   errorMessage = signal('');
 
+  async getTasks(): Promise<Task[]> {
+    this.prepareLoadingState();
+
+    try {
+      const taskRows = await this.fetchTaskRows();
+      const tasks = this.mapTaskRows(taskRows);
+      this.allTasks.set(tasks);
+      return tasks;
+    } catch (error) {
+      this.errorMessage.set('Tasks could not be loaded.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  private async fetchTaskRows(): Promise<TaskRow[]> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []) as TaskRow[];
+  }
+
+  private prepareLoadingState(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+  }
+
   private mapTaskRows(taskRows: TaskRow[]): Task[] {
     return taskRows.map((taskRow) => this.mapTaskRow(taskRow));
   }
