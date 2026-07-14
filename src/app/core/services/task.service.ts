@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { Subtask, SubtaskRow } from '../models/subtask.model';
 import { Task, TaskRow } from '../models/task.model';
 import { SupabaseService } from '../supabase/supabase';
 
@@ -6,7 +7,8 @@ import { SupabaseService } from '../supabase/supabase';
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly tableName = 'tasks';
+  private readonly taskTableName = 'tasks';
+  private readonly subtaskTableName = 'subtasks';
   private readonly supabase = inject(SupabaseService).client;
 
   allTasks = signal<Task[]>([]);
@@ -45,9 +47,22 @@ export class TaskService {
     }
   }
 
+  async getSubtasksByTaskId(taskId: string): Promise<Subtask[]> {
+    this.prepareLoadingState();
+
+    try {
+      return this.mapSubtaskRows(await this.fetchSubtaskRows(taskId));
+    } catch (error) {
+      this.handleLoadError('Subtasks could not be loaded.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
   private async fetchTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
-      .from(this.tableName)
+      .from(this.taskTableName)
       .select('*')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
@@ -61,7 +76,7 @@ export class TaskService {
 
   private async fetchTaskRowById(id: string): Promise<TaskRow | null> {
     const { data, error } = await this.supabase
-      .from(this.tableName)
+      .from(this.taskTableName)
       .select('*')
       .eq('id', id)
       .maybeSingle();
@@ -71,6 +86,21 @@ export class TaskService {
     }
 
     return data as TaskRow | null;
+  }
+
+  private async fetchSubtaskRows(taskId: string): Promise<SubtaskRow[]> {
+    const { data, error } = await this.supabase
+      .from(this.subtaskTableName)
+      .select('*')
+      .eq('task_id', taskId)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []) as SubtaskRow[];
   }
 
   private prepareLoadingState(): void {
@@ -98,6 +128,22 @@ export class TaskService {
       sortOrder: taskRow.sort_order,
       createdAt: taskRow.created_at,
       updatedAt: taskRow.updated_at,
+    };
+  }
+
+  private mapSubtaskRows(subtaskRows: SubtaskRow[]): Subtask[] {
+    return subtaskRows.map((subtaskRow) => this.mapSubtaskRow(subtaskRow));
+  }
+
+  private mapSubtaskRow(subtaskRow: SubtaskRow): Subtask {
+    return {
+      id: subtaskRow.id,
+      taskId: subtaskRow.task_id,
+      title: subtaskRow.title,
+      isCompleted: subtaskRow.is_completed,
+      sortOrder: subtaskRow.sort_order,
+      createdAt: subtaskRow.created_at,
+      updatedAt: subtaskRow.updated_at,
     };
   }
 }
