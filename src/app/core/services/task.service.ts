@@ -18,12 +18,27 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const taskRows = await this.fetchTaskRows();
-      const tasks = this.mapTaskRows(taskRows);
+      const tasks = this.mapTaskRows(await this.fetchTaskRows());
       this.allTasks.set(tasks);
       return tasks;
     } catch (error) {
-      this.errorMessage.set('Tasks could not be loaded.');
+      this.handleLoadError('Tasks could not be loaded.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async getTaskById(id: string): Promise<Task | null> {
+    this.prepareLoadingState();
+
+    try {
+      const taskRow = await this.fetchTaskRowById(id);
+      const task = taskRow ? this.mapTaskRow(taskRow) : null;
+      this.selectedTask.set(task);
+      return task;
+    } catch (error) {
+      this.handleLoadError('Task could not be loaded.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -44,9 +59,27 @@ export class TaskService {
     return (data ?? []) as TaskRow[];
   }
 
+  private async fetchTaskRowById(id: string): Promise<TaskRow | null> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as TaskRow | null;
+  }
+
   private prepareLoadingState(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
+  }
+
+  private handleLoadError(message: string): void {
+    this.errorMessage.set(message);
   }
 
   private mapTaskRows(taskRows: TaskRow[]): Task[] {
