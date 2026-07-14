@@ -1,16 +1,68 @@
 :root {
   --color-bg-main: #f6f7f8;
   --color-bg-light: #ffffff;
+
   --color-primary: #2a3647;
+  --color-primary-dark: #091931;
   --color-primary-hover: #29abe2;
+  --color-primary-button-hover: #0f5365;
+
   --color-text-main: #000000;
   --color-text-light: #ffffff;
-  --color-link: #007cee;
+  --color-text-muted: #6b6b6b;
 
-  --font-primary: Arial, sans-serif;
+  --color-border-light: #d1d1d1;
+  --color-border-input: #6b6b6bb6;
+  --color-border-focus: #29abe2;
+  --color-error: #ff8190;
+  --color-link: #007cee;
+  --color-icon: #686868;
+
+  --font-primary: 'Inter', Arial, sans-serif;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 16px;
+  --font-size-md: 20px;
+  --font-size-lg: 21px;
+  --font-size-xl: 27px;
+  --font-size-2xl: 47px;
+  --font-size-3xl: 61px;
+
+  --line-height-base: 120%;
+
   --layout-max-width: 1440px;
+  --layout-header-height: 96px;
+  --layout-mobile-header-height: 80px;
+  --layout-mobile-bottom-nav-height: 80px;
+  --layout-mobile-landscape-header-height: 64px;
+  --layout-mobile-landscape-bottom-nav-height: 72px;
+
+  --contact-sidebar-width: 232px;
+  --contact-list-width: 424px;
+  --contact-mobile-frame-width: 428px;
+  --contact-mobile-content-width: 400px;
+  --contact-mobile-inner-width: 364px;
+  --contact-mobile-fab-size: 56px;
+
+  --dialog-mobile-width: 396px;
+  --dialog-mobile-height: 760px;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+  --radius-dialog: 30px;
+  --radius-round: 999px;
+
+  --shadow-sidebar: 0 0 4px 0 #00000066;
+  --shadow-header: 0 4px 4px 0 #0000001a;
+  --shadow-list: 4px 0 6px 0 #00000014;
+  --shadow-avatar: 0 0 4px 0 #00000066;
+  --shadow-overlay: 0 0 4px 0 #00000026;
+  --shadow-fab: 0 4px 4px 0 #00000040;
+
+  --transition-fast: 100ms ease-in-out;
 
   --button-primary-bg: var(--color-primary);
-  --button-primary-bg-hover: var(--color-primary-hover);
+  --button-primary-bg-hover: var(--color-primary-button-hover);
   --button-primary-color: var(--color-text-light);
 }

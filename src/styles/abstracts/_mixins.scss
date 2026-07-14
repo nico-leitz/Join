@@ -14,3 +14,9 @@
   display: flex;
   flex-direction: column;
 }
+
+@mixin card-desc($clamp, $orient) {
+  display: -webkit-box;
+  -webkit-line-clamp: $clamp;
+  -webkit-box-orient: $orient;
+}

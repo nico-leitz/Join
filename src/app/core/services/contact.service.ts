@@ -28,7 +28,7 @@ export class ContactService {
       throw error;
     }
 
-    return this.mapContactRows(data ?? []);
+    return this.sortContacts(this.mapContactRows((data ?? []) as ContactRow[]));
   }
 
   async getContactById(id: string): Promise<Contact | null> {
@@ -47,24 +47,17 @@ export class ContactService {
 
   async createContact(contact: CreateContact): Promise<Contact> {
     const badgeColor = await this.createUniqueBadgeColor();
-
-    const { data, error } = await this.supabase
-      .from(this.tableName)
-      .insert({
-        first_name: contact.firstName,
-        last_name: contact.lastName,
-        email: contact.email,
-        phone: contact.phone ?? null,
-        badge_color: badgeColor,
-      })
-      .select()
-      .single();
+    const { data, error } = await this.insertContact(contact, badgeColor);
 
     if (error) {
       throw error;
     }
 
-    return this.mapContactRow(data as ContactRow);
+    const createdContact = this.mapContactRow(data as ContactRow);
+    this.addContactToState(createdContact);
+    this.selectedContact.set(createdContact);
+
+    return createdContact;
   }
 
   async updateContact(id: string, contact: UpdateContact): Promise<Contact> {
@@ -80,16 +73,9 @@ export class ContactService {
     }
 
     const updatedContact = this.mapContactRow(data as ContactRow);
+    this.updateContactInState(updatedContact);
 
-      this.selectedContact.set(updatedContact);
-      
-      this.allContacts.update(contacts => 
-        contacts.map(contact => contact.id === id ? updatedContact : contact)
-      );
-
-      if (error) throw error;
-
-    return updatedContact
+    return updatedContact;
   }
 
   async deleteContact(id: string): Promise<void> {
@@ -102,27 +88,76 @@ export class ContactService {
       throw error;
     }
 
-    this.allContacts.set(
-      this.allContacts().filter((contact) => contact.id !== id)
-    );
-
-    if (this.selectedContact()?.id === id) {
-      this.selectedContact.set(null);
-    }
+    this.removeContactFromState(id);
   }
 
   getInitials(firstName: string, lastName: string): string {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    const firstInitial = firstName.trim().charAt(0);
+    const lastInitial = lastName.trim().charAt(0);
+
+    return `${firstInitial}${lastInitial}`.toUpperCase();
+  }
+
+  private async insertContact(contact: CreateContact, badgeColor: string) {
+    return this.supabase
+      .from(this.tableName)
+      .insert(this.createInsertPayload(contact, badgeColor))
+      .select()
+      .single();
+  }
+
+  private createInsertPayload(
+    contact: CreateContact,
+    badgeColor: string
+  ): Partial<ContactRow> {
+    return {
+      first_name: contact.firstName.trim(),
+      last_name: contact.lastName.trim(),
+      email: contact.email.trim(),
+      phone: contact.phone?.trim() || null,
+      badge_color: badgeColor,
+    };
   }
 
   private createUpdatePayload(contact: UpdateContact): Partial<ContactRow> {
     return {
-      ...(contact.firstName !== undefined && { first_name: contact.firstName }),
-      ...(contact.lastName !== undefined && { last_name: contact.lastName }),
-      ...(contact.email !== undefined && { email: contact.email }),
-      ...(contact.phone !== undefined && { phone: contact.phone }),
+      ...(contact.firstName !== undefined && { first_name: contact.firstName.trim() }),
+      ...(contact.lastName !== undefined && { last_name: contact.lastName.trim() }),
+      ...(contact.email !== undefined && { email: contact.email.trim() }),
+      ...(contact.phone !== undefined && { phone: contact.phone?.trim() || null }),
       updated_at: new Date().toISOString(),
     };
+  }
+
+  private addContactToState(contact: Contact): void {
+    this.allContacts.update((contacts) => {
+      return this.sortContacts([...contacts, contact]);
+    });
+  }
+
+  private updateContactInState(updatedContact: Contact): void {
+    this.selectedContact.set(updatedContact);
+    this.allContacts.update((contacts) => {
+      return this.replaceContact(contacts, updatedContact);
+    });
+  }
+
+  private replaceContact(contacts: Contact[], updatedContact: Contact): Contact[] {
+    const updatedContacts = contacts.map((contact) => {
+      return contact.id === updatedContact.id ? updatedContact : contact;
+    });
+
+    return this.sortContacts(updatedContacts);
+  }
+
+  private removeContactFromState(contactId: string): void {
+    this.allContacts.update((contacts) => {
+      return contacts.filter((contact) => contact.id !== contactId);
+    });
+
+    if (this.selectedContact()?.id === contactId) {
+      this.selectedContact.set(null);
+    }
   }
 
   private async createUniqueBadgeColor(): Promise<string> {
@@ -178,5 +213,18 @@ export class ContactService {
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
     };
+  }
+
+  private sortContacts(contacts: Contact[]): Contact[] {
+    return [...contacts].sort((firstContact, secondContact) => {
+      return this.compareContacts(firstContact, secondContact);
+    });
+  }
+
+  private compareContacts(firstContact: Contact, secondContact: Contact): number {
+    return (
+      firstContact.firstName.localeCompare(secondContact.firstName) ||
+      firstContact.lastName.localeCompare(secondContact.lastName)
+    );
   }
 }

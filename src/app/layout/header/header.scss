@@ -1,84 +1,123 @@
 @use 'abstracts/breakpoints' as bp;
-@use 'abstracts/mixins' as mx;
 
-.header_BG {
+.header {
   width: 100%;
-  height: 6.25rem;
-  background-color: var(--color-bg-light, #ffffff);
-  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.1);
+  height: var(--layout-header-height);
+  background-color: var(--color-bg-light);
+  box-shadow: var(--shadow-header);
+  font-family: var(--font-primary);
 
-  .header_wrapper {
-    @include mx.flexbox(row, $alignItems: center);
+  &__wrapper {
     position: relative;
+    display: flex;
     width: 100%;
     height: 100%;
-    padding: 0 2.5rem;
-    box-sizing: border-box;
-
-    p {
-      margin: 0;
-      color: var(--color-primary, #2a3647);
-      font-size: 1.25rem;
-    }
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px 20px 96px;
   }
 
-  .mobile_logo {
+  &__title {
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--font-size-md);
+    font-weight: 400;
+    line-height: var(--line-height-base);
+  }
+
+  &__mobile-logo {
     display: none;
   }
 
-  .header_icons {
-    @include mx.flexbox(row, flex-end, center);
-    position: absolute;
-    right: 2.5rem;
-    top: 50%;
-    width: 6.5625rem;
-    height: 3.75rem;
-    gap: 1rem;
-    transform: translateY(-50%);
+  &__actions {
+    display: flex;
+    width: 104px;
+    height: 56px;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+  }
+
+  &__help-link {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
 
     img {
-      display: block;
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
     }
   }
 
-  .help_icon {
-    width: 1.25rem;
-    height: 1.25rem;
+  &__profile-link {
+    display: flex;
+    width: 56px;
+    height: 56px;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+    }
   }
+}
 
-  .settings_icon {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
+@media (max-width: bp.$breakpoint-tablet-xl) {
+  .header {
+    height: var(--layout-mobile-header-height);
 
-  @media (max-width: bp.$breakpoints-mobile-l) {
-    height: 5rem;
+    &__wrapper {
+      padding: 20px 16px;
+    }
 
-    .header_wrapper p {
+    &__title {
       display: none;
     }
 
-    .mobile_logo {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
+    &__mobile-logo {
       display: block;
-      width: 2.5rem;
-      height: 2.5rem;
-      transform: translateY(-50%);
+      width: 32px;
+      height: 39px;
+      object-fit: contain;
     }
 
-    .header_icons {
-      right: 1rem;
+    &__actions {
+      width: 40px;
+      height: 40px;
     }
 
-    .settings_icon {
-      width: 2.5rem;
-      height: 2.5rem;
-    }
-
-    .help_icon {
+    &__help-link {
       display: none;
+    }
+
+    &__profile-link {
+      width: 40px;
+      height: 40px;
+
+      img {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
+  .header {
+    height: var(--layout-mobile-landscape-header-height);
+
+    &__wrapper {
+      padding: 12px 16px;
+    }
+
+    &__mobile-logo {
+      width: 28px;
+      height: 34px;
     }
   }
 }

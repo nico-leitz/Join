@@ -1,38 +1,66 @@
-<button class="button button-primary contact__button" type="button" (click)="openCreateDialog()">
-  Add new contact <img class="contact__btn_icon" src="assets/contact-details/person_add.svg" alt="add button">
-</button>
-
-<button class="contact__fab" type="button" (click)="openCreateDialog()" aria-label="Add new contact">
+<button
+  class="button button-primary contact__button"
+  type="button"
+  (click)="openCreateDialog()"
+>
+  <span>Add new contact</span>
   <img
-    class="contact__fab-icon"
-    src="assets/contact-details/addcontactmobile.svg"
+    class="contact__btn-icon"
+    src="assets/contact-details/person_add.svg"
     alt=""
     aria-hidden="true"
   />
 </button>
 
-<div class="contact__wrapper" [class.contact__wrapper--hidden-mobile]="contact()">
+<button
+  class="contact__fab"
+  type="button"
+  (click)="openCreateDialog()"
+  aria-label="Add new contact"
+>
+  <img
+    class="contact__fab-icon"
+    src="assets/contact-details/person_add.svg"
+    alt=""
+    aria-hidden="true"
+  />
+</button>
+
+<div
+  class="contact__wrapper"
+  [class.contact__wrapper--hidden-mobile]="selectedContact()"
+>
   @if (isLoading()) {
     <p class="contact__status">Kontakte werden geladen...</p>
   } @else if (errorMessage()) {
     <p class="contact__status contact__status--error">{{ errorMessage() }}</p>
   } @else {
     <div class="contact__scroll-container">
-      @for (contact of contacts(); track contact.id; let index = $index) {
+      @for (contactItem of contacts(); track contactItem.id; let index = $index) {
         @if (shouldShowLetterHeader(index)) {
           <div class="contact__letter-header">
-            {{ contact.firstName.charAt(0).toUpperCase() }}
+            {{ contactItem.firstName.charAt(0).toUpperCase() }}
           </div>
         }
 
-        <button class="contact__item" type="button" (click)="getContact(contact)">
-          <span class="contact__badge" [style.background-color]="contact.badgeColor">
-            {{ getInitials(contact.firstName, contact.lastName) }}
+        <button
+          class="contact__item"
+          [class.contact__item--active]="selectedContact()?.id === contactItem.id"
+          type="button"
+          (click)="getContact(contactItem)"
+        >
+          <span
+            class="contact__badge avatar-badge avatar-badge--small"
+            [style.background-color]="contactItem.badgeColor"
+          >
+            {{ getInitials(contactItem.firstName, contactItem.lastName) }}
           </span>
 
           <span class="contact__info">
-            <span class="contact__name"> {{ contact.firstName }} {{ contact.lastName }} </span>
-            <span class="contact__email">{{ contact.email }}</span>
+            <span class="contact__name">
+              {{ contactItem.firstName }} {{ contactItem.lastName }}
+            </span>
+            <span class="contact__email">{{ contactItem.email }}</span>
           </span>
         </button>
       }
