@@ -1,7 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Contact, ContactRow } from '../models/contact.model';
 import { Subtask, SubtaskRow } from '../models/subtask.model';
-import { CreateTask, Task, TaskRow } from '../models/task.model';
+import {
+  CreateTask,
+  Task,
+  TaskRow,
+  UpdateTask,
+} from '../models/task.model';
 import { SupabaseService } from '../supabase/supabase';
 
 interface TaskContactRelationRow {
@@ -86,13 +91,27 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const taskRow = await this.insertTask(task);
-      const createdTask = this.mapTaskRow(taskRow);
+      const createdTask = this.mapTaskRow(await this.insertTask(task));
       this.addTaskToState(createdTask);
       this.selectedTask.set(createdTask);
       return createdTask;
     } catch (error) {
       this.handleRequestError('Task could not be created.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async updateTask(id: string, task: UpdateTask): Promise<Task> {
+    this.prepareLoadingState();
+
+    try {
+      const updatedTask = this.mapTaskRow(await this.updateTaskRow(id, task));
+      this.updateTaskInState(updatedTask);
+      return updatedTask;
+    } catch (error) {
+      this.handleRequestError('Task could not be updated.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -171,6 +190,24 @@ export class TaskService {
     return data as TaskRow;
   }
 
+  private async updateTaskRow(
+    id: string,
+    task: UpdateTask,
+  ): Promise<TaskRow> {
+    const { data, error } = await this.supabase
+      .from(this.taskTableName)
+      .update(this.createUpdatePayload(task))
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as TaskRow;
+  }
+
   private createInsertPayload(task: CreateTask): Partial<TaskRow> {
     return {
       title: task.title.trim(),
@@ -183,10 +220,43 @@ export class TaskService {
     };
   }
 
+  private createUpdatePayload(task: UpdateTask): Partial<TaskRow> {
+    return {
+      ...(task.title !== undefined && { title: task.title.trim() }),
+      ...(task.description !== undefined && {
+        description: task.description.trim(),
+      }),
+      ...(task.dueDate !== undefined && { due_date: task.dueDate }),
+      ...(task.priority !== undefined && { priority: task.priority }),
+      ...(task.category !== undefined && { category: task.category }),
+      ...(task.status !== undefined && { status: task.status }),
+      ...(task.sortOrder !== undefined && { sort_order: task.sortOrder }),
+      updated_at: new Date().toISOString(),
+    };
+  }
+
   private addTaskToState(task: Task): void {
     this.allTasks.update((tasks) => {
       return this.sortTasks([...tasks, task]);
     });
+  }
+
+  private updateTaskInState(updatedTask: Task): void {
+    this.allTasks.update((tasks) => {
+      return this.replaceTask(tasks, updatedTask);
+    });
+
+    if (this.selectedTask()?.id === updatedTask.id) {
+      this.selectedTask.set(updatedTask);
+    }
+  }
+
+  private replaceTask(tasks: Task[], updatedTask: Task): Task[] {
+    const updatedTasks = tasks.map((task) => {
+      return task.id === updatedTask.id ? updatedTask : task;
+    });
+
+    return this.sortTasks(updatedTasks);
   }
 
   private sortTasks(tasks: Task[]): Task[] {
