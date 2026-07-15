@@ -73,9 +73,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const subtasks = mapSubtaskRows(
-        await this.fetchSubtaskRows(taskId),
-      );
+      const subtasks = mapSubtaskRows(await this.fetchSubtaskRows(taskId));
       this.selectedSubtasks.set(subtasks);
       return subtasks;
     } catch (error) {
@@ -121,9 +119,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const updatedTask = mapTaskRow(
-        await this.updateTaskRow(id, task),
-      );
+      const updatedTask = mapTaskRow(await this.updateTaskRow(id, task));
       this.updateTaskInState(updatedTask);
       return updatedTask;
     } catch (error) {
@@ -190,6 +186,20 @@ export class TaskService {
     isCompleted: boolean,
   ): Promise<Subtask> {
     return this.updateSubtask(id, { isCompleted });
+  }
+
+  async deleteSubtask(id: string): Promise<void> {
+    this.prepareLoadingState();
+
+    try {
+      await this.deleteSubtaskRow(id);
+      this.removeSubtaskFromState(id);
+    } catch (error) {
+      this.handleRequestError('Subtask could not be deleted.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   private async fetchTaskRows(): Promise<TaskRow[]> {
@@ -327,6 +337,17 @@ export class TaskService {
     return data as SubtaskRow;
   }
 
+  private async deleteSubtaskRow(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.subtaskTableName)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+  }
+
   private createTaskInsertPayload(task: CreateTask): Partial<TaskRow> {
     return {
       title: task.title.trim(),
@@ -428,6 +449,12 @@ export class TaskService {
   private updateSubtaskInState(updatedSubtask: Subtask): void {
     this.selectedSubtasks.update((subtasks) => {
       return this.replaceSubtask(subtasks, updatedSubtask);
+    });
+  }
+
+  private removeSubtaskFromState(subtaskId: string): void {
+    this.selectedSubtasks.update((subtasks) => {
+      return subtasks.filter((subtask) => subtask.id !== subtaskId);
     });
   }
 
