@@ -1,0 +1,17 @@
+.task_section{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.task_details{
+    display: flex;
+    height: 100%;
+}
+
+.divider{
+    height: 100%;
+    width: 1.2px;
+    background-color: black;
+    margin-inline: 24px;
+}
