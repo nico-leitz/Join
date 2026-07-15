@@ -1,3 +1,8 @@
+<app-task-card (cardClick)="openDialog()"></app-task-card>
+
+@if (isDialogOpen()) {
+	<app-board-cards-dialog (dialogClosed)="closeDialog()"></app-board-cards-dialog>
+}
 <main class="board">
   <header class="board__header">
     <h1 class="board__title">Board</h1>
