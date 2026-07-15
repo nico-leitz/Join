@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Contact, ContactRow } from '../models/contact.model';
 import { Subtask, SubtaskRow } from '../models/subtask.model';
-import { Task, TaskRow } from '../models/task.model';
+import { CreateTask, Task, TaskRow } from '../models/task.model';
 import { SupabaseService } from '../supabase/supabase';
 
 interface TaskContactRelationRow {
@@ -31,7 +31,7 @@ export class TaskService {
       this.allTasks.set(tasks);
       return tasks;
     } catch (error) {
-      this.handleLoadError('Tasks could not be loaded.');
+      this.handleRequestError('Tasks could not be loaded.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -47,7 +47,7 @@ export class TaskService {
       this.selectedTask.set(task);
       return task;
     } catch (error) {
-      this.handleLoadError('Task could not be loaded.');
+      this.handleRequestError('Task could not be loaded.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -60,7 +60,7 @@ export class TaskService {
     try {
       return this.mapSubtaskRows(await this.fetchSubtaskRows(taskId));
     } catch (error) {
-      this.handleLoadError('Subtasks could not be loaded.');
+      this.handleRequestError('Subtasks could not be loaded.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -75,7 +75,24 @@ export class TaskService {
       this.assignedContacts.set(contacts);
       return contacts;
     } catch (error) {
-      this.handleLoadError('Assigned contacts could not be loaded.');
+      this.handleRequestError('Assigned contacts could not be loaded.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async createTask(task: CreateTask): Promise<Task> {
+    this.prepareLoadingState();
+
+    try {
+      const taskRow = await this.insertTask(task);
+      const createdTask = this.mapTaskRow(taskRow);
+      this.addTaskToState(createdTask);
+      this.selectedTask.set(createdTask);
+      return createdTask;
+    } catch (error) {
+      this.handleRequestError('Task could not be created.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -136,8 +153,49 @@ export class TaskService {
     }
 
     return this.mapContactRelations(
-      (data ?? []) as unknown as TaskContactRelationRow[]
+      (data ?? []) as unknown as TaskContactRelationRow[],
     );
+  }
+
+  private async insertTask(task: CreateTask): Promise<TaskRow> {
+    const { data, error } = await this.supabase
+      .from(this.taskTableName)
+      .insert(this.createInsertPayload(task))
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as TaskRow;
+  }
+
+  private createInsertPayload(task: CreateTask): Partial<TaskRow> {
+    return {
+      title: task.title.trim(),
+      description: task.description?.trim() ?? '',
+      due_date: task.dueDate,
+      category: task.category,
+      ...(task.priority !== undefined && { priority: task.priority }),
+      ...(task.status !== undefined && { status: task.status }),
+      ...(task.sortOrder !== undefined && { sort_order: task.sortOrder }),
+    };
+  }
+
+  private addTaskToState(task: Task): void {
+    this.allTasks.update((tasks) => {
+      return this.sortTasks([...tasks, task]);
+    });
+  }
+
+  private sortTasks(tasks: Task[]): Task[] {
+    return [...tasks].sort((firstTask, secondTask) => {
+      return (
+        firstTask.sortOrder - secondTask.sortOrder ||
+        firstTask.createdAt.localeCompare(secondTask.createdAt)
+      );
+    });
   }
 
   private prepareLoadingState(): void {
@@ -145,7 +203,7 @@ export class TaskService {
     this.errorMessage.set('');
   }
 
-  private handleLoadError(message: string): void {
+  private handleRequestError(message: string): void {
     this.errorMessage.set(message);
   }
 
@@ -169,7 +227,9 @@ export class TaskService {
   }
 
   private mapSubtaskRows(subtaskRows: SubtaskRow[]): Subtask[] {
-    return subtaskRows.map((subtaskRow) => this.mapSubtaskRow(subtaskRow));
+    return subtaskRows.map((subtaskRow) => {
+      return this.mapSubtaskRow(subtaskRow);
+    });
   }
 
   private mapSubtaskRow(subtaskRow: SubtaskRow): Subtask {
@@ -185,7 +245,7 @@ export class TaskService {
   }
 
   private mapContactRelations(
-    relations: TaskContactRelationRow[]
+    relations: TaskContactRelationRow[],
   ): Contact[] {
     return relations
       .map((relation) => relation.contacts)
