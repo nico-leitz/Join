@@ -118,6 +118,20 @@ export class TaskService {
     }
   }
 
+  async deleteTask(id: string): Promise<void> {
+    this.prepareLoadingState();
+
+    try {
+      await this.deleteTaskRow(id);
+      this.removeTaskFromState(id);
+    } catch (error) {
+      this.handleRequestError('Task could not be deleted.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
   private async fetchTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -208,6 +222,17 @@ export class TaskService {
     return data as TaskRow;
   }
 
+  private async deleteTaskRow(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.taskTableName)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+  }
+
   private createInsertPayload(task: CreateTask): Partial<TaskRow> {
     return {
       title: task.title.trim(),
@@ -248,6 +273,17 @@ export class TaskService {
 
     if (this.selectedTask()?.id === updatedTask.id) {
       this.selectedTask.set(updatedTask);
+    }
+  }
+
+  private removeTaskFromState(taskId: string): void {
+    this.allTasks.update((tasks) => {
+      return tasks.filter((task) => task.id !== taskId);
+    });
+
+    if (this.selectedTask()?.id === taskId) {
+      this.selectedTask.set(null);
+      this.assignedContacts.set([]);
     }
   }
 
