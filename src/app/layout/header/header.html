@@ -4,18 +4,73 @@
 
     <img
       class="header__mobile-logo"
-      src="assets/sidebar/icons/Capa 3.svg"
+      ngSrc="assets/sidebar/icons/Capa 3.svg"
+      width="32"
+      height="39"
       alt="Join logo"
     />
 
     <div class="header__actions">
       <a class="header__help-link" href="#" aria-label="Open help">
-        <img src="assets/sidebar/icons/help_dark.svg" alt="" aria-hidden="true" />
+        <img
+          ngSrc="assets/sidebar/icons/help_dark.svg"
+          width="32"
+          height="32"
+          alt=""
+          aria-hidden="true"
+        />
       </a>
 
-      <a class="header__profile-link" href="#" aria-label="Open user menu">
-        <img src="assets/sidebar/icons/userprofile.svg" alt="" aria-hidden="true" />
-      </a>
+      <div class="header__profile-menu">
+        <button
+          type="button"
+          class="header__profile-link"
+          aria-label="Open user menu"
+          [attr.aria-expanded]="menuOpen()"
+          aria-haspopup="menu"
+          (click)="toggleMenu()"
+        >
+          <img
+            ngSrc="assets/sidebar/icons/userprofile.svg"
+            width="56"
+            height="56"
+            alt=""
+            aria-hidden="true"
+          />
+        </button>
+
+        @if (menuOpen()) {
+          <div class="header__menu" role="menu" aria-label="User menu">
+            <a
+              class="header__menu-link header__menu-link--mobile-only"
+              routerLink="/help"
+              role="menuitem"
+              (click)="closeMenu()"
+            >
+              Help
+            </a>
+            <a
+              class="header__menu-link"
+              routerLink="/legal-notice"
+              role="menuitem"
+              (click)="closeMenu()"
+            >
+              Legal Notice
+            </a>
+            <a
+              class="header__menu-link"
+              routerLink="/privacy-policy"
+              role="menuitem"
+              (click)="closeMenu()"
+            >
+              Privacy Policy
+            </a>
+            <a class="header__menu-link" routerLink="/login" role="menuitem" (click)="closeMenu()">
+              Log out
+            </a>
+          </div>
+        }
+      </div>
     </div>
   </div>
 </section>

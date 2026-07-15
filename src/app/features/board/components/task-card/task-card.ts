@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, output } from '@angular/core';
 
 @Component({
   selector: 'app-task-card',
@@ -6,4 +6,6 @@ import { Component } from '@angular/core';
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
 })
-export class TaskCard {}
+export class TaskCard {
+  cardClick = output<void>();
+}
