@@ -1,7 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { Contact, ContactRow } from '../models/contact.model';
 import { Subtask, SubtaskRow } from '../models/subtask.model';
 import { Task, TaskRow } from '../models/task.model';
 import { SupabaseService } from '../supabase/supabase';
+
+interface TaskContactRelationRow {
+  contacts: ContactRow | null;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -9,10 +14,12 @@ import { SupabaseService } from '../supabase/supabase';
 export class TaskService {
   private readonly taskTableName = 'tasks';
   private readonly subtaskTableName = 'subtasks';
+  private readonly assignmentTableName = 'task_assignments';
   private readonly supabase = inject(SupabaseService).client;
 
   allTasks = signal<Task[]>([]);
   selectedTask = signal<Task | null>(null);
+  assignedContacts = signal<Contact[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
 
@@ -54,6 +61,21 @@ export class TaskService {
       return this.mapSubtaskRows(await this.fetchSubtaskRows(taskId));
     } catch (error) {
       this.handleLoadError('Subtasks could not be loaded.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async getAssignedContacts(taskId: string): Promise<Contact[]> {
+    this.prepareLoadingState();
+
+    try {
+      const contacts = await this.fetchAssignedContacts(taskId);
+      this.assignedContacts.set(contacts);
+      return contacts;
+    } catch (error) {
+      this.handleLoadError('Assigned contacts could not be loaded.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -103,6 +125,21 @@ export class TaskService {
     return (data ?? []) as SubtaskRow[];
   }
 
+  private async fetchAssignedContacts(taskId: string): Promise<Contact[]> {
+    const { data, error } = await this.supabase
+      .from(this.assignmentTableName)
+      .select('contacts(*)')
+      .eq('task_id', taskId);
+
+    if (error) {
+      throw error;
+    }
+
+    return this.mapContactRelations(
+      (data ?? []) as unknown as TaskContactRelationRow[]
+    );
+  }
+
   private prepareLoadingState(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -144,6 +181,28 @@ export class TaskService {
       sortOrder: subtaskRow.sort_order,
       createdAt: subtaskRow.created_at,
       updatedAt: subtaskRow.updated_at,
+    };
+  }
+
+  private mapContactRelations(
+    relations: TaskContactRelationRow[]
+  ): Contact[] {
+    return relations
+      .map((relation) => relation.contacts)
+      .filter((contact): contact is ContactRow => contact !== null)
+      .map((contact) => this.mapContactRow(contact));
+  }
+
+  private mapContactRow(contactRow: ContactRow): Contact {
+    return {
+      id: contactRow.id,
+      firstName: contactRow.first_name,
+      lastName: contactRow.last_name,
+      email: contactRow.email,
+      phone: contactRow.phone,
+      badgeColor: contactRow.badge_color,
+      createdAt: contactRow.created_at,
+      updatedAt: contactRow.updated_at,
     };
   }
 }
