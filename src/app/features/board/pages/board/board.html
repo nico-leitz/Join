@@ -1,1 +1,5 @@
-<app-task-card></app-task-card>
+<app-task-card (cardClick)="openDialog()"></app-task-card>
+
+@if (isDialogOpen()) {
+	<app-board-cards-dialog (dialogClosed)="closeDialog()"></app-board-cards-dialog>
+}
