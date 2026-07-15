@@ -1,6 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Contact, ContactRow } from '../models/contact.model';
-import { Subtask, SubtaskRow } from '../models/subtask.model';
+import {
+  CreateSubtask,
+  Subtask,
+  SubtaskRow,
+} from '../models/subtask.model';
 import {
   CreateTask,
   Task,
@@ -24,6 +28,7 @@ export class TaskService {
 
   allTasks = signal<Task[]>([]);
   selectedTask = signal<Task | null>(null);
+  selectedSubtasks = signal<Subtask[]>([]);
   assignedContacts = signal<Contact[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -63,7 +68,11 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      return this.mapSubtaskRows(await this.fetchSubtaskRows(taskId));
+      const subtasks = this.mapSubtaskRows(
+        await this.fetchSubtaskRows(taskId),
+      );
+      this.selectedSubtasks.set(subtasks);
+      return subtasks;
     } catch (error) {
       this.handleRequestError('Subtasks could not be loaded.');
       throw error;
@@ -107,7 +116,9 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const updatedTask = this.mapTaskRow(await this.updateTaskRow(id, task));
+      const updatedTask = this.mapTaskRow(
+        await this.updateTaskRow(id, task),
+      );
       this.updateTaskInState(updatedTask);
       return updatedTask;
     } catch (error) {
@@ -126,6 +137,22 @@ export class TaskService {
       this.removeTaskFromState(id);
     } catch (error) {
       this.handleRequestError('Task could not be deleted.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async createSubtask(subtask: CreateSubtask): Promise<Subtask> {
+    this.prepareLoadingState();
+
+    try {
+      const subtaskRow = await this.insertSubtask(subtask);
+      const createdSubtask = this.mapSubtaskRow(subtaskRow);
+      this.addSubtaskToState(createdSubtask);
+      return createdSubtask;
+    } catch (error) {
+      this.handleRequestError('Subtask could not be created.');
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -193,7 +220,7 @@ export class TaskService {
   private async insertTask(task: CreateTask): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
-      .insert(this.createInsertPayload(task))
+      .insert(this.createTaskInsertPayload(task))
       .select()
       .single();
 
@@ -210,7 +237,7 @@ export class TaskService {
   ): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
-      .update(this.createUpdatePayload(task))
+      .update(this.createTaskUpdatePayload(task))
       .eq('id', id)
       .select()
       .single();
@@ -233,7 +260,23 @@ export class TaskService {
     }
   }
 
-  private createInsertPayload(task: CreateTask): Partial<TaskRow> {
+  private async insertSubtask(
+    subtask: CreateSubtask,
+  ): Promise<SubtaskRow> {
+    const { data, error } = await this.supabase
+      .from(this.subtaskTableName)
+      .insert(this.createSubtaskInsertPayload(subtask))
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as SubtaskRow;
+  }
+
+  private createTaskInsertPayload(task: CreateTask): Partial<TaskRow> {
     return {
       title: task.title.trim(),
       description: task.description?.trim() ?? '',
@@ -245,7 +288,7 @@ export class TaskService {
     };
   }
 
-  private createUpdatePayload(task: UpdateTask): Partial<TaskRow> {
+  private createTaskUpdatePayload(task: UpdateTask): Partial<TaskRow> {
     return {
       ...(task.title !== undefined && { title: task.title.trim() }),
       ...(task.description !== undefined && {
@@ -257,6 +300,18 @@ export class TaskService {
       ...(task.status !== undefined && { status: task.status }),
       ...(task.sortOrder !== undefined && { sort_order: task.sortOrder }),
       updated_at: new Date().toISOString(),
+    };
+  }
+
+  private createSubtaskInsertPayload(
+    subtask: CreateSubtask,
+  ): Partial<SubtaskRow> {
+    return {
+      task_id: subtask.taskId,
+      title: subtask.title.trim(),
+      ...(subtask.sortOrder !== undefined && {
+        sort_order: subtask.sortOrder,
+      }),
     };
   }
 
@@ -282,9 +337,24 @@ export class TaskService {
     });
 
     if (this.selectedTask()?.id === taskId) {
-      this.selectedTask.set(null);
-      this.assignedContacts.set([]);
+      this.clearSelectedTaskState();
     }
+  }
+
+  private clearSelectedTaskState(): void {
+    this.selectedTask.set(null);
+    this.selectedSubtasks.set([]);
+    this.assignedContacts.set([]);
+  }
+
+  private addSubtaskToState(subtask: Subtask): void {
+    if (this.selectedTask()?.id !== subtask.taskId) {
+      return;
+    }
+
+    this.selectedSubtasks.update((subtasks) => {
+      return this.sortSubtasks([...subtasks, subtask]);
+    });
   }
 
   private replaceTask(tasks: Task[], updatedTask: Task): Task[] {
@@ -300,6 +370,15 @@ export class TaskService {
       return (
         firstTask.sortOrder - secondTask.sortOrder ||
         firstTask.createdAt.localeCompare(secondTask.createdAt)
+      );
+    });
+  }
+
+  private sortSubtasks(subtasks: Subtask[]): Subtask[] {
+    return [...subtasks].sort((firstSubtask, secondSubtask) => {
+      return (
+        firstSubtask.sortOrder - secondSubtask.sortOrder ||
+        firstSubtask.createdAt.localeCompare(secondSubtask.createdAt)
       );
     });
   }
