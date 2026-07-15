@@ -1,5 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Contact, ContactRow } from '../models/contact.model';
+import {
+  mapContactRelations,
+  mapSubtaskRow,
+  mapSubtaskRows,
+  mapTaskRow,
+  mapTaskRows,
+  TaskContactRelationRow,
+} from '../mappers/task.mapper';
+import { Contact } from '../models/contact.model';
 import {
   CreateSubtask,
   Subtask,
@@ -12,10 +20,6 @@ import {
   UpdateTask,
 } from '../models/task.model';
 import { SupabaseService } from '../supabase/supabase';
-
-interface TaskContactRelationRow {
-  contacts: ContactRow | null;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +41,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const tasks = this.mapTaskRows(await this.fetchTaskRows());
+      const tasks = mapTaskRows(await this.fetchTaskRows());
       this.allTasks.set(tasks);
       return tasks;
     } catch (error) {
@@ -53,7 +57,7 @@ export class TaskService {
 
     try {
       const taskRow = await this.fetchTaskRowById(id);
-      const task = taskRow ? this.mapTaskRow(taskRow) : null;
+      const task = taskRow ? mapTaskRow(taskRow) : null;
       this.selectedTask.set(task);
       return task;
     } catch (error) {
@@ -68,7 +72,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const subtasks = this.mapSubtaskRows(
+      const subtasks = mapSubtaskRows(
         await this.fetchSubtaskRows(taskId),
       );
       this.selectedSubtasks.set(subtasks);
@@ -100,7 +104,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const createdTask = this.mapTaskRow(await this.insertTask(task));
+      const createdTask = mapTaskRow(await this.insertTask(task));
       this.addTaskToState(createdTask);
       this.selectedTask.set(createdTask);
       return createdTask;
@@ -116,7 +120,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const updatedTask = this.mapTaskRow(
+      const updatedTask = mapTaskRow(
         await this.updateTaskRow(id, task),
       );
       this.updateTaskInState(updatedTask);
@@ -147,8 +151,9 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const subtaskRow = await this.insertSubtask(subtask);
-      const createdSubtask = this.mapSubtaskRow(subtaskRow);
+      const createdSubtask = mapSubtaskRow(
+        await this.insertSubtask(subtask),
+      );
       this.addSubtaskToState(createdSubtask);
       return createdSubtask;
     } catch (error) {
@@ -212,7 +217,7 @@ export class TaskService {
       throw error;
     }
 
-    return this.mapContactRelations(
+    return mapContactRelations(
       (data ?? []) as unknown as TaskContactRelationRow[],
     );
   }
@@ -390,64 +395,5 @@ export class TaskService {
 
   private handleRequestError(message: string): void {
     this.errorMessage.set(message);
-  }
-
-  private mapTaskRows(taskRows: TaskRow[]): Task[] {
-    return taskRows.map((taskRow) => this.mapTaskRow(taskRow));
-  }
-
-  private mapTaskRow(taskRow: TaskRow): Task {
-    return {
-      id: taskRow.id,
-      title: taskRow.title,
-      description: taskRow.description,
-      dueDate: taskRow.due_date,
-      priority: taskRow.priority,
-      category: taskRow.category,
-      status: taskRow.status,
-      sortOrder: taskRow.sort_order,
-      createdAt: taskRow.created_at,
-      updatedAt: taskRow.updated_at,
-    };
-  }
-
-  private mapSubtaskRows(subtaskRows: SubtaskRow[]): Subtask[] {
-    return subtaskRows.map((subtaskRow) => {
-      return this.mapSubtaskRow(subtaskRow);
-    });
-  }
-
-  private mapSubtaskRow(subtaskRow: SubtaskRow): Subtask {
-    return {
-      id: subtaskRow.id,
-      taskId: subtaskRow.task_id,
-      title: subtaskRow.title,
-      isCompleted: subtaskRow.is_completed,
-      sortOrder: subtaskRow.sort_order,
-      createdAt: subtaskRow.created_at,
-      updatedAt: subtaskRow.updated_at,
-    };
-  }
-
-  private mapContactRelations(
-    relations: TaskContactRelationRow[],
-  ): Contact[] {
-    return relations
-      .map((relation) => relation.contacts)
-      .filter((contact): contact is ContactRow => contact !== null)
-      .map((contact) => this.mapContactRow(contact));
-  }
-
-  private mapContactRow(contactRow: ContactRow): Contact {
-    return {
-      id: contactRow.id,
-      firstName: contactRow.first_name,
-      lastName: contactRow.last_name,
-      email: contactRow.email,
-      phone: contactRow.phone,
-      badgeColor: contactRow.badge_color,
-      createdAt: contactRow.created_at,
-      updatedAt: contactRow.updated_at,
-    };
   }
 }
