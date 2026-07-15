@@ -12,6 +12,7 @@ import {
   CreateSubtask,
   Subtask,
   SubtaskRow,
+  UpdateSubtask,
 } from '../models/subtask.model';
 import {
   CreateTask,
@@ -164,6 +165,33 @@ export class TaskService {
     }
   }
 
+  async updateSubtask(
+    id: string,
+    subtask: UpdateSubtask,
+  ): Promise<Subtask> {
+    this.prepareLoadingState();
+
+    try {
+      const updatedSubtask = mapSubtaskRow(
+        await this.updateSubtaskRow(id, subtask),
+      );
+      this.updateSubtaskInState(updatedSubtask);
+      return updatedSubtask;
+    } catch (error) {
+      this.handleRequestError('Subtask could not be updated.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async toggleSubtaskCompletion(
+    id: string,
+    isCompleted: boolean,
+  ): Promise<Subtask> {
+    return this.updateSubtask(id, { isCompleted });
+  }
+
   private async fetchTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -281,6 +309,24 @@ export class TaskService {
     return data as SubtaskRow;
   }
 
+  private async updateSubtaskRow(
+    id: string,
+    subtask: UpdateSubtask,
+  ): Promise<SubtaskRow> {
+    const { data, error } = await this.supabase
+      .from(this.subtaskTableName)
+      .update(this.createSubtaskUpdatePayload(subtask))
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data as SubtaskRow;
+  }
+
   private createTaskInsertPayload(task: CreateTask): Partial<TaskRow> {
     return {
       title: task.title.trim(),
@@ -317,6 +363,23 @@ export class TaskService {
       ...(subtask.sortOrder !== undefined && {
         sort_order: subtask.sortOrder,
       }),
+    };
+  }
+
+  private createSubtaskUpdatePayload(
+    subtask: UpdateSubtask,
+  ): Partial<SubtaskRow> {
+    return {
+      ...(subtask.title !== undefined && {
+        title: subtask.title.trim(),
+      }),
+      ...(subtask.isCompleted !== undefined && {
+        is_completed: subtask.isCompleted,
+      }),
+      ...(subtask.sortOrder !== undefined && {
+        sort_order: subtask.sortOrder,
+      }),
+      updated_at: new Date().toISOString(),
     };
   }
 
@@ -362,12 +425,31 @@ export class TaskService {
     });
   }
 
+  private updateSubtaskInState(updatedSubtask: Subtask): void {
+    this.selectedSubtasks.update((subtasks) => {
+      return this.replaceSubtask(subtasks, updatedSubtask);
+    });
+  }
+
   private replaceTask(tasks: Task[], updatedTask: Task): Task[] {
     const updatedTasks = tasks.map((task) => {
       return task.id === updatedTask.id ? updatedTask : task;
     });
 
     return this.sortTasks(updatedTasks);
+  }
+
+  private replaceSubtask(
+    subtasks: Subtask[],
+    updatedSubtask: Subtask,
+  ): Subtask[] {
+    const updatedSubtasks = subtasks.map((subtask) => {
+      return subtask.id === updatedSubtask.id
+        ? updatedSubtask
+        : subtask;
+    });
+
+    return this.sortSubtasks(updatedSubtasks);
   }
 
   private sortTasks(tasks: Task[]): Task[] {
