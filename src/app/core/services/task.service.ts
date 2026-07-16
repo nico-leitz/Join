@@ -30,6 +30,14 @@ import {
   UpdateTask,
 } from '../models/task.model';
 import { SupabaseService } from '../supabase/supabase';
+import {
+  getMissingIds,
+  getUniqueIds,
+  replaceSubtask,
+  replaceTask,
+  sortSubtasks,
+  sortTasks,
+} from '../utils/task-state.utils';
 
 @Injectable({
   providedIn: 'root',
@@ -506,9 +514,9 @@ export class TaskService {
     contactIds: string[],
   ): Promise<void> {
     const currentIds = await this.fetchAssignedContactIds(taskId);
-    const requestedIds = this.getUniqueIds(contactIds);
-    const removedIds = this.getMissingIds(currentIds, requestedIds);
-    const addedIds = this.getMissingIds(requestedIds, currentIds);
+    const requestedIds = getUniqueIds(contactIds);
+    const removedIds = getMissingIds(currentIds, requestedIds);
+    const addedIds = getMissingIds(requestedIds, currentIds);
 
     await this.deleteTaskAssignments(taskId, removedIds);
     await this.insertTaskAssignments(taskId, addedIds);
@@ -516,13 +524,13 @@ export class TaskService {
 
   private addTaskToState(task: Task): void {
     this.allTasks.update((tasks) => {
-      return this.sortTasks([...tasks, task]);
+      return sortTasks([...tasks, task]);
     });
   }
 
   private updateTaskInState(updatedTask: Task): void {
     this.allTasks.update((tasks) => {
-      return this.replaceTask(tasks, updatedTask);
+      return replaceTask(tasks, updatedTask);
     });
 
     if (this.selectedTask()?.id === updatedTask.id) {
@@ -552,13 +560,13 @@ export class TaskService {
     }
 
     this.selectedSubtasks.update((subtasks) => {
-      return this.sortSubtasks([...subtasks, subtask]);
+      return sortSubtasks([...subtasks, subtask]);
     });
   }
 
   private updateSubtaskInState(updatedSubtask: Subtask): void {
     this.selectedSubtasks.update((subtasks) => {
-      return this.replaceSubtask(subtasks, updatedSubtask);
+      return replaceSubtask(subtasks, updatedSubtask);
     });
   }
 
@@ -566,56 +574,6 @@ export class TaskService {
     this.selectedSubtasks.update((subtasks) => {
       return subtasks.filter((subtask) => subtask.id !== subtaskId);
     });
-  }
-
-  private replaceTask(tasks: Task[], updatedTask: Task): Task[] {
-    const updatedTasks = tasks.map((task) => {
-      return task.id === updatedTask.id ? updatedTask : task;
-    });
-
-    return this.sortTasks(updatedTasks);
-  }
-
-  private replaceSubtask(
-    subtasks: Subtask[],
-    updatedSubtask: Subtask,
-  ): Subtask[] {
-    const updatedSubtasks = subtasks.map((subtask) => {
-      return subtask.id === updatedSubtask.id
-        ? updatedSubtask
-        : subtask;
-    });
-
-    return this.sortSubtasks(updatedSubtasks);
-  }
-
-  private sortTasks(tasks: Task[]): Task[] {
-    return [...tasks].sort((firstTask, secondTask) => {
-      return (
-        firstTask.sortOrder - secondTask.sortOrder ||
-        firstTask.createdAt.localeCompare(secondTask.createdAt)
-      );
-    });
-  }
-
-  private sortSubtasks(subtasks: Subtask[]): Subtask[] {
-    return [...subtasks].sort((firstSubtask, secondSubtask) => {
-      return (
-        firstSubtask.sortOrder - secondSubtask.sortOrder ||
-        firstSubtask.createdAt.localeCompare(secondSubtask.createdAt)
-      );
-    });
-  }
-
-  private getUniqueIds(ids: string[]): string[] {
-    return [...new Set(ids)];
-  }
-
-  private getMissingIds(
-    sourceIds: string[],
-    comparisonIds: string[],
-  ): string[] {
-    return sourceIds.filter((id) => !comparisonIds.includes(id));
   }
 
   private prepareLoadingState(): void {
