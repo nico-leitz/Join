@@ -221,6 +221,23 @@ export class TaskService {
     }
   }
 
+  async removeContactAssignment(
+    taskId: string,
+    contactId: string,
+  ): Promise<Contact[]> {
+    this.prepareLoadingState();
+
+    try {
+      await this.deleteTaskAssignment(taskId, contactId);
+      return await this.refreshAssignedContacts(taskId);
+    } catch (error) {
+      this.handleRequestError('Contact assignment could not be removed.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
   private async fetchTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -390,6 +407,21 @@ export class TaskService {
     const { error } = await this.supabase
       .from(this.assignmentTableName)
       .insert(assignmentRow);
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  private async deleteTaskAssignment(
+    taskId: string,
+    contactId: string,
+  ): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.assignmentTableName)
+      .delete()
+      .eq('task_id', taskId)
+      .eq('contact_id', contactId);
 
     if (error) {
       throw error;
