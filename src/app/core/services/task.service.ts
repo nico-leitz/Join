@@ -7,6 +7,14 @@ import {
   mapTaskRows,
   TaskContactRelationRow,
 } from '../mappers/task.mapper';
+import {
+  createSubtaskInsertPayload,
+  createSubtaskUpdatePayload,
+  createTaskAssignmentRow,
+  createTaskAssignmentRows,
+  createTaskInsertPayload,
+  createTaskUpdatePayload,
+} from '../mappers/task-payload.mapper';
 import { Contact } from '../models/contact.model';
 import {
   CreateSubtask,
@@ -14,10 +22,7 @@ import {
   SubtaskRow,
   UpdateSubtask,
 } from '../models/subtask.model';
-import {
-  CreateTaskAssignment,
-  TaskAssignmentRow,
-} from '../models/task-assignment.model';
+import { TaskAssignmentRow } from '../models/task-assignment.model';
 import {
   CreateTask,
   Task,
@@ -213,7 +218,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      await this.insertTaskAssignment({ taskId, contactId });
+      await this.insertTaskAssignment(taskId, contactId);
       return await this.refreshAssignedContacts(taskId);
     } catch (error) {
       this.handleRequestError('Contact could not be assigned.');
@@ -327,8 +332,9 @@ export class TaskService {
       throw error;
     }
 
-    return ((data ?? []) as Pick<TaskAssignmentRow, 'contact_id'>[])
-      .map((assignment) => assignment.contact_id);
+    return ((data ?? []) as Pick<TaskAssignmentRow, 'contact_id'>[]).map(
+      (assignment) => assignment.contact_id,
+    );
   }
 
   private async refreshAssignedContacts(
@@ -346,7 +352,7 @@ export class TaskService {
   private async insertTask(task: CreateTask): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
-      .insert(this.createTaskInsertPayload(task))
+      .insert(createTaskInsertPayload(task))
       .select()
       .single();
 
@@ -363,7 +369,7 @@ export class TaskService {
   ): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
-      .update(this.createTaskUpdatePayload(task))
+      .update(createTaskUpdatePayload(task))
       .eq('id', id)
       .select()
       .single();
@@ -391,7 +397,7 @@ export class TaskService {
   ): Promise<SubtaskRow> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
-      .insert(this.createSubtaskInsertPayload(subtask))
+      .insert(createSubtaskInsertPayload(subtask))
       .select()
       .single();
 
@@ -408,7 +414,7 @@ export class TaskService {
   ): Promise<SubtaskRow> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
-      .update(this.createSubtaskUpdatePayload(subtask))
+      .update(createSubtaskUpdatePayload(subtask))
       .eq('id', id)
       .select()
       .single();
@@ -432,16 +438,12 @@ export class TaskService {
   }
 
   private async insertTaskAssignment(
-    assignment: CreateTaskAssignment,
+    taskId: string,
+    contactId: string,
   ): Promise<void> {
-    const assignmentRow: Partial<TaskAssignmentRow> = {
-      task_id: assignment.taskId,
-      contact_id: assignment.contactId,
-    };
-
     const { error } = await this.supabase
       .from(this.assignmentTableName)
-      .insert(assignmentRow);
+      .insert(createTaskAssignmentRow(taskId, contactId));
 
     if (error) {
       throw error;
@@ -456,14 +458,9 @@ export class TaskService {
       return;
     }
 
-    const assignmentRows = contactIds.map((contactId) => ({
-      task_id: taskId,
-      contact_id: contactId,
-    }));
-
     const { error } = await this.supabase
       .from(this.assignmentTableName)
-      .insert(assignmentRows);
+      .insert(createTaskAssignmentRows(taskId, contactIds));
 
     if (error) {
       throw error;
@@ -515,76 +512,6 @@ export class TaskService {
 
     await this.deleteTaskAssignments(taskId, removedIds);
     await this.insertTaskAssignments(taskId, addedIds);
-  }
-
-  private createTaskInsertPayload(task: CreateTask): Partial<TaskRow> {
-    return {
-      title: task.title.trim(),
-      description: task.description?.trim() ?? '',
-      due_date: task.dueDate,
-      category: task.category,
-      ...(task.priority !== undefined && { priority: task.priority }),
-      ...(task.status !== undefined && { status: task.status }),
-      ...(task.sortOrder !== undefined && {
-        sort_order: task.sortOrder,
-      }),
-    };
-  }
-
-  private createTaskUpdatePayload(task: UpdateTask): Partial<TaskRow> {
-    return {
-      ...(task.title !== undefined && {
-        title: task.title.trim(),
-      }),
-      ...(task.description !== undefined && {
-        description: task.description.trim(),
-      }),
-      ...(task.dueDate !== undefined && {
-        due_date: task.dueDate,
-      }),
-      ...(task.priority !== undefined && {
-        priority: task.priority,
-      }),
-      ...(task.category !== undefined && {
-        category: task.category,
-      }),
-      ...(task.status !== undefined && {
-        status: task.status,
-      }),
-      ...(task.sortOrder !== undefined && {
-        sort_order: task.sortOrder,
-      }),
-      updated_at: new Date().toISOString(),
-    };
-  }
-
-  private createSubtaskInsertPayload(
-    subtask: CreateSubtask,
-  ): Partial<SubtaskRow> {
-    return {
-      task_id: subtask.taskId,
-      title: subtask.title.trim(),
-      ...(subtask.sortOrder !== undefined && {
-        sort_order: subtask.sortOrder,
-      }),
-    };
-  }
-
-  private createSubtaskUpdatePayload(
-    subtask: UpdateSubtask,
-  ): Partial<SubtaskRow> {
-    return {
-      ...(subtask.title !== undefined && {
-        title: subtask.title.trim(),
-      }),
-      ...(subtask.isCompleted !== undefined && {
-        is_completed: subtask.isCompleted,
-      }),
-      ...(subtask.sortOrder !== undefined && {
-        sort_order: subtask.sortOrder,
-      }),
-      updated_at: new Date().toISOString(),
-    };
   }
 
   private addTaskToState(task: Task): void {
