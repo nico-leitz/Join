@@ -26,6 +26,7 @@ import { TaskAssignmentRow } from '../models/task-assignment.model';
 import {
   CreateTaskSubtaskInput,
   CreateTaskWithRelationsInput,
+  UpdateTaskSubtaskInput,
 } from '../models/task-persistence.model';
 import {
   CreateTask,
@@ -97,10 +98,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const subtaskRows = await this.fetchSubtaskRows(taskId);
-      const subtasks = mapSubtaskRows(subtaskRows);
-      this.selectedSubtasks.set(subtasks);
-      return subtasks;
+      return await this.refreshTaskSubtasks(taskId);
     } catch (error) {
       this.handleRequestError('Subtasks could not be loaded.');
       throw error;
@@ -169,6 +167,25 @@ export class TaskService {
       await this.rollbackCreatedTask(createdTaskId);
       this.handleRequestError(
         'Task and its relations could not be created.',
+      );
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async replaceTaskSubtasks(
+    taskId: string,
+    subtasks: UpdateTaskSubtaskInput[],
+  ): Promise<Subtask[]> {
+    this.prepareLoadingState();
+
+    try {
+      await this.synchronizeTaskSubtasks(taskId, subtasks);
+      return await this.refreshTaskSubtasks(taskId);
+    } catch (error) {
+      this.handleRequestError(
+        'Task subtasks could not be updated.',
       );
       throw error;
     } finally {
@@ -416,6 +433,19 @@ export class TaskService {
     });
   }
 
+  private async refreshTaskSubtasks(
+    taskId: string,
+  ): Promise<Subtask[]> {
+    const subtaskRows = await this.fetchSubtaskRows(taskId);
+    const subtasks = mapSubtaskRows(subtaskRows);
+
+    if (this.selectedTask()?.id === taskId) {
+      this.selectedSubtasks.set(subtasks);
+    }
+
+    return subtasks;
+  }
+
   private async refreshAssignedContacts(
     taskId: string,
   ): Promise<Contact[]> {
@@ -507,6 +537,22 @@ export class TaskService {
     return data as SubtaskRow;
   }
 
+  private async updateRelatedSubtaskRow(
+    taskId: string,
+    id: string,
+    subtask: UpdateSubtask,
+  ): Promise<void> {
+    const { error } = await this.supabase
+      .from(this.subtaskTableName)
+      .update(createSubtaskUpdatePayload(subtask))
+      .eq('id', id)
+      .eq('task_id', taskId);
+
+    if (error) {
+      throw error;
+    }
+  }
+
   private async deleteSubtaskRow(
     id: string,
   ): Promise<void> {
@@ -514,6 +560,25 @@ export class TaskService {
       .from(this.subtaskTableName)
       .delete()
       .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  private async deleteTaskSubtasks(
+    taskId: string,
+    subtaskIds: string[],
+  ): Promise<void> {
+    if (subtaskIds.length === 0) {
+      return;
+    }
+
+    const { error } = await this.supabase
+      .from(this.subtaskTableName)
+      .delete()
+      .eq('task_id', taskId)
+      .in('id', subtaskIds);
 
     if (error) {
       throw error;
@@ -551,6 +616,106 @@ export class TaskService {
     });
 
     return mapSubtaskRow(subtaskRow);
+  }
+
+  private async synchronizeTaskSubtasks(
+    taskId: string,
+    subtasks: UpdateTaskSubtaskInput[],
+  ): Promise<void> {
+    const currentRows = await this.fetchSubtaskRows(taskId);
+    const currentIds = currentRows.map((subtask) => subtask.id);
+    const requestedIds = this.getRequestedSubtaskIds(subtasks);
+
+    this.validateRequestedSubtaskIds(currentIds, requestedIds);
+    await this.persistTaskSubtasks(taskId, subtasks);
+
+    const removedIds = getMissingIds(currentIds, requestedIds);
+    await this.deleteTaskSubtasks(taskId, removedIds);
+  }
+
+  private async persistTaskSubtasks(
+    taskId: string,
+    subtasks: UpdateTaskSubtaskInput[],
+  ): Promise<void> {
+    for (const [index, subtask] of subtasks.entries()) {
+      await this.persistTaskSubtask(taskId, subtask, index);
+    }
+  }
+
+  private async persistTaskSubtask(
+    taskId: string,
+    subtask: UpdateTaskSubtaskInput,
+    index: number,
+  ): Promise<void> {
+    if (subtask.id) {
+      await this.updateRelatedSubtask(
+        taskId,
+        subtask,
+        index,
+      );
+
+      return;
+    }
+
+    await this.insertSubtask({
+      taskId,
+      title: subtask.title,
+      sortOrder: subtask.sortOrder ?? index,
+    });
+  }
+
+  private async updateRelatedSubtask(
+    taskId: string,
+    subtask: UpdateTaskSubtaskInput,
+    index: number,
+  ): Promise<void> {
+    if (!subtask.id) {
+      return;
+    }
+
+    await this.updateRelatedSubtaskRow(
+      taskId,
+      subtask.id,
+      this.createRelatedSubtaskUpdate(subtask, index),
+    );
+  }
+
+  private createRelatedSubtaskUpdate(
+    subtask: UpdateTaskSubtaskInput,
+    index: number,
+  ): UpdateSubtask {
+    return {
+      title: subtask.title,
+      sortOrder: subtask.sortOrder ?? index,
+      ...(subtask.isCompleted !== undefined && {
+        isCompleted: subtask.isCompleted,
+      }),
+    };
+  }
+
+  private getRequestedSubtaskIds(
+    subtasks: UpdateTaskSubtaskInput[],
+  ): string[] {
+    return subtasks.flatMap((subtask) => {
+      return subtask.id ? [subtask.id] : [];
+    });
+  }
+
+  private validateRequestedSubtaskIds(
+    currentIds: string[],
+    requestedIds: string[],
+  ): void {
+    const uniqueIds = getUniqueIds(requestedIds);
+
+    if (uniqueIds.length !== requestedIds.length) {
+      throw new Error('Duplicate subtask IDs are not allowed.');
+    }
+
+    const invalidIds = getMissingIds(uniqueIds, currentIds);
+
+    if (invalidIds.length > 0) {
+      throw new Error('Subtask does not belong to this task.');
+    }
   }
 
   private async insertTaskAssignment(
