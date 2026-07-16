@@ -27,6 +27,7 @@ import {
   CreateTaskSubtaskInput,
   CreateTaskWithRelationsInput,
   UpdateTaskSubtaskInput,
+  UpdateTaskWithRelationsInput,
 } from '../models/task-persistence.model';
 import {
   CreateTask,
@@ -174,25 +175,6 @@ export class TaskService {
     }
   }
 
-  async replaceTaskSubtasks(
-    taskId: string,
-    subtasks: UpdateTaskSubtaskInput[],
-  ): Promise<Subtask[]> {
-    this.prepareLoadingState();
-
-    try {
-      await this.synchronizeTaskSubtasks(taskId, subtasks);
-      return await this.refreshTaskSubtasks(taskId);
-    } catch (error) {
-      this.handleRequestError(
-        'Task subtasks could not be updated.',
-      );
-      throw error;
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
-
   async updateTask(
     id: string,
     task: UpdateTask,
@@ -206,6 +188,63 @@ export class TaskService {
       return updatedTask;
     } catch (error) {
       this.handleRequestError('Task could not be updated.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async updateTaskWithRelations(
+    id: string,
+    input: UpdateTaskWithRelationsInput,
+  ): Promise<Task> {
+    this.prepareLoadingState();
+
+    try {
+      const taskRow = await this.updateTaskRow(id, input.task);
+      const updatedTask = mapTaskRow(taskRow);
+
+      const subtasks = await this.updateOptionalTaskSubtasks(
+        id,
+        input.subtasks,
+      );
+
+      const contacts = await this.updateOptionalAssignments(
+        id,
+        input.contactIds,
+      );
+
+      this.applyUpdatedTaskState(
+        updatedTask,
+        subtasks,
+        contacts,
+      );
+
+      return updatedTask;
+    } catch (error) {
+      await this.refreshTaskStateAfterFailure(id);
+      this.handleRequestError(
+        'Task and its relations could not be updated.',
+      );
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async replaceTaskSubtasks(
+    taskId: string,
+    subtasks: UpdateTaskSubtaskInput[],
+  ): Promise<Subtask[]> {
+    this.prepareLoadingState();
+
+    try {
+      await this.synchronizeTaskSubtasks(taskId, subtasks);
+      return await this.refreshTaskSubtasks(taskId);
+    } catch (error) {
+      this.handleRequestError(
+        'Task subtasks could not be updated.',
+      );
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -623,13 +662,24 @@ export class TaskService {
     subtasks: UpdateTaskSubtaskInput[],
   ): Promise<void> {
     const currentRows = await this.fetchSubtaskRows(taskId);
-    const currentIds = currentRows.map((subtask) => subtask.id);
+    const currentIds = currentRows.map((subtask) => {
+      return subtask.id;
+    });
+
     const requestedIds = this.getRequestedSubtaskIds(subtasks);
 
-    this.validateRequestedSubtaskIds(currentIds, requestedIds);
+    this.validateRequestedSubtaskIds(
+      currentIds,
+      requestedIds,
+    );
+
     await this.persistTaskSubtasks(taskId, subtasks);
 
-    const removedIds = getMissingIds(currentIds, requestedIds);
+    const removedIds = getMissingIds(
+      currentIds,
+      requestedIds,
+    );
+
     await this.deleteTaskSubtasks(taskId, removedIds);
   }
 
@@ -638,7 +688,11 @@ export class TaskService {
     subtasks: UpdateTaskSubtaskInput[],
   ): Promise<void> {
     for (const [index, subtask] of subtasks.entries()) {
-      await this.persistTaskSubtask(taskId, subtask, index);
+      await this.persistTaskSubtask(
+        taskId,
+        subtask,
+        index,
+      );
     }
   }
 
@@ -708,13 +762,20 @@ export class TaskService {
     const uniqueIds = getUniqueIds(requestedIds);
 
     if (uniqueIds.length !== requestedIds.length) {
-      throw new Error('Duplicate subtask IDs are not allowed.');
+      throw new Error(
+        'Duplicate subtask IDs are not allowed.',
+      );
     }
 
-    const invalidIds = getMissingIds(uniqueIds, currentIds);
+    const invalidIds = getMissingIds(
+      uniqueIds,
+      currentIds,
+    );
 
     if (invalidIds.length > 0) {
-      throw new Error('Subtask does not belong to this task.');
+      throw new Error(
+        'Subtask does not belong to this task.',
+      );
     }
   }
 
@@ -814,6 +875,35 @@ export class TaskService {
     await this.insertTaskAssignments(taskId, addedIds);
   }
 
+  private async updateOptionalTaskSubtasks(
+    taskId: string,
+    subtasks?: UpdateTaskSubtaskInput[],
+  ): Promise<Subtask[] | undefined> {
+    if (subtasks === undefined) {
+      return undefined;
+    }
+
+    await this.synchronizeTaskSubtasks(taskId, subtasks);
+    const subtaskRows = await this.fetchSubtaskRows(taskId);
+    return mapSubtaskRows(subtaskRows);
+  }
+
+  private async updateOptionalAssignments(
+    taskId: string,
+    contactIds?: string[],
+  ): Promise<Contact[] | undefined> {
+    if (contactIds === undefined) {
+      return undefined;
+    }
+
+    await this.synchronizeTaskAssignments(
+      taskId,
+      contactIds,
+    );
+
+    return this.fetchAssignedContacts(taskId);
+  }
+
   private async rollbackCreatedTask(
     taskId: string | null,
   ): Promise<void> {
@@ -828,6 +918,41 @@ export class TaskService {
     }
   }
 
+  private async refreshTaskStateAfterFailure(
+    taskId: string,
+  ): Promise<void> {
+    try {
+      const taskRow = await this.fetchTaskRowById(taskId);
+
+      if (!taskRow) {
+        return;
+      }
+
+      const task = mapTaskRow(taskRow);
+      const isSelected =
+        this.selectedTask()?.id === taskId;
+
+      this.updateTaskInState(task);
+
+      if (!isSelected) {
+        return;
+      }
+
+      const [subtaskRows, contacts] = await Promise.all([
+        this.fetchSubtaskRows(taskId),
+        this.fetchAssignedContacts(taskId),
+      ]);
+
+      this.selectedSubtasks.set(
+        mapSubtaskRows(subtaskRows),
+      );
+
+      this.assignedContacts.set(contacts);
+    } catch {
+      return;
+    }
+  }
+
   private applyCreatedTaskState(
     task: Task,
     subtasks: Subtask[],
@@ -837,6 +962,26 @@ export class TaskService {
     this.selectedTask.set(task);
     this.selectedSubtasks.set(subtasks);
     this.assignedContacts.set(contacts);
+  }
+
+  private applyUpdatedTaskState(
+    task: Task,
+    subtasks?: Subtask[],
+    contacts?: Contact[],
+  ): void {
+    this.updateTaskInState(task);
+
+    if (this.selectedTask()?.id !== task.id) {
+      return;
+    }
+
+    if (subtasks !== undefined) {
+      this.selectedSubtasks.set(subtasks);
+    }
+
+    if (contacts !== undefined) {
+      this.assignedContacts.set(contacts);
+    }
   }
 
   private addTaskToState(task: Task): void {
@@ -857,7 +1002,9 @@ export class TaskService {
 
   private removeTaskFromState(taskId: string): void {
     this.allTasks.update((tasks) => {
-      return tasks.filter((task) => task.id !== taskId);
+      return tasks.filter((task) => {
+        return task.id !== taskId;
+      });
     });
 
     if (this.selectedTask()?.id === taskId) {
