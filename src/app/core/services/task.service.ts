@@ -15,6 +15,10 @@ import {
   UpdateSubtask,
 } from '../models/subtask.model';
 import {
+  CreateTaskAssignment,
+  TaskAssignmentRow,
+} from '../models/task-assignment.model';
+import {
   CreateTask,
   Task,
   TaskRow,
@@ -88,9 +92,7 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const contacts = await this.fetchAssignedContacts(taskId);
-      this.assignedContacts.set(contacts);
-      return contacts;
+      return await this.refreshAssignedContacts(taskId);
     } catch (error) {
       this.handleRequestError('Assigned contacts could not be loaded.');
       throw error;
@@ -202,6 +204,23 @@ export class TaskService {
     }
   }
 
+  async assignContact(
+    taskId: string,
+    contactId: string,
+  ): Promise<Contact[]> {
+    this.prepareLoadingState();
+
+    try {
+      await this.insertTaskAssignment({ taskId, contactId });
+      return await this.refreshAssignedContacts(taskId);
+    } catch (error) {
+      this.handleRequestError('Contact could not be assigned.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
   private async fetchTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -258,6 +277,18 @@ export class TaskService {
     return mapContactRelations(
       (data ?? []) as unknown as TaskContactRelationRow[],
     );
+  }
+
+  private async refreshAssignedContacts(
+    taskId: string,
+  ): Promise<Contact[]> {
+    const contacts = await this.fetchAssignedContacts(taskId);
+
+    if (this.selectedTask()?.id === taskId) {
+      this.assignedContacts.set(contacts);
+    }
+
+    return contacts;
   }
 
   private async insertTask(task: CreateTask): Promise<TaskRow> {
@@ -342,6 +373,23 @@ export class TaskService {
       .from(this.subtaskTableName)
       .delete()
       .eq('id', id);
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  private async insertTaskAssignment(
+    assignment: CreateTaskAssignment,
+  ): Promise<void> {
+    const assignmentRow: Partial<TaskAssignmentRow> = {
+      task_id: assignment.taskId,
+      contact_id: assignment.contactId,
+    };
+
+    const { error } = await this.supabase
+      .from(this.assignmentTableName)
+      .insert(assignmentRow);
 
     if (error) {
       throw error;
