@@ -24,6 +24,10 @@ import {
 } from '../models/subtask.model';
 import { TaskAssignmentRow } from '../models/task-assignment.model';
 import {
+  CreateTaskSubtaskInput,
+  CreateTaskWithRelationsInput,
+} from '../models/task-persistence.model';
+import {
   CreateTask,
   Task,
   TaskRow,
@@ -59,7 +63,8 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const tasks = mapTaskRows(await this.fetchTaskRows());
+      const taskRows = await this.fetchTaskRows();
+      const tasks = mapTaskRows(taskRows);
       this.allTasks.set(tasks);
       return tasks;
     } catch (error) {
@@ -86,11 +91,14 @@ export class TaskService {
     }
   }
 
-  async getSubtasksByTaskId(taskId: string): Promise<Subtask[]> {
+  async getSubtasksByTaskId(
+    taskId: string,
+  ): Promise<Subtask[]> {
     this.prepareLoadingState();
 
     try {
-      const subtasks = mapSubtaskRows(await this.fetchSubtaskRows(taskId));
+      const subtaskRows = await this.fetchSubtaskRows(taskId);
+      const subtasks = mapSubtaskRows(subtaskRows);
       this.selectedSubtasks.set(subtasks);
       return subtasks;
     } catch (error) {
@@ -101,13 +109,17 @@ export class TaskService {
     }
   }
 
-  async getAssignedContacts(taskId: string): Promise<Contact[]> {
+  async getAssignedContacts(
+    taskId: string,
+  ): Promise<Contact[]> {
     this.prepareLoadingState();
 
     try {
       return await this.refreshAssignedContacts(taskId);
     } catch (error) {
-      this.handleRequestError('Assigned contacts could not be loaded.');
+      this.handleRequestError(
+        'Assigned contacts could not be loaded.',
+      );
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -118,7 +130,8 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const createdTask = mapTaskRow(await this.insertTask(task));
+      const taskRow = await this.insertTask(task);
+      const createdTask = mapTaskRow(taskRow);
       this.addTaskToState(createdTask);
       this.selectedTask.set(createdTask);
       return createdTask;
@@ -130,11 +143,48 @@ export class TaskService {
     }
   }
 
-  async updateTask(id: string, task: UpdateTask): Promise<Task> {
+  async createTaskWithRelations(
+    input: CreateTaskWithRelationsInput,
+  ): Promise<Task> {
+    this.prepareLoadingState();
+    let createdTaskId: string | null = null;
+
+    try {
+      const task = mapTaskRow(await this.insertTask(input.task));
+      createdTaskId = task.id;
+
+      const subtasks = await this.createSubtasksForTask(
+        task.id,
+        input.subtasks ?? [],
+      );
+
+      const contactIds = getUniqueIds(input.contactIds ?? []);
+      await this.insertTaskAssignments(task.id, contactIds);
+
+      const contacts = await this.fetchAssignedContacts(task.id);
+      this.applyCreatedTaskState(task, subtasks, contacts);
+
+      return task;
+    } catch (error) {
+      await this.rollbackCreatedTask(createdTaskId);
+      this.handleRequestError(
+        'Task and its relations could not be created.',
+      );
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async updateTask(
+    id: string,
+    task: UpdateTask,
+  ): Promise<Task> {
     this.prepareLoadingState();
 
     try {
-      const updatedTask = mapTaskRow(await this.updateTaskRow(id, task));
+      const taskRow = await this.updateTaskRow(id, task);
+      const updatedTask = mapTaskRow(taskRow);
       this.updateTaskInState(updatedTask);
       return updatedTask;
     } catch (error) {
@@ -159,14 +209,14 @@ export class TaskService {
     }
   }
 
-  async createSubtask(subtask: CreateSubtask): Promise<Subtask> {
+  async createSubtask(
+    subtask: CreateSubtask,
+  ): Promise<Subtask> {
     this.prepareLoadingState();
 
     try {
-      const createdSubtask = mapSubtaskRow(
-        await this.insertSubtask(subtask),
-      );
-
+      const subtaskRow = await this.insertSubtask(subtask);
+      const createdSubtask = mapSubtaskRow(subtaskRow);
       this.addSubtaskToState(createdSubtask);
       return createdSubtask;
     } catch (error) {
@@ -184,10 +234,12 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      const updatedSubtask = mapSubtaskRow(
-        await this.updateSubtaskRow(id, subtask),
+      const subtaskRow = await this.updateSubtaskRow(
+        id,
+        subtask,
       );
 
+      const updatedSubtask = mapSubtaskRow(subtaskRow);
       this.updateSubtaskInState(updatedSubtask);
       return updatedSubtask;
     } catch (error) {
@@ -246,7 +298,9 @@ export class TaskService {
       await this.deleteTaskAssignment(taskId, contactId);
       return await this.refreshAssignedContacts(taskId);
     } catch (error) {
-      this.handleRequestError('Contact assignment could not be removed.');
+      this.handleRequestError(
+        'Contact assignment could not be removed.',
+      );
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -260,10 +314,16 @@ export class TaskService {
     this.prepareLoadingState();
 
     try {
-      await this.synchronizeTaskAssignments(taskId, contactIds);
+      await this.synchronizeTaskAssignments(
+        taskId,
+        contactIds,
+      );
+
       return await this.refreshAssignedContacts(taskId);
     } catch (error) {
-      this.handleRequestError('Contact assignments could not be updated.');
+      this.handleRequestError(
+        'Contact assignments could not be updated.',
+      );
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -284,7 +344,9 @@ export class TaskService {
     return (data ?? []) as TaskRow[];
   }
 
-  private async fetchTaskRowById(id: string): Promise<TaskRow | null> {
+  private async fetchTaskRowById(
+    id: string,
+  ): Promise<TaskRow | null> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
       .select('*')
@@ -298,7 +360,9 @@ export class TaskService {
     return data as TaskRow | null;
   }
 
-  private async fetchSubtaskRows(taskId: string): Promise<SubtaskRow[]> {
+  private async fetchSubtaskRows(
+    taskId: string,
+  ): Promise<SubtaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
       .select('*')
@@ -313,7 +377,9 @@ export class TaskService {
     return (data ?? []) as SubtaskRow[];
   }
 
-  private async fetchAssignedContacts(taskId: string): Promise<Contact[]> {
+  private async fetchAssignedContacts(
+    taskId: string,
+  ): Promise<Contact[]> {
     const { data, error } = await this.supabase
       .from(this.assignmentTableName)
       .select('contacts(*)')
@@ -340,9 +406,14 @@ export class TaskService {
       throw error;
     }
 
-    return ((data ?? []) as Pick<TaskAssignmentRow, 'contact_id'>[]).map(
-      (assignment) => assignment.contact_id,
-    );
+    const assignmentRows = (data ?? []) as Pick<
+      TaskAssignmentRow,
+      'contact_id'
+    >[];
+
+    return assignmentRows.map((assignment) => {
+      return assignment.contact_id;
+    });
   }
 
   private async refreshAssignedContacts(
@@ -357,7 +428,9 @@ export class TaskService {
     return contacts;
   }
 
-  private async insertTask(task: CreateTask): Promise<TaskRow> {
+  private async insertTask(
+    task: CreateTask,
+  ): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
       .insert(createTaskInsertPayload(task))
@@ -434,7 +507,9 @@ export class TaskService {
     return data as SubtaskRow;
   }
 
-  private async deleteSubtaskRow(id: string): Promise<void> {
+  private async deleteSubtaskRow(
+    id: string,
+  ): Promise<void> {
     const { error } = await this.supabase
       .from(this.subtaskTableName)
       .delete()
@@ -445,13 +520,51 @@ export class TaskService {
     }
   }
 
+  private async createSubtasksForTask(
+    taskId: string,
+    subtasks: CreateTaskSubtaskInput[],
+  ): Promise<Subtask[]> {
+    const createdSubtasks: Subtask[] = [];
+
+    for (const [index, subtask] of subtasks.entries()) {
+      const createdSubtask = await this.createRelatedSubtask(
+        taskId,
+        subtask,
+        index,
+      );
+
+      createdSubtasks.push(createdSubtask);
+    }
+
+    return sortSubtasks(createdSubtasks);
+  }
+
+  private async createRelatedSubtask(
+    taskId: string,
+    subtask: CreateTaskSubtaskInput,
+    index: number,
+  ): Promise<Subtask> {
+    const subtaskRow = await this.insertSubtask({
+      taskId,
+      title: subtask.title,
+      sortOrder: subtask.sortOrder ?? index,
+    });
+
+    return mapSubtaskRow(subtaskRow);
+  }
+
   private async insertTaskAssignment(
     taskId: string,
     contactId: string,
   ): Promise<void> {
+    const assignmentRow = createTaskAssignmentRow(
+      taskId,
+      contactId,
+    );
+
     const { error } = await this.supabase
       .from(this.assignmentTableName)
-      .insert(createTaskAssignmentRow(taskId, contactId));
+      .insert(assignmentRow);
 
     if (error) {
       throw error;
@@ -466,9 +579,14 @@ export class TaskService {
       return;
     }
 
+    const assignmentRows = createTaskAssignmentRows(
+      taskId,
+      contactIds,
+    );
+
     const { error } = await this.supabase
       .from(this.assignmentTableName)
-      .insert(createTaskAssignmentRows(taskId, contactIds));
+      .insert(assignmentRows);
 
     if (error) {
       throw error;
@@ -513,13 +631,47 @@ export class TaskService {
     taskId: string,
     contactIds: string[],
   ): Promise<void> {
-    const currentIds = await this.fetchAssignedContactIds(taskId);
+    const currentIds =
+      await this.fetchAssignedContactIds(taskId);
+
     const requestedIds = getUniqueIds(contactIds);
-    const removedIds = getMissingIds(currentIds, requestedIds);
-    const addedIds = getMissingIds(requestedIds, currentIds);
+    const removedIds = getMissingIds(
+      currentIds,
+      requestedIds,
+    );
+
+    const addedIds = getMissingIds(
+      requestedIds,
+      currentIds,
+    );
 
     await this.deleteTaskAssignments(taskId, removedIds);
     await this.insertTaskAssignments(taskId, addedIds);
+  }
+
+  private async rollbackCreatedTask(
+    taskId: string | null,
+  ): Promise<void> {
+    if (!taskId) {
+      return;
+    }
+
+    try {
+      await this.deleteTaskRow(taskId);
+    } catch {
+      return;
+    }
+  }
+
+  private applyCreatedTaskState(
+    task: Task,
+    subtasks: Subtask[],
+    contacts: Contact[],
+  ): void {
+    this.addTaskToState(task);
+    this.selectedTask.set(task);
+    this.selectedSubtasks.set(subtasks);
+    this.assignedContacts.set(contacts);
   }
 
   private addTaskToState(task: Task): void {
@@ -564,15 +716,21 @@ export class TaskService {
     });
   }
 
-  private updateSubtaskInState(updatedSubtask: Subtask): void {
+  private updateSubtaskInState(
+    updatedSubtask: Subtask,
+  ): void {
     this.selectedSubtasks.update((subtasks) => {
       return replaceSubtask(subtasks, updatedSubtask);
     });
   }
 
-  private removeSubtaskFromState(subtaskId: string): void {
+  private removeSubtaskFromState(
+    subtaskId: string,
+  ): void {
     this.selectedSubtasks.update((subtasks) => {
-      return subtasks.filter((subtask) => subtask.id !== subtaskId);
+      return subtasks.filter((subtask) => {
+        return subtask.id !== subtaskId;
+      });
     });
   }
 
