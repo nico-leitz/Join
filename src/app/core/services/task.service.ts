@@ -153,6 +153,7 @@ export class TaskService {
       const createdSubtask = mapSubtaskRow(
         await this.insertSubtask(subtask),
       );
+
       this.addSubtaskToState(createdSubtask);
       return createdSubtask;
     } catch (error) {
@@ -173,6 +174,7 @@ export class TaskService {
       const updatedSubtask = mapSubtaskRow(
         await this.updateSubtaskRow(id, subtask),
       );
+
       this.updateSubtaskInState(updatedSubtask);
       return updatedSubtask;
     } catch (error) {
@@ -238,6 +240,23 @@ export class TaskService {
     }
   }
 
+  async replaceTaskAssignments(
+    taskId: string,
+    contactIds: string[],
+  ): Promise<Contact[]> {
+    this.prepareLoadingState();
+
+    try {
+      await this.synchronizeTaskAssignments(taskId, contactIds);
+      return await this.refreshAssignedContacts(taskId);
+    } catch (error) {
+      this.handleRequestError('Contact assignments could not be updated.');
+      throw error;
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
   private async fetchTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -294,6 +313,22 @@ export class TaskService {
     return mapContactRelations(
       (data ?? []) as unknown as TaskContactRelationRow[],
     );
+  }
+
+  private async fetchAssignedContactIds(
+    taskId: string,
+  ): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from(this.assignmentTableName)
+      .select('contact_id')
+      .eq('task_id', taskId);
+
+    if (error) {
+      throw error;
+    }
+
+    return ((data ?? []) as Pick<TaskAssignmentRow, 'contact_id'>[])
+      .map((assignment) => assignment.contact_id);
   }
 
   private async refreshAssignedContacts(
@@ -413,6 +448,28 @@ export class TaskService {
     }
   }
 
+  private async insertTaskAssignments(
+    taskId: string,
+    contactIds: string[],
+  ): Promise<void> {
+    if (contactIds.length === 0) {
+      return;
+    }
+
+    const assignmentRows = contactIds.map((contactId) => ({
+      task_id: taskId,
+      contact_id: contactId,
+    }));
+
+    const { error } = await this.supabase
+      .from(this.assignmentTableName)
+      .insert(assignmentRows);
+
+    if (error) {
+      throw error;
+    }
+  }
+
   private async deleteTaskAssignment(
     taskId: string,
     contactId: string,
@@ -428,6 +485,38 @@ export class TaskService {
     }
   }
 
+  private async deleteTaskAssignments(
+    taskId: string,
+    contactIds: string[],
+  ): Promise<void> {
+    if (contactIds.length === 0) {
+      return;
+    }
+
+    const { error } = await this.supabase
+      .from(this.assignmentTableName)
+      .delete()
+      .eq('task_id', taskId)
+      .in('contact_id', contactIds);
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  private async synchronizeTaskAssignments(
+    taskId: string,
+    contactIds: string[],
+  ): Promise<void> {
+    const currentIds = await this.fetchAssignedContactIds(taskId);
+    const requestedIds = this.getUniqueIds(contactIds);
+    const removedIds = this.getMissingIds(currentIds, requestedIds);
+    const addedIds = this.getMissingIds(requestedIds, currentIds);
+
+    await this.deleteTaskAssignments(taskId, removedIds);
+    await this.insertTaskAssignments(taskId, addedIds);
+  }
+
   private createTaskInsertPayload(task: CreateTask): Partial<TaskRow> {
     return {
       title: task.title.trim(),
@@ -436,21 +525,35 @@ export class TaskService {
       category: task.category,
       ...(task.priority !== undefined && { priority: task.priority }),
       ...(task.status !== undefined && { status: task.status }),
-      ...(task.sortOrder !== undefined && { sort_order: task.sortOrder }),
+      ...(task.sortOrder !== undefined && {
+        sort_order: task.sortOrder,
+      }),
     };
   }
 
   private createTaskUpdatePayload(task: UpdateTask): Partial<TaskRow> {
     return {
-      ...(task.title !== undefined && { title: task.title.trim() }),
+      ...(task.title !== undefined && {
+        title: task.title.trim(),
+      }),
       ...(task.description !== undefined && {
         description: task.description.trim(),
       }),
-      ...(task.dueDate !== undefined && { due_date: task.dueDate }),
-      ...(task.priority !== undefined && { priority: task.priority }),
-      ...(task.category !== undefined && { category: task.category }),
-      ...(task.status !== undefined && { status: task.status }),
-      ...(task.sortOrder !== undefined && { sort_order: task.sortOrder }),
+      ...(task.dueDate !== undefined && {
+        due_date: task.dueDate,
+      }),
+      ...(task.priority !== undefined && {
+        priority: task.priority,
+      }),
+      ...(task.category !== undefined && {
+        category: task.category,
+      }),
+      ...(task.status !== undefined && {
+        status: task.status,
+      }),
+      ...(task.sortOrder !== undefined && {
+        sort_order: task.sortOrder,
+      }),
       updated_at: new Date().toISOString(),
     };
   }
@@ -575,6 +678,17 @@ export class TaskService {
         firstSubtask.createdAt.localeCompare(secondSubtask.createdAt)
       );
     });
+  }
+
+  private getUniqueIds(ids: string[]): string[] {
+    return [...new Set(ids)];
+  }
+
+  private getMissingIds(
+    sourceIds: string[],
+    comparisonIds: string[],
+  ): string[] {
+    return sourceIds.filter((id) => !comparisonIds.includes(id));
   }
 
   private prepareLoadingState(): void {
