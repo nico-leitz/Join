@@ -1,38 +1,40 @@
-<div class="task_section">
-    <h1>Add Task</h1>
-    <div class="task_details">
-        <section>
-            <p>Title<span>*</span></p>
-            <input>
-            <p>Description</p>
-            <input>
-            <p>Due date<span>*</span></p>
-            <input>
-        </section>
-        <div class="divider">
-
+<section class="add_task_component">
+    <section class="add_task_field">
+        <h1 class="add_task_field_title">Add Task</h1>
+        <div class="add_task_field_details">
+            <section class="task_detail_section">
+                <label>Title<span>*</span></label>
+                <input class="input title_input">
+                <label>Description</label>
+                <input class="input">
+                <label>Due date<span>*</span></label>
+                <input class="input">
+            </section>
+            <div class="divider"></div>
+            <section class="task_detail_section">
+                <label>Priority</label>
+                <div class="priority_button_container">
+                    <button>Urgent</button>
+                    <button>Medium</button>
+                    <button>Low</button>
+                </div>
+                <label>Assigned to</label>
+                <input class="input">
+                <label>Category<span>*</span></label>
+                <input class="input">
+                <label>Subtasks</label>
+                <input class="input">
+            </section>
         </div>
-        <section>
-            <p>Priority</p>
-            <button>Urgent</button>
-            <button>Medium</button>
-            <button>Low</button>
-            <p>Assigned to</p>
-            <input>
-            <p>Category<span>*</span></p>
-            <input>
-            <p>Subtasks</p>
-            <input>
-        </section>
-    </div>
-</div>
+    </section>
 
-<div class="task_controls">
-    <div>
-        <p><span>*</span>This field is required</p>
+    <div class="task_controls">
+        <div>
+            <p><span>*</span>This field is required</p>
+        </div>
+        <div>
+            <button>Clear</button>
+            <button>Create Task</button>
+        </div>
     </div>
-    <div>
-        <button>Clear</button>
-        <button>Create Task</button>
-    </div>
-</div>
+</section>

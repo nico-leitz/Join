@@ -7,6 +7,7 @@ import { Login } from './features/auth/pages/login/login';
 import { Signup } from './features/auth/pages/signup/signup';
 import { LegalNotice } from './features/legal/legal-notice/legal-notice';
 import { PrivacyPolicy } from './features/legal/privacy-policy/privacy-policy';
+import { AddTaskPage } from './features/add-task/pages/add-task-page/add-task-page';
 
 export const routes: Routes = [
   {

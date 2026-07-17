@@ -1,3 +1,5 @@
+@use 'abstracts/breakpoints' as breakpoints;
+
 .add_task_page{
     display: flex;
     flex-direction: row;
@@ -6,4 +8,10 @@
 
 .add_task_content{
     width: 100%;
+}
+
+@media (max-width: breakpoints.$breakpoint-tablet-xl){
+    app-sidebar{
+        display: none;
+    }
 }
