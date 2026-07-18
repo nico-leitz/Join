@@ -12,18 +12,26 @@
   border: 0;
 }
 
-.board {
+app-task-card {
+  display: block;
   width: 100%;
-  max-width: 90rem;
-  margin: 0 auto;
+  height: max-content;
+  margin: 0;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
   padding: 4rem;
-  font-family: var(--font_primary, 'Inter', sans-serif);
-  background-color: var(--color_bg_main, #F6F7F8);
-  min-height: 100vh;
   box-sizing: border-box;
+  overflow: hidden;
+  font-family: var(--font_primary, 'Inter', sans-serif);
+  background-color: var(--color_bg_main, #f6f7f8);
 
   &__header {
     @include mx.flexbox(row, space-between, center);
+    flex-shrink: 0;
     margin-bottom: 3rem;
   }
 
@@ -41,18 +49,13 @@
 
   &__search_wrapper {
     @include mx.flexbox($alignItems: center);
-    background-color: var(--color_bg_light, #FFFFFF);
-    border: 1px solid var(--color_border_main, #A8A8A8);
+    background-color: var(--color_bg_light, #ffffff);
+    border: 1px solid var(--color_border_main, #a8a8a8);
     border-radius: var(--radius_md, 0.625rem);
     padding: 0.5rem 1rem;
     height: 3rem;
     width: 19.5rem;
     box-sizing: border-box;
-    transition: border-color var(--transition_fast, 0.2s ease);
-
-    &:focus-within {
-      border-color: var(--color_secondary, #29ABE2);
-    }
   }
 
   &__search_input {
@@ -63,16 +66,12 @@
     color: var(--color_text_main, #000000);
     background: transparent;
     width: 100%;
-
-    &::placeholder {
-      color: #D1D1D1;
-    }
   }
 
   &__search_divider {
     width: 1px;
     height: 1.875rem;
-    background-color: #D1D1D1;
+    background-color: #d1d1d1;
     margin: 0 1rem;
   }
 
@@ -84,18 +83,13 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-
-    img {
-      width: 1rem;
-      height: 1rem;
-    }
   }
 
   &__add_btn {
     @include mx.flexbox(row, center, center);
     gap: 0.5rem;
-    background-color: var(--color_text_main, #2A3647);
-    color: var(--color_text_light, #FFFFFF);
+    background-color: var(--color_text_main, #2a3647);
+    color: var(--color_text_light, #ffffff);
     border: none;
     border-radius: var(--radius_md, 0.625rem);
     padding: 0 1.5rem;
@@ -103,38 +97,34 @@
     font-size: 1.25rem;
     font-weight: 700;
     cursor: pointer;
-    transition: background-color var(--transition_fast, 0.2s ease);
-
-    &:hover {
-      background-color: var(--color_secondary, #29ABE2);
-    }
-
-    img {
-      width: 1.125rem;
-      height: 1.125rem;
-    }
   }
 
   &__grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
   &__column {
     @include mx.flexbox(column);
     gap: 1rem;
+    height: 100%;
+    min-height: 0;
   }
 
   &__column_header {
     @include mx.flexbox(row, space-between, center);
     padding: 0 0.5rem;
+    flex-shrink: 0;
   }
 
   &__column_title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #42526E;
+    color: #42526e;
     margin: 0;
   }
 
@@ -148,75 +138,60 @@
     padding: 0;
     width: 1.5rem;
     height: 1.5rem;
-    transition: opacity var(--transition_fast, 0.2s ease);
-
-    &:hover {
-      opacity: 0.7;
-    }
-
-    img {
-      width: 100%;
-      height: 100%;
-    }
   }
 
   &__column_content {
     @include mx.flexbox(column);
     gap: 1rem;
-    min-height: 10rem;
-  }
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.5rem;
+    padding-bottom: 2rem;
+    min-height: 20rem;
 
-  &__empty_state {
-    @include mx.flexbox(row, center, center);
-    height: 3rem;
-    background-color: #E7E7E7;
-    border: 1px dashed #A8A8A8;
-    border-radius: var(--radius_md, 0.625rem);
-    color: #A8A8A8;
-    font-size: 1rem;
-  }
-
-  &__placeholder_card {
-    @include mx.flexbox(row, center, center);
-    width: 15rem;
-    height: fit-content;
-    min-height: 15rem;
-    background-color: var(--color_bg_light, #FFFFFF);
-    border-radius: var(--radius_lg, 1.5rem);
-    box-shadow: var(--shadow_card, 0px 0px 0.625rem 0.1875rem rgba(0, 0, 0, 0.04));
-    color: #A8A8A8;
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #d1d1d1;
+      border-radius: 10px;
+    }
+    &:hover::-webkit-scrollbar-thumb {
+      background-color: #a8a8a8;
+    }
   }
 }
 
 @media (max-width: bp.$breakpoint_tablet_xl) {
   .board {
     padding: 24px 16px;
+    height: auto;
+    overflow-y: auto;
 
     &__header {
       flex-wrap: wrap;
       gap: 2rem 1rem;
     }
-
     &__controls {
       display: contents;
     }
-
     &__title {
       flex: 1;
       order: 1;
     }
-
     &__add_btn {
       order: 2;
       width: 2.5rem;
       height: 2.5rem;
       padding: 0;
     }
-
     &__add_btn_text {
       display: none;
     }
-
     &__search_wrapper {
       order: 3;
       width: 100%;
@@ -225,6 +200,19 @@
     &__grid {
       grid-template-columns: 1fr;
       gap: 2rem;
+      overflow: visible;
+      height: auto;
+    }
+
+    &__column {
+      height: auto;
+    }
+
+    &__column_content {
+      overflow-y: visible;
+      min-height: auto;
+      gap: 1.5rem;
+      padding: 1rem;
     }
   }
 }
@@ -232,24 +220,25 @@
 @media (max-width: bp.$breakpoint_mobile_xs) {
   .board {
     padding: 16px 12px;
-    
     &__header {
       margin-bottom: 2rem;
     }
   }
 }
 
-@media (orientation: landscape) and (max-height: bp.$breakpoint_landscape_height_md) and (max-width: bp.$breakpoint_landscape_width_lg) {
-  .board {
-    padding: 16px 24px;
-    
-    &__header {
-      margin-bottom: 1.5rem;
-      gap: 1rem;
-    }
-    
-    &__grid {
-      gap: 1.5rem;
-    }
-  }
+.cdk-drag-preview {
+  box-sizing: border-box;
+  margin: 0;
+  border-radius: var(--radius_lg, 1.5rem);
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
