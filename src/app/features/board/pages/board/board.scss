@@ -140,6 +140,20 @@ app-task-card {
     height: 1.5rem;
   }
 
+  &__no_tasks {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 4.5rem;
+    border: 1px dashed #a8a8a8;
+    border-radius: var(--radius_md, 0.625rem);
+    background-color: #f1f1f1;
+    color: #a8a8a8;
+    font-size: 1rem;
+    margin: 0.5rem;
+    pointer-events: none;
+  }
+
   &__column_content {
     @include mx.flexbox(column);
     gap: 1rem;
