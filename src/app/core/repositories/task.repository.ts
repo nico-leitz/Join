@@ -316,4 +316,23 @@ export class TaskRepository {
       throw error;
     }
   }
+
+async getAllSubtaskRows(): Promise<SubtaskRow[]> {
+  const { data, error } = await this.supabase
+    .from(this.subtaskTableName)
+    .select('*');
+
+  if (error) throw error;
+  return (data ?? []) as SubtaskRow[];
+}
+
+async getAllAssignmentRows(): Promise<TaskAssignmentRow[]> {
+  const { data, error } = await this.supabase
+    .from(this.assignmentTableName)
+    .select('*');
+
+  if (error) throw error;
+  return (data ?? []) as TaskAssignmentRow[];
+}
+  
 }
