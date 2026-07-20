@@ -47,12 +47,21 @@
           <div class="board__no_tasks">No tasks To do</div>
         } @else {
           @for (task of todo(); track task.id) {
-            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
+            <app-task-card
+              [task]="task"
+              [cdkDragData]="task"
+              [subtasks]="getSubtasksForTask(task.id)"
+              [assignedContacts]="getContactsForTask(task.id)"
+              cdkDrag
+              (cardClick)="openDialog()"
+            >
+            </app-task-card>
           }
         }
       </div>
     </section>
 
+    <!-- In progress -->
     <section class="board__column" aria-labelledby="col_inprogress">
       <header class="board__column_header">
         <h2 id="col_inprogress" class="board__column_title">In progress</h2>
@@ -71,7 +80,15 @@
           <div class="board__no_tasks">No tasks In progress</div>
         } @else {
           @for (task of inProgress(); track task.id) {
-            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
+            <app-task-card
+              [task]="task"
+              [cdkDragData]="task"
+              [subtasks]="getSubtasksForTask(task.id)"
+              [assignedContacts]="getContactsForTask(task.id)"
+              cdkDrag
+              (cardClick)="openDialog()"
+            >
+            </app-task-card>
           }
         }
       </div>
@@ -95,12 +112,21 @@
           <div class="board__no_tasks">No tasks Await feedback</div>
         } @else {
           @for (task of awaitFeedback(); track task.id) {
-            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
+            <app-task-card
+              [task]="task"
+              [cdkDragData]="task"
+              [subtasks]="getSubtasksForTask(task.id)"
+              [assignedContacts]="getContactsForTask(task.id)"
+              cdkDrag
+              (cardClick)="openDialog()"
+            >
+            </app-task-card>
           }
         }
       </div>
     </section>
 
+    <!-- Done -->
     <section class="board__column" aria-labelledby="col_done">
       <header class="board__column_header">
         <h2 id="col_done" class="board__column_title">Done</h2>
@@ -119,7 +145,15 @@
           <div class="board__no_tasks">No tasks Done</div>
         } @else {
           @for (task of done(); track task.id) {
-            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
+            <app-task-card
+              [task]="task"
+              [cdkDragData]="task"
+              [subtasks]="getSubtasksForTask(task.id)"
+              [assignedContacts]="getContactsForTask(task.id)"
+              cdkDrag
+              (cardClick)="openDialog()"
+            >
+            </app-task-card>
           }
         }
       </div>
