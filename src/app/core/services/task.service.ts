@@ -31,6 +31,7 @@ import {
   sortSubtasks,
   sortTasks,
 } from '../utils/task-state.utils';
+import { TaskStatus } from '../models/task.model';
 
 @Injectable({
   providedIn: 'root',
@@ -814,5 +815,34 @@ export class TaskService {
 
   private handleRequestError(message: string): void {
     this.errorMessage.set(message);
+  }
+  
+  async loadAllBoardData() {
+  const [subtaskRows, assignments] = await Promise.all([
+    this.repository.getAllSubtaskRows(),
+    this.repository.getAllAssignmentRows()
+  ]);
+  
+  return {
+    subtasks: mapSubtaskRows(subtaskRows), 
+    assignments: assignments
+  };
+}
+
+updateTaskStatusLocally(taskId: string, newStatus: TaskStatus): void {
+    this.allTasks.update((tasks) => {
+      return tasks.map((task) =>
+        task.id === taskId ? { ...task, status: newStatus } : task
+      );
+    });
+  }
+
+  updateTasksLocally(updatedTasks: Task[]) {
+    this.allTasks.update(tasks => {
+      return tasks.map(t => {
+        const updated = updatedTasks.find(ut => ut.id === t.id);
+        return updated ? updated : t;
+      });
+    });
   }
 }
