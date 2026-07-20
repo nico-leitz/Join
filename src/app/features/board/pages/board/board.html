@@ -29,7 +29,6 @@
   </header>
 
   <div class="board__grid" cdkDropListGroup>
-    <!-- To do -->
     <section class="board__column" aria-labelledby="col_todo">
       <header class="board__column_header">
         <h2 id="col_todo" class="board__column_title">To do</h2>
@@ -38,22 +37,22 @@
         </button>
       </header>
       <div
+        id="todo"
         class="board__column_content"
         cdkDropList
-        [cdkDropListData]="todo"
+        [cdkDropListData]="todo()"
         (cdkDropListDropped)="drop($event)"
       >
-        @if (todo.length === 0) {
+        @if (todo().length === 0) {
           <div class="board__no_tasks">No tasks To do</div>
         } @else {
-          @for (task of todo; track task) {
-            <app-task-card cdkDrag (cardClick)="openDialog()"></app-task-card>
+          @for (task of todo(); track task.id) {
+            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
           }
         }
       </div>
     </section>
 
-    <!-- In progress -->
     <section class="board__column" aria-labelledby="col_inprogress">
       <header class="board__column_header">
         <h2 id="col_inprogress" class="board__column_title">In progress</h2>
@@ -62,22 +61,22 @@
         </button>
       </header>
       <div
+        id="in_progress"
         class="board__column_content"
         cdkDropList
-        [cdkDropListData]="inProgress"
+        [cdkDropListData]="inProgress()"
         (cdkDropListDropped)="drop($event)"
       >
-        @if (inProgress.length === 0) {
+        @if (inProgress().length === 0) {
           <div class="board__no_tasks">No tasks In progress</div>
         } @else {
-          @for (task of inProgress; track task) {
-            <app-task-card cdkDrag (cardClick)="openDialog()"></app-task-card>
+          @for (task of inProgress(); track task.id) {
+            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
           }
         }
       </div>
     </section>
 
-    <!-- Await feedback -->
     <section class="board__column" aria-labelledby="col_await">
       <header class="board__column_header">
         <h2 id="col_await" class="board__column_title">Await feedback</h2>
@@ -86,22 +85,22 @@
         </button>
       </header>
       <div
+        id="awaiting_feedback"
         class="board__column_content"
         cdkDropList
-        [cdkDropListData]="awaitFeedback"
+        [cdkDropListData]="awaitFeedback()"
         (cdkDropListDropped)="drop($event)"
       >
-        @if (awaitFeedback.length === 0) {
+        @if (awaitFeedback().length === 0) {
           <div class="board__no_tasks">No tasks Await feedback</div>
         } @else {
-          @for (task of awaitFeedback; track task) {
-            <app-task-card cdkDrag (cardClick)="openDialog()"></app-task-card>
+          @for (task of awaitFeedback(); track task.id) {
+            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
           }
         }
       </div>
     </section>
 
-    <!-- Done -->
     <section class="board__column" aria-labelledby="col_done">
       <header class="board__column_header">
         <h2 id="col_done" class="board__column_title">Done</h2>
@@ -110,16 +109,17 @@
         </button>
       </header>
       <div
+        id="done"
         class="board__column_content"
         cdkDropList
-        [cdkDropListData]="done"
+        [cdkDropListData]="done()"
         (cdkDropListDropped)="drop($event)"
       >
-        @if (done.length === 0) {
+        @if (done().length === 0) {
           <div class="board__no_tasks">No tasks Done</div>
         } @else {
-          @for (task of done; track task) {
-            <app-task-card cdkDrag (cardClick)="openDialog()"></app-task-card>
+          @for (task of done(); track task.id) {
+            <app-task-card [task]="task" cdkDrag (cardClick)="openDialog()"></app-task-card>
           }
         }
       </div>

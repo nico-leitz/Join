@@ -1,4 +1,5 @@
-import { Component, output } from '@angular/core';
+import { Component, input, output } from '@angular/core'; 
+import { Task } from '../../../../core/models/task.model';
 
 @Component({
   selector: 'app-task-card',
@@ -7,5 +8,8 @@ import { Component, output } from '@angular/core';
   styleUrl: './task-card.scss',
 })
 export class TaskCard {
+
+  task = input.required<Task>(); 
+  
   cardClick = output<void>();
 }
