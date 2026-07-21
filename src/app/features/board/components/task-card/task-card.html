@@ -1,21 +1,93 @@
-<div class="task_card" (click)="cardClick.emit()">
-  <div class="task_card__type">User Story</div>
-  <h2 class="task_card__title">Kochwelt Page & Recipe Recommender</h2>
-  <p class="task_card__desc">Build start page with recipe recommendation...</p>
-  <div class="task_card__subtasks_wrapper">
-    <div class="task_card__progress">
-      <div class="task_card__progress_fill" style="width: 50%"></div>
-    </div>
-    <span class="task_card__subtasks_text">1/2 Subtasks</span>
+<article
+  class="task_card"
+  role="button"
+  tabindex="0"
+  (click)="openCard()"
+  (keydown.enter)="openCard()"
+  (keydown.space)="
+    $event.preventDefault();
+    openCard()
+  "
+>
+  <div
+    class="task_card__type"
+    [class.task_card__type--technical]="
+      task().category === 'technical_task'
+    "
+    [class.task_card__type--user-story]="
+      task().category === 'user_story'
+    "
+  >
+    {{ categoryLabel() }}
   </div>
+
+  <h2 class="task_card__title">
+    {{ task().title }}
+  </h2>
+
+  <p class="task_card__desc">
+    {{ task().description }}
+  </p>
+
+  @if (progress().total > 0) {
+    <div class="task_card__subtasks_wrapper">
+      <div
+        class="task_card__progress"
+        aria-hidden="true"
+      >
+        <div
+          class="task_card__progress_fill"
+          [style.width.%]="
+            progress().percentage
+          "
+        ></div>
+      </div>
+
+      <span class="task_card__subtasks_text">
+        {{ progress().completed }}/{{
+          progress().total
+        }}
+        Subtasks
+      </span>
+    </div>
+  }
+
   <div class="task_card__footer">
-    <div class="task_card__badges">
-      <div class="task_card__badge" style="background-color: #ff7a00">AM</div>
-      <div class="task_card__badge" style="background-color: #1fd7c1">EM</div>
-      <div class="task_card__badge" style="background-color: #462f8a">MB</div>
+    <div
+      class="task_card__badges"
+      aria-label="Assigned contacts"
+    >
+      @for (
+        contact of assignedContacts();
+        track contact.id
+      ) {
+        <div
+          class="task_card__badge"
+          [style.background-color]="
+            contact.badgeColor
+          "
+          [attr.title]="
+            contact.firstName +
+            ' ' +
+            contact.lastName
+          "
+        >
+          {{ getInitials(contact) }}
+        </div>
+      }
     </div>
+
     <div class="task_card__priority">
-      <img src="assets/board/board-card/medium.svg" alt="priority icon">
+      <img
+        [src]="
+          'assets/board/board-card/' +
+          task().priority +
+          '.svg'
+        "
+        [alt]="
+          task().priority + ' priority'
+        "
+      />
     </div>
   </div>
-</div>
+</article>
