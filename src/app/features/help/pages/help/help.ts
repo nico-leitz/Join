@@ -1,16 +1,16 @@
 import { Location, NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Header } from '../../../layout/header/header';
-import { Sidebar } from '../../../layout/sidebar/sidebar';
+import { Header } from '../../../../layout/header/header';
+import { Sidebar } from '../../../../layout/sidebar/sidebar';
 
 @Component({
-  selector: 'app-legal-notice',
+  selector: 'app-help',
   imports: [Header, Sidebar, NgOptimizedImage],
-  templateUrl: './legal-notice.html',
-  styleUrl: './legal-notice.scss',
+  templateUrl: './help.html',
+  styleUrl: './help.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LegalNotice {
+export class Help {
   private readonly location = inject(Location);
 
   protected goBack(): void {

@@ -2,159 +2,175 @@
   <app-board-cards-dialog (dialogClosed)="closeDialog()"></app-board-cards-dialog>
 }
 
-<main class="board">
-  <header class="board__header">
-    <h1 class="board__title">Board</h1>
+<section class="board-page">
+  <app-sidebar></app-sidebar>
 
-    <div class="board__controls">
-      <div class="board__search_wrapper">
-        <label for="board_search" class="visually_hidden">Find Task</label>
-        <input
-          type="search"
-          id="board_search"
-          class="board__search_input"
-          placeholder="Find Task"
-        />
-        <div class="board__search_divider"></div>
-        <button class="board__search_btn" aria-label="Search tasks">
-          <img src="assets/img/search-icon.svg" alt="" aria-hidden="true" />
-        </button>
-      </div>
+  <div class="right-wrapper">
+    <app-header></app-header>
 
-      <button class="board__add_btn">
-        <span class="board__add_btn_text">Add task</span>
-        <img src="assets/img/add-white.svg" alt="" aria-hidden="true" />
-      </button>
-    </div>
-  </header>
+    <main class="board" (window:resize)="onWindowResize()">
+      <header class="board__header">
+        <h1 class="board__title">Board</h1>
 
-  <div class="board__grid" cdkDropListGroup>
-    <section class="board__column" aria-labelledby="col_todo">
-      <header class="board__column_header">
-        <h2 id="col_todo" class="board__column_title">To do</h2>
-        <button class="board__column_add_btn" aria-label="Add new task to To do">
-          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
-        </button>
+        <div class="board__controls">
+          <div class="board__search_wrapper">
+            <label for="board_search" class="visually_hidden">Find Task</label>
+            <input
+              type="search"
+              id="board_search"
+              class="board__search_input"
+              placeholder="Find Task"
+            />
+            <div class="board__search_divider"></div>
+            <button class="board__search_btn" aria-label="Search tasks">
+              <img src="assets/img/search-icon.svg" alt="" aria-hidden="true" />
+            </button>
+          </div>
+
+          <button class="board__add_btn">
+            <span class="board__add_btn_text">Add task</span>
+            <img class="board__add_btn_icon" src="assets/img/add-white.svg" alt="" aria-hidden="true" />
+          </button>
+        </div>
       </header>
-      <div
-        id="todo"
-        class="board__column_content"
-        cdkDropList
-        [cdkDropListData]="todo()"
-        (cdkDropListDropped)="drop($event)"
-      >
-        @if (todo().length === 0) {
-          <div class="board__no_tasks">No tasks To do</div>
-        } @else {
-          @for (task of todo(); track task.id) {
-            <app-task-card
-              [task]="task"
-              [cdkDragData]="task"
-              [subtasks]="getSubtasksForTask(task.id)"
-              [assignedContacts]="getContactsForTask(task.id)"
-              cdkDrag
-              (cardClick)="openDialog()"
-            >
-            </app-task-card>
-          }
-        }
-      </div>
-    </section>
 
-    <section class="board__column" aria-labelledby="col_inprogress">
-      <header class="board__column_header">
-        <h2 id="col_inprogress" class="board__column_title">In progress</h2>
-        <button class="board__column_add_btn" aria-label="Add new task to In progress">
-          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
-        </button>
-      </header>
-      <div
-        id="in_progress"
-        class="board__column_content"
-        cdkDropList
-        [cdkDropListData]="inProgress()"
-        (cdkDropListDropped)="drop($event)"
-      >
-        @if (inProgress().length === 0) {
-          <div class="board__no_tasks">No tasks In progress</div>
-        } @else {
-          @for (task of inProgress(); track task.id) {
-            <app-task-card
-              [task]="task"
-              [cdkDragData]="task"
-              [subtasks]="getSubtasksForTask(task.id)"
-              [assignedContacts]="getContactsForTask(task.id)"
-              cdkDrag
-              (cardClick)="openDialog()"
-            >
-            </app-task-card>
-          }
-        }
-      </div>
-    </section>
+      <div class="board__grid" cdkDropListGroup>
+        <section class="board__column" aria-labelledby="col_todo">
+          <header class="board__column_header">
+            <h2 id="col_todo" class="board__column_title">To do</h2>
+            <button class="board__column_add_btn" type="button" aria-label="Add new task to To do">
+              <img class="board__column_add_icon" src="assets/board/board-card/plus-button-mobile.svg" alt="" aria-hidden="true" />
+            </button>
+          </header>
+          <div
+            id="todo"
+            class="board__column_content"
+            cdkDropList
+            [cdkDropListData]="todo()"
+            (cdkDropListDropped)="drop($event)"
+          >
+            @if (todo().length === 0) {
+              <div class="board__no_tasks">No tasks To do</div>
+            } @else {
+              @for (task of todo(); track task.id) {
+                <app-task-card
+                  [task]="task"
+                  [cdkDragData]="task"
+                  [cdkDragDisabled]="isMobileViewport()"
+                  [subtasks]="getSubtasksForTask(task.id)"
+                  [assignedContacts]="getContactsForTask(task.id)"
+                  cdkDrag
+                  (cardClick)="openDialog()"
+                  (moveRequested)="moveTaskToStatus(task, $event)"
+                >
+                </app-task-card>
+              }
+            }
+          </div>
+        </section>
 
-    <section class="board__column" aria-labelledby="col_await">
-      <header class="board__column_header">
-        <h2 id="col_await" class="board__column_title">Await feedback</h2>
-        <button class="board__column_add_btn" aria-label="Add new task to Await feedback">
-          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
-        </button>
-      </header>
-      <div
-        id="awaiting_feedback"
-        class="board__column_content"
-        cdkDropList
-        [cdkDropListData]="awaitFeedback()"
-        (cdkDropListDropped)="drop($event)"
-      >
-        @if (awaitFeedback().length === 0) {
-          <div class="board__no_tasks">No tasks Await feedback</div>
-        } @else {
-          @for (task of awaitFeedback(); track task.id) {
-            <app-task-card
-              [task]="task"
-              [cdkDragData]="task"
-              [subtasks]="getSubtasksForTask(task.id)"
-              [assignedContacts]="getContactsForTask(task.id)"
-              cdkDrag
-              (cardClick)="openDialog()"
-            >
-            </app-task-card>
-          }
-        }
-      </div>
-    </section>
+        <section class="board__column" aria-labelledby="col_inprogress">
+          <header class="board__column_header">
+            <h2 id="col_inprogress" class="board__column_title">In progress</h2>
+            <button class="board__column_add_btn" type="button" aria-label="Add new task to In progress">
+              <img class="board__column_add_icon" src="assets/board/board-card/plus-button-mobile.svg" alt="" aria-hidden="true" />
+            </button>
+          </header>
+          <div
+            id="in_progress"
+            class="board__column_content"
+            cdkDropList
+            [cdkDropListData]="inProgress()"
+            (cdkDropListDropped)="drop($event)"
+          >
+            @if (inProgress().length === 0) {
+              <div class="board__no_tasks">No tasks In progress</div>
+            } @else {
+              @for (task of inProgress(); track task.id) {
+                <app-task-card
+                  [task]="task"
+                  [cdkDragData]="task"
+                  [cdkDragDisabled]="isMobileViewport()"
+                  [subtasks]="getSubtasksForTask(task.id)"
+                  [assignedContacts]="getContactsForTask(task.id)"
+                  cdkDrag
+                  (cardClick)="openDialog()"
+                  (moveRequested)="moveTaskToStatus(task, $event)"
+                >
+                </app-task-card>
+              }
+            }
+          </div>
+        </section>
 
-    <section class="board__column" aria-labelledby="col_done">
-      <header class="board__column_header">
-        <h2 id="col_done" class="board__column_title">Done</h2>
-        <button class="board__column_add_btn" aria-label="Add new task to Done">
-          <img src="assets/img/plus-button.svg" alt="" aria-hidden="true" />
-        </button>
-      </header>
-      <div
-        id="done"
-        class="board__column_content"
-        cdkDropList
-        [cdkDropListData]="done()"
-        (cdkDropListDropped)="drop($event)"
-      >
-        @if (done().length === 0) {
-          <div class="board__no_tasks">No tasks Done</div>
-        } @else {
-          @for (task of done(); track task.id) {
-            <app-task-card
-              [task]="task"
-              [cdkDragData]="task"
-              [subtasks]="getSubtasksForTask(task.id)"
-              [assignedContacts]="getContactsForTask(task.id)"
-              cdkDrag
-              (cardClick)="openDialog()"
-            >
-            </app-task-card>
-          }
-        }
+        <section class="board__column" aria-labelledby="col_await">
+          <header class="board__column_header">
+            <h2 id="col_await" class="board__column_title">Await feedback</h2>
+            <button class="board__column_add_btn" type="button" aria-label="Add new task to Await feedback">
+              <img class="board__column_add_icon" src="assets/board/board-card/plus-button-mobile.svg" alt="" aria-hidden="true" />
+            </button>
+          </header>
+          <div
+            id="awaiting_feedback"
+            class="board__column_content"
+            cdkDropList
+            [cdkDropListData]="awaitFeedback()"
+            (cdkDropListDropped)="drop($event)"
+          >
+            @if (awaitFeedback().length === 0) {
+              <div class="board__no_tasks">No tasks Await feedback</div>
+            } @else {
+              @for (task of awaitFeedback(); track task.id) {
+                <app-task-card
+                  [task]="task"
+                  [cdkDragData]="task"
+                  [cdkDragDisabled]="isMobileViewport()"
+                  [subtasks]="getSubtasksForTask(task.id)"
+                  [assignedContacts]="getContactsForTask(task.id)"
+                  cdkDrag
+                  (cardClick)="openDialog()"
+                  (moveRequested)="moveTaskToStatus(task, $event)"
+                >
+                </app-task-card>
+              }
+            }
+          </div>
+        </section>
+
+        <section class="board__column" aria-labelledby="col_done">
+          <header class="board__column_header">
+            <h2 id="col_done" class="board__column_title">Done</h2>
+            <button class="board__column_add_btn" type="button" aria-label="Add new task to Done">
+              <img class="board__column_add_icon" src="assets/board/board-card/plus-button-mobile.svg" alt="" aria-hidden="true" />
+            </button>
+          </header>
+          <div
+            id="done"
+            class="board__column_content"
+            cdkDropList
+            [cdkDropListData]="done()"
+            (cdkDropListDropped)="drop($event)"
+          >
+            @if (done().length === 0) {
+              <div class="board__no_tasks">No tasks Done</div>
+            } @else {
+              @for (task of done(); track task.id) {
+                <app-task-card
+                  [task]="task"
+                  [cdkDragData]="task"
+                  [cdkDragDisabled]="isMobileViewport()"
+                  [subtasks]="getSubtasksForTask(task.id)"
+                  [assignedContacts]="getContactsForTask(task.id)"
+                  cdkDrag
+                  (cardClick)="openDialog()"
+                  (moveRequested)="moveTaskToStatus(task, $event)"
+                >
+                </app-task-card>
+              }
+            }
+          </div>
+        </section>
       </div>
-    </section>
+    </main>
   </div>
-</main>
+</section>

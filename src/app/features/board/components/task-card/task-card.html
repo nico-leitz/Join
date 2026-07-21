@@ -1,7 +1,47 @@
 <div class="task_card" (click)="cardClick.emit()">
-  <div class="task_card__type">
-    {{ task().category === 'technical_task' ? 'Technical Task' : 'User Story' }}
+  <div class="task_card__topbar">
+    <div class="task_card__type">
+      {{ task().category === 'technical_task' ? 'Technical Task' : 'User Story' }}
+    </div>
+
+    <div class="task_card__move_action">
+      <button
+        type="button"
+        class="task_card__move_btn"
+        [attr.aria-expanded]="moveMenuOpen()"
+        aria-haspopup="menu"
+        aria-label="Open move menu"
+        (click)="toggleMoveMenu($event)"
+      >
+        <img class="task_card__move_icon" src="assets/board/board-card/swap_horiz.svg" alt="" aria-hidden="true" />
+      </button>
+
+      @if (moveMenuOpen()) {
+        <div class="task_card__move_menu" role="menu" aria-label="Move task menu" (click)="$event.stopPropagation()">
+          <p class="task_card__move_menu_title">Move to</p>
+          <button
+            type="button"
+            class="task_card__move_menu_item"
+            role="menuitem"
+            (click)="requestMove($event, 'todo')"
+          >
+            <span aria-hidden="true">&uarr;</span>
+            <span>To-do</span>
+          </button>
+          <button
+            type="button"
+            class="task_card__move_menu_item"
+            role="menuitem"
+            (click)="requestMove($event, 'awaiting_feedback')"
+          >
+            <span aria-hidden="true">&darr;</span>
+            <span>Review</span>
+          </button>
+        </div>
+      }
+    </div>
   </div>
+
   <h2 class="task_card__title">{{ task().title }}</h2>
   <p class="task_card__desc">{{ task().description }}</p>
 
