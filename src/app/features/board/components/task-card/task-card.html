@@ -9,16 +9,74 @@
     openCard()
   "
 >
-  <div
-    class="task_card__type"
-    [class.task_card__type--technical]="
-      task().category === 'technical_task'
-    "
-    [class.task_card__type--user-story]="
-      task().category === 'user_story'
-    "
-  >
-    {{ categoryLabel() }}
+  <div class="task_card__topbar">
+    <div
+      class="task_card__type"
+      [class.task_card__type--technical]="
+        task().category === 'technical_task'
+      "
+      [class.task_card__type--user-story]="
+        task().category === 'user_story'
+      "
+    >
+      {{ categoryLabel() }}
+    </div>
+
+    <div class="task_card__move_action">
+      <button
+        type="button"
+        class="task_card__move_btn"
+        [attr.aria-expanded]="moveMenuOpen()"
+        aria-haspopup="menu"
+        aria-label="Open move menu"
+        (click)="toggleMoveMenu($event)"
+      >
+        <img
+          class="task_card__move_icon"
+          src="assets/board/board-card/swap_horiz.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+
+      @if (moveMenuOpen()) {
+        <div
+          class="task_card__move_menu"
+          role="menu"
+          aria-label="Move task menu"
+          (click)="$event.stopPropagation()"
+        >
+          <p class="task_card__move_menu_title">
+            Move to
+          </p>
+
+          <button
+            type="button"
+            class="task_card__move_menu_item"
+            role="menuitem"
+            (click)="requestMove($event, 'todo')"
+          >
+            <span aria-hidden="true">↑</span>
+            <span>To-do</span>
+          </button>
+
+          <button
+            type="button"
+            class="task_card__move_menu_item"
+            role="menuitem"
+            (click)="
+              requestMove(
+                $event,
+                'awaiting_feedback'
+              )
+            "
+          >
+            <span aria-hidden="true">↓</span>
+            <span>Review</span>
+          </button>
+        </div>
+      }
+    </div>
   </div>
 
   <h2 class="task_card__title">
@@ -37,9 +95,7 @@
       >
         <div
           class="task_card__progress_fill"
-          [style.width.%]="
-            progress().percentage
-          "
+          [style.width.%]="progress().percentage"
         ></div>
       </div>
 

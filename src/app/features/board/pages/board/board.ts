@@ -45,6 +45,9 @@ import { TaskCard } from '../../components/task-card/task-card';
   ],
   templateUrl: './board.html',
   styleUrl: './board.scss',
+  host: {
+    '(window:resize)': 'onWindowResize()',
+  },
 })
 export class Board implements OnInit {
   private readonly taskService = inject(TaskService);
@@ -56,9 +59,15 @@ export class Board implements OnInit {
   readonly boardError = signal('');
   readonly searchTerm = signal('');
 
+  protected readonly isMobileViewport = signal(
+    this.getIsMobileViewport(),
+  );
+
   readonly allSubtasks = signal<Subtask[]>([]);
-  readonly allAssignments = signal<TaskAssignmentRow[]>([]);
-  readonly allContacts = this.contactService.allContacts;
+  readonly allAssignments =
+    signal<TaskAssignmentRow[]>([]);
+  readonly allContacts =
+    this.contactService.allContacts;
 
   readonly dialogTask = signal<Task | null>(null);
   readonly dialogSubtasks = signal<Subtask[]>([]);
@@ -110,23 +119,26 @@ export class Board implements OnInit {
     );
   });
 
-  private readonly subtasksByTaskId = computed(() => {
-    return groupSubtasksByTaskId(
-      this.allSubtasks(),
-    );
-  });
+  private readonly subtasksByTaskId =
+    computed(() => {
+      return groupSubtasksByTaskId(
+        this.allSubtasks(),
+      );
+    });
 
-  private readonly contactIdsByTaskId = computed(() => {
-    return groupContactIdsByTaskId(
-      this.allAssignments(),
-    );
-  });
+  private readonly contactIdsByTaskId =
+    computed(() => {
+      return groupContactIdsByTaskId(
+        this.allAssignments(),
+      );
+    });
 
-  private readonly contactsById = computed(() => {
-    return createContactMap(
-      this.allContacts(),
-    );
-  });
+  private readonly contactsById =
+    computed(() => {
+      return createContactMap(
+        this.allContacts(),
+      );
+    });
 
   async ngOnInit(): Promise<void> {
     await this.loadBoard();
@@ -153,17 +165,23 @@ export class Board implements OnInit {
   }
 
   updateSearchTerm(event: Event): void {
-    const input = event.target as HTMLInputElement;
+    const input =
+      event.target as HTMLInputElement;
+
     this.searchTerm.set(input.value);
   }
 
-  getSubtasksForTask(taskId: string): Subtask[] {
+  getSubtasksForTask(
+    taskId: string,
+  ): Subtask[] {
     return (
       this.subtasksByTaskId().get(taskId) ?? []
     );
   }
 
-  getContactsForTask(taskId: string): Contact[] {
+  getContactsForTask(
+    taskId: string,
+  ): Contact[] {
     const contactIds =
       this.contactIdsByTaskId().get(taskId) ?? [];
 
@@ -171,16 +189,23 @@ export class Board implements OnInit {
   }
 
   openDialog(task: Task): void {
-    const subtasks = this.getSubtasksForTask(task.id);
-    const contacts = this.getContactsForTask(task.id);
+    const subtasks =
+      this.getSubtasksForTask(task.id);
+
+    const contacts =
+      this.getContactsForTask(task.id);
 
     this.dialogTask.set(task);
     this.dialogSubtasks.set(subtasks);
     this.dialogContacts.set(contacts);
 
     this.taskService.selectedTask.set(task);
-    this.taskService.selectedSubtasks.set(subtasks);
-    this.taskService.assignedContacts.set(contacts);
+    this.taskService.selectedSubtasks.set(
+      subtasks,
+    );
+    this.taskService.assignedContacts.set(
+      contacts,
+    );
 
     this.isDialogOpen.set(true);
   }
@@ -221,11 +246,45 @@ export class Board implements OnInit {
       });
     });
 
-    this.allAssignments.update((assignments) => {
-      return assignments.filter((assignment) => {
-        return assignment.task_id !== taskId;
-      });
-    });
+    this.allAssignments.update(
+      (assignments) => {
+        return assignments.filter(
+          (assignment) => {
+            return (
+              assignment.task_id !== taskId
+            );
+          },
+        );
+      },
+    );
+  }
+
+  protected onWindowResize(): void {
+    this.isMobileViewport.set(
+      this.getIsMobileViewport(),
+    );
+  }
+
+  protected async moveTaskToStatus(
+    task: Task,
+    targetStatus: TaskStatus,
+  ): Promise<void> {
+    if (
+      task.status === targetStatus ||
+      this.isBoardUpdating()
+    ) {
+      return;
+    }
+
+    const updatedTasks =
+      this.createStatusMoveUpdates(
+        task,
+        targetStatus,
+      );
+
+    await this.persistTaskUpdates(
+      updatedTasks,
+    );
   }
 
   async drop(
@@ -240,7 +299,9 @@ export class Board implements OnInit {
     const updatedTasks =
       this.createDropUpdates(event);
 
-    await this.persistTaskUpdates(updatedTasks);
+    await this.persistTaskUpdates(
+      updatedTasks,
+    );
   }
 
   private async loadBoardContent(): Promise<void> {
@@ -251,28 +312,39 @@ export class Board implements OnInit {
         this.contactService.getContacts(),
       ]);
 
-    this.allSubtasks.set(boardData.subtasks);
-    this.allAssignments.set(boardData.assignments);
+    this.allSubtasks.set(
+      boardData.subtasks,
+    );
+
+    this.allAssignments.set(
+      boardData.assignments,
+    );
+
     this.allContacts.set(contacts);
   }
 
   private getContactsByIds(
     contactIds: string[],
   ): Contact[] {
-    const contactsById = this.contactsById();
+    const contactsById =
+      this.contactsById();
 
-    return contactIds.flatMap((contactId) => {
-      const contact = contactsById.get(contactId);
+    return contactIds.flatMap(
+      (contactId) => {
+        const contact =
+          contactsById.get(contactId);
 
-      return contact ? [contact] : [];
-    });
+        return contact ? [contact] : [];
+      },
+    );
   }
 
   private moveDroppedTask(
     event: CdkDragDrop<Task[]>,
   ): void {
     if (
-      event.previousContainer === event.container
+      event.previousContainer ===
+      event.container
     ) {
       moveItemInArray(
         event.container.data,
@@ -294,28 +366,95 @@ export class Board implements OnInit {
   private createDropUpdates(
     event: CdkDragDrop<Task[]>,
   ): Task[] {
-    const targetTasks = this.normalizeColumnTasks(
-      event.container.data,
-      this.getTaskStatus(event.container.id),
-    );
+    const targetTasks =
+      this.normalizeColumnTasks(
+        event.container.data,
+        this.getTaskStatus(
+          event.container.id,
+        ),
+      );
 
     if (
-      event.previousContainer === event.container
+      event.previousContainer ===
+      event.container
     ) {
-      return this.getChangedTasks(targetTasks);
+      return this.getChangedTasks(
+        targetTasks,
+      );
     }
 
-    const sourceTasks = this.normalizeColumnTasks(
-      event.previousContainer.data,
-      this.getTaskStatus(
-        event.previousContainer.id,
-      ),
-    );
+    const sourceTasks =
+      this.normalizeColumnTasks(
+        event.previousContainer.data,
+        this.getTaskStatus(
+          event.previousContainer.id,
+        ),
+      );
 
     return this.getChangedTasks([
       ...sourceTasks,
       ...targetTasks,
     ]);
+  }
+
+  private createStatusMoveUpdates(
+    task: Task,
+    targetStatus: TaskStatus,
+  ): Task[] {
+    const sourceTasks =
+      this.getTasksByStatusWithoutTask(
+        task.status,
+        task.id,
+      );
+
+    const targetTasks =
+      this.getTasksByStatusWithoutTask(
+        targetStatus,
+        task.id,
+      );
+
+    const movedTask: Task = {
+      ...task,
+      status: targetStatus,
+      sortOrder: targetTasks.length,
+    };
+
+    const normalizedSource =
+      this.normalizeColumnTasks(
+        sourceTasks,
+        task.status,
+      );
+
+    const normalizedTarget =
+      this.normalizeColumnTasks(
+        [...targetTasks, movedTask],
+        targetStatus,
+      );
+
+    return this.getChangedTasks([
+      ...normalizedSource,
+      ...normalizedTarget,
+    ]);
+  }
+
+  private getTasksByStatusWithoutTask(
+    status: TaskStatus,
+    excludedTaskId: string,
+  ): Task[] {
+    return this.taskService
+      .allTasks()
+      .filter((task) => {
+        return (
+          task.status === status &&
+          task.id !== excludedTaskId
+        );
+      })
+      .sort((firstTask, secondTask) => {
+        return (
+          firstTask.sortOrder -
+          secondTask.sortOrder
+        );
+      });
   }
 
   private normalizeColumnTasks(
@@ -335,9 +474,11 @@ export class Board implements OnInit {
     updatedTasks: Task[],
   ): Task[] {
     const currentTasks = new Map(
-      this.taskService.allTasks().map((task) => {
-        return [task.id, task];
-      }),
+      this.taskService
+        .allTasks()
+        .map((task) => {
+          return [task.id, task];
+        }),
     );
 
     return updatedTasks.filter((task) => {
@@ -355,8 +496,10 @@ export class Board implements OnInit {
     return (
       currentTask !== undefined &&
       (
-        currentTask.status !== updatedTask.status ||
-        currentTask.sortOrder !== updatedTask.sortOrder
+        currentTask.status !==
+          updatedTask.status ||
+        currentTask.sortOrder !==
+          updatedTask.sortOrder
       )
     );
   }
@@ -374,7 +517,9 @@ export class Board implements OnInit {
     try {
       await this.updateTasks(updatedTasks);
     } catch (error) {
-      await this.handleTaskUpdateError(error);
+      await this.handleTaskUpdateError(
+        error,
+      );
     } finally {
       this.isBoardUpdating.set(false);
     }
@@ -423,6 +568,13 @@ export class Board implements OnInit {
   ): TaskStatus {
     return containerId as TaskStatus;
   }
+
+  private getIsMobileViewport(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      window.innerWidth <= 640
+    );
+  }
 }
 
 function groupSubtasksByTaskId(
@@ -458,7 +610,10 @@ function groupContactIdsByTaskId(
 
     groupedContactIds.set(
       assignment.task_id,
-      [...contactIds, assignment.contact_id],
+      [
+        ...contactIds,
+        assignment.contact_id,
+      ],
     );
   }
 
@@ -470,7 +625,10 @@ function createContactMap(
 ): Map<string, Contact> {
   return new Map(
     contacts.map((contact) => {
-      return [contact.id, contact];
+      return [
+        contact.id,
+        contact,
+      ];
     }),
   );
 }
@@ -480,7 +638,8 @@ function replaceSubtask(
   updatedSubtask: Subtask,
 ): Subtask[] {
   return subtasks.map((subtask) => {
-    return subtask.id === updatedSubtask.id
+    return subtask.id ===
+      updatedSubtask.id
       ? updatedSubtask
       : subtask;
   });

@@ -273,6 +273,7 @@ app-task-card {
   &__column_add_btn {
     width: 1.5rem;
     height: 1.5rem;
+    flex-shrink: 0;
   }
 
   &__column_content {
@@ -404,6 +405,7 @@ app-task-card {
 
     &__column_content {
       min-height: 8rem;
+      align-items: flex-start;
       gap: 1.5rem;
       padding: 1rem 0;
       overflow: visible;

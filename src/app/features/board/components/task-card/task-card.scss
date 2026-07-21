@@ -1,3 +1,4 @@
+@use 'abstracts/breakpoints' as bp;
 @use 'abstracts/mixins' as mx;
 
 .task_card {
@@ -12,6 +13,7 @@
     --radius-lg,
     1.5rem
   );
+  box-sizing: border-box;
   background: var(
     --color-bg-light,
     #ffffff
@@ -48,9 +50,19 @@
     outline-offset: 3px;
   }
 
+  &__topbar {
+    @include mx.flexbox(
+      row,
+      space-between,
+      flex-start
+    );
+
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
   &__type {
     width: fit-content;
-    margin-bottom: 1.25rem;
     padding: 0.25rem 1rem;
     border-radius: var(
       --radius-sm,
@@ -74,6 +86,84 @@
     }
   }
 
+  &__move_action {
+    position: relative;
+    display: none;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  &__move_btn {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #2a3647;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #2a3647;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: #29abe2;
+      color: #29abe2;
+      outline: none;
+    }
+  }
+
+  &__move_icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+
+  &__move_menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 5;
+    display: flex;
+    min-width: 116px;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 20px 0 20px 20px;
+    background-color: #2a3647;
+    box-shadow:
+      0 4px 8px 0
+      rgba(0, 0, 0, 0.16);
+  }
+
+  &__move_menu_title {
+    margin: 0;
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  &__move_menu_item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #cdcdcd;
+    font-size: 16px;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      color: #29abe2;
+      outline: none;
+    }
+  }
+
   &__title {
     margin: 0 0 0.5rem;
     color: var(
@@ -89,8 +179,8 @@
   }
 
   &__desc {
-    margin: 0 0 1.5rem;
     display: -webkit-box;
+    margin: 0 0 1.5rem;
     overflow: hidden;
     color: var(
       --color-text-muted,
@@ -102,7 +192,6 @@
     );
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    /* Standard property for compatibility */
     line-clamp: 2;
   }
 
@@ -113,8 +202,8 @@
       center
     );
 
-    margin-bottom: 1.5rem;
     gap: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
   &__progress {
@@ -218,6 +307,43 @@
       width: 1.25rem;
       height: 1.25rem;
       object-fit: contain;
+    }
+  }
+}
+
+@media (
+  min-width:
+    calc(#{bp.$breakpoint-tablet-xl} + 1px)
+) {
+  .task_card {
+    width: 252px;
+    max-width: 252px;
+  }
+}
+
+@media (
+  min-width:
+    calc(#{bp.$breakpoint-mobile-l} + 1px)
+) and (
+  max-width:
+    bp.$breakpoint-tablet-xl
+) {
+  .task_card {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (
+  max-width:
+    bp.$breakpoint-mobile-l
+) {
+  .task_card {
+    width: 252px;
+    max-width: 252px;
+
+    &__move_action {
+      display: block;
     }
   }
 }

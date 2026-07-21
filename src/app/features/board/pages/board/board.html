@@ -149,7 +149,8 @@
                     cdkDrag
                     [cdkDragData]="task"
                     [cdkDragDisabled]="
-                      isDragDisabled()
+                      isDragDisabled() ||
+                      isMobileViewport()
                     "
                     [task]="task"
                     [subtasks]="
@@ -159,6 +160,9 @@
                       getContactsForTask(task.id)
                     "
                     (cardClick)="openDialog(task)"
+                    (moveRequested)="
+                      moveTaskToStatus(task, $event)
+                    "
                   ></app-task-card>
                 }
               }
@@ -213,7 +217,8 @@
                     cdkDrag
                     [cdkDragData]="task"
                     [cdkDragDisabled]="
-                      isDragDisabled()
+                      isDragDisabled() ||
+                      isMobileViewport()
                     "
                     [task]="task"
                     [subtasks]="
@@ -223,6 +228,9 @@
                       getContactsForTask(task.id)
                     "
                     (cardClick)="openDialog(task)"
+                    (moveRequested)="
+                      moveTaskToStatus(task, $event)
+                    "
                   ></app-task-card>
                 }
               }
@@ -281,7 +289,8 @@
                     cdkDrag
                     [cdkDragData]="task"
                     [cdkDragDisabled]="
-                      isDragDisabled()
+                      isDragDisabled() ||
+                      isMobileViewport()
                     "
                     [task]="task"
                     [subtasks]="
@@ -291,6 +300,9 @@
                       getContactsForTask(task.id)
                     "
                     (cardClick)="openDialog(task)"
+                    (moveRequested)="
+                      moveTaskToStatus(task, $event)
+                    "
                   ></app-task-card>
                 }
               }
@@ -333,7 +345,8 @@
                     cdkDrag
                     [cdkDragData]="task"
                     [cdkDragDisabled]="
-                      isDragDisabled()
+                      isDragDisabled() ||
+                      isMobileViewport()
                     "
                     [task]="task"
                     [subtasks]="
@@ -343,6 +356,9 @@
                       getContactsForTask(task.id)
                     "
                     (cardClick)="openDialog(task)"
+                    (moveRequested)="
+                      moveTaskToStatus(task, $event)
+                    "
                   ></app-task-card>
                 }
               }
