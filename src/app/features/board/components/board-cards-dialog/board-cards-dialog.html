@@ -1,0 +1,207 @@
+<div
+  class="dialog_overlay"
+  [class.dialog_overlay--closing]="isClosing()"
+  (click)="closeDialog()"
+>
+  <dialog
+    open
+    class="board_dialog"
+    [class.board_dialog--closing]="isClosing()"
+    aria-modal="true"
+    aria-labelledby="board-dialog-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="board_dialog__header">
+      <span
+        class="board_dialog__type"
+        [class.board_dialog__type--technical]="
+          task().category === 'technical_task'
+        "
+        [class.board_dialog__type--user-story]="
+          task().category === 'user_story'
+        "
+      >
+        {{ categoryLabel() }}
+      </span>
+
+      <button
+        type="button"
+        class="board_dialog__close"
+        aria-label="Close dialog"
+        (click)="closeDialog()"
+      >
+        ×
+      </button>
+    </header>
+
+    <div class="board_dialog__content">
+      <h2
+        id="board-dialog-title"
+        class="board_dialog__title"
+      >
+        {{ task().title }}
+      </h2>
+
+      <p class="board_dialog__desc">
+        {{
+          task().description ||
+            'No description available.'
+        }}
+      </p>
+
+      <div class="board_dialog__meta">
+        <span class="board_dialog__label">
+          Due date:
+        </span>
+
+        <span>
+          {{ formattedDueDate() }}
+        </span>
+      </div>
+
+      <div class="board_dialog__meta">
+        <span class="board_dialog__label">
+          Priority:
+        </span>
+
+        <div class="board_dialog__priority">
+          <span>
+            {{ priorityLabel() }}
+          </span>
+
+          <img
+            [src]="
+              'assets/board/board-card/' +
+              task().priority +
+              '.svg'
+            "
+            [alt]="task().priority + ' priority'"
+          />
+        </div>
+      </div>
+
+      <section class="board_dialog__section">
+        <h3 class="board_dialog__section_title">
+          Assigned To:
+        </h3>
+
+        @if (assignedContacts().length === 0) {
+          <p class="board_dialog__empty">
+            No contacts assigned.
+          </p>
+        } @else {
+          <div class="board_dialog__assignees">
+            @for (
+              contact of assignedContacts();
+              track contact.id
+            ) {
+              <div class="board_dialog__assignee">
+                <span
+                  class="board_dialog__badge"
+                  [style.background-color]="
+                    contact.badgeColor
+                  "
+                >
+                  {{ getInitials(contact) }}
+                </span>
+
+                <span>
+                  {{ contact.firstName }}
+                  {{ contact.lastName }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="board_dialog__section">
+        <h3 class="board_dialog__section_title">
+          Subtasks
+        </h3>
+
+        @if (subtasks().length === 0) {
+          <p class="board_dialog__empty">
+            No subtasks available.
+          </p>
+        } @else {
+          <div class="board_dialog__subtasks">
+            @for (
+              subtask of subtasks();
+              track subtask.id
+            ) {
+              <label class="board_dialog__subtask">
+                <input
+                  class="board_dialog__checkbox"
+                  type="checkbox"
+                  [checked]="subtask.isCompleted"
+                  [disabled]="
+                    updatingSubtaskId() === subtask.id
+                  "
+                  (change)="
+                    toggleSubtask(subtask, $event)
+                  "
+                />
+
+                <span>
+                  {{ subtask.title }}
+                </span>
+              </label>
+            }
+          </div>
+        }
+      </section>
+
+      @if (errorMessage()) {
+        <p
+          class="board_dialog__error"
+          role="alert"
+        >
+          {{ errorMessage() }}
+        </p>
+      }
+    </div>
+
+    <footer class="board_dialog__actions">
+      <button
+        type="button"
+        class="board_dialog__action"
+        [disabled]="isDeleting()"
+        (click)="deleteTask()"
+      >
+        <img
+          class="board_dialog__action_icon"
+          src="assets/board/task-details/delete.svg"
+          alt=""
+          aria-hidden="true"
+        />
+
+        <span>
+          @if (isDeleting()) {
+            Deleting...
+          } @else {
+            Delete
+          }
+        </span>
+      </button>
+
+      <div class="board_dialog__action_divider"></div>
+
+      <button
+        type="button"
+        class="board_dialog__action"
+        disabled
+        title="Task editing is not connected yet"
+      >
+        <img
+          class="board_dialog__action_icon"
+          src="assets/board/task-details/edit.svg"
+          alt=""
+          aria-hidden="true"
+        />
+
+        <span>Edit</span>
+      </button>
+    </footer>
+  </dialog>
+</div>
