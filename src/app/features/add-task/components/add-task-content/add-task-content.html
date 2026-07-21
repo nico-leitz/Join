@@ -2,29 +2,33 @@
     <section class="add_task_field">
         <h1 class="add_task_field_title">Add Task</h1>
         <div class="add_task_field_details">
-            <section class="task_detail_section">
-                <label>Title<span>*</span></label>
-                <input class="input title_input">
-                <label>Description</label>
-                <input class="input">
-                <label>Due date<span>*</span></label>
-                <input class="input">
-            </section>
+            <form [formGroup]="taskForm" class="task_detail_section" (ngSubmit)="newTaskSubmit()">
+                <label for="title">Title<span>*</span></label>
+                <input id="title" type="text" formControlName= "title" class="input title_input">
+                <label for="description">Description</label>
+                <input id="description" type="text" formControlName= "description" class="input">
+                <label for="dueDate">Due date<span>*</span></label>
+                <input id="dueDate" type="date" formControlName= "dueDate" class="input">
+                <p>{{taskForm.get("title")?.valid}}</p>
+                <p>{{"date:" + taskForm.get("dueDate")?.valid}}</p>
+                <p>{{taskForm.valid}}</p>
+            </form>
             <div class="divider"></div>
-            <section class="task_detail_section">
+            <form [formGroup]="taskForm" class="task_detail_section" (ngSubmit)="newTaskSubmit()">
                 <label>Priority</label>
                 <div class="priority_button_container">
                     <button>Urgent</button>
                     <button>Medium</button>
                     <button>Low</button>
                 </div>
-                <label>Assigned to</label>
-                <input class="input">
-                <label>Category<span>*</span></label>
-                <input class="input">
-                <label>Subtasks</label>
-                <input class="input">
-            </section>
+                <label for="assignedTo">Assigned to</label>
+                <input id="assignedTo" type="text" formControlName= "assignedTo" class="input">
+                <label for="category">Category<span>*</span></label>
+                <input id="category" type="text" formControlName= "category" class="input">
+                <label for="subtasks">Subtasks</label>
+                <input id="subtasks" type="text" formControlName= "subtasks" class="input">
+                <p>{{taskForm.get("category")?.valid}}</p>
+            </form>
         </div>
     </section>
 
@@ -33,8 +37,8 @@
             <p><span>*</span>This field is required</p>
         </div>
         <div>
-            <button>Clear</button>
-            <button>Create Task</button>
+            <button (click)="resetInputFields()">Clear</button>
+            <button type="submit">Create Task</button>
         </div>
     </div>
 </section>
