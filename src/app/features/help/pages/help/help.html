@@ -1,0 +1,56 @@
+<section class="help-page">
+  <app-sidebar></app-sidebar>
+
+  <div class="right-wrapper">
+    <app-header></app-header>
+
+    <main class="help-page__content">
+      <section class="help-page__hero">
+        <h1 class="help-page__title">Help</h1>
+
+        <button type="button" class="help-page__back" aria-label="Go back" (click)="goBack()">
+          <img
+            ngSrc="assets/contact-details/arrow-left.svg"
+            width="24"
+            height="23"
+            alt=""
+            aria-hidden="true"
+          />
+        </button>
+      </section>
+
+      <section class="help-page__section help-page__section--intro">
+        <p>
+          Welcome to the help page for Join, your guide to using our kanban project management tool. Here,
+          we'll provide an overview of what Join is, how it can benefit you, and how to use it.
+        </p>
+      </section>
+
+      <section class="help-page__section">
+        <h2>What is Join?</h2>
+        <p>
+          Join is a kanban-based project management tool designed and built by a group of dedicated students
+          as part of their web development bootcamp at the Developer Akademie.
+        </p>
+        <p>
+          Kanban, a Japanese term meaning "billboard", is a highly effective method to visualize work,
+          limit work-in-progress, and maximize efficiency or flow. Join leverages the principles of kanban
+          to help users manage their tasks and projects in an intuitive, visual interface.
+        </p>
+        <p>
+          It is important to note that Join is designed as an educational exercise and is not intended for
+          extensive business usage. While we strive to ensure the best possible user experience, we cannot
+          guarantee consistent availability, reliability, accuracy, or other aspects of quality regarding Join.
+        </p>
+      </section>
+
+      <section class="help-page__section">
+        <h2>How to use it</h2>
+        <p>
+          Use the board to keep track of tasks, move cards between statuses, and organize work clearly for the
+          whole team. Contacts, task details, and subtasks help you manage each topic in one place.
+        </p>
+      </section>
+    </main>
+  </div>
+</section>

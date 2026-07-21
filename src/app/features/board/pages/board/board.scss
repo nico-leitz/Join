@@ -19,13 +19,56 @@ app-task-card {
   margin: 0;
 }
 
+.board-page {
+  position: relative;
+  display: flex;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-bg-main, #f6f7f8);
+  font-family: var(--font_primary, 'Inter', sans-serif);
+}
+
+.right-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding-bottom: var(--layout-mobile-bottom-nav-height);
+}
+
+app-sidebar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  width: 100%;
+  height: var(--layout-mobile-bottom-nav-height);
+  flex-shrink: 0;
+}
+
+app-header {
+  z-index: 20;
+  display: block;
+  width: 100%;
+  height: var(--layout-mobile-header-height);
+  flex-shrink: 0;
+}
+
 .board {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
   padding: 4rem;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: auto;
   font-family: var(--font_primary, 'Inter', sans-serif);
   background-color: var(--color_bg_main, #f6f7f8);
 
@@ -99,6 +142,12 @@ app-task-card {
     cursor: pointer;
   }
 
+  &__add_btn_icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+
   &__grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -122,22 +171,29 @@ app-task-card {
   }
 
   &__column_title {
-    font-size: 1.25rem;
+    font-size: 27px;
     font-weight: 700;
     color: #42526e;
     margin: 0;
   }
 
   &__column_add_btn {
-    background: none;
     border: none;
+    background: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+  }
+
+  &__column_add_icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
   }
 
   &__no_tasks {
@@ -180,10 +236,17 @@ app-task-card {
   }
 }
 
-@media (max-width: bp.$breakpoint_tablet_xl) {
+@media (min-width: calc(#{bp.$breakpoint-mobile-l} + 1px)) and (max-width: bp.$breakpoint-tablet-xl) {
+  .board-page {
+    --mobile-bottom-nav-height: 0px;
+  }
+
+  .right-wrapper {
+    padding-bottom: 0;
+  }
+
   .board {
-    padding: 24px 16px;
-    height: auto;
+    padding: 24px;
     overflow-y: auto;
 
     &__header {
@@ -212,6 +275,151 @@ app-task-card {
     }
 
     &__grid {
+      flex: 0 0 auto;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+      overflow: visible;
+      height: auto;
+    }
+
+    &__column {
+      height: auto;
+    }
+
+    &__column_content {
+      flex: 0 0 auto;
+      overflow: visible;
+      min-height: auto;
+      gap: 1.5rem;
+      padding: 1rem 0.5rem 0 0;
+    }
+  }
+}
+
+@media (min-width: calc(#{bp.$breakpoint-tablet-xl} + 1px)) {
+  .board-page {
+    --mobile-bottom-nav-height: 0px;
+  }
+
+  app-sidebar {
+    position: static;
+    width: var(--contact-sidebar-width);
+    height: 100%;
+    flex: 0 0 var(--contact-sidebar-width);
+  }
+
+  app-header {
+    height: var(--layout-header-height);
+  }
+
+  .right-wrapper {
+    padding-bottom: 0;
+  }
+
+  .board {
+    padding: 4rem;
+    overflow: auto;
+  }
+}
+
+@media (min-width: calc(#{bp.$breakpoint-tablet-xl} + 1px)) and (max-width: calc(#{bp.$breakpoint-desktop-fhd} - 1px)) {
+  .board {
+    padding: 24px;
+    overflow-y: auto;
+
+    &__header {
+      flex-wrap: wrap;
+      gap: 2rem 1rem;
+    }
+
+    &__controls {
+      display: contents;
+    }
+
+    &__title {
+      flex: 1;
+      order: 1;
+    }
+
+    &__add_btn {
+      order: 2;
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+    }
+
+    &__add_btn_text {
+      display: none;
+    }
+
+    &__search_wrapper {
+      order: 3;
+      width: 100%;
+    }
+
+    &__grid {
+      flex: 0 0 auto;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+      overflow: visible;
+      height: auto;
+    }
+
+    &__column {
+      height: auto;
+    }
+
+    &__column_content {
+      flex: 0 0 auto;
+      overflow: visible;
+      min-height: auto;
+      gap: 1.5rem;
+      padding: 1rem 0.5rem 0 0;
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-l) {
+  app-task-card {
+    width: auto;
+  }
+
+  .board {
+    padding: 24px 16px;
+    overflow-y: auto;
+
+    &__header {
+      flex-wrap: wrap;
+      gap: 2rem 1rem;
+    }
+
+    &__controls {
+      display: contents;
+    }
+
+    &__title {
+      flex: 1;
+      order: 1;
+    }
+
+    &__add_btn {
+      order: 2;
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+    }
+
+    &__add_btn_text {
+      display: none;
+    }
+
+    &__search_wrapper {
+      order: 3;
+      width: 100%;
+    }
+
+    &__grid {
+      flex: 0 0 auto;
       grid-template-columns: 1fr;
       gap: 2rem;
       overflow: visible;
@@ -223,20 +431,46 @@ app-task-card {
     }
 
     &__column_content {
-      overflow-y: visible;
+      flex: 0 0 auto;
+      align-items: flex-start;
+      overflow: visible;
       min-height: auto;
       gap: 1.5rem;
-      padding: 1rem;
+      padding: 1rem 0;
     }
   }
 }
 
-@media (max-width: bp.$breakpoint_mobile_xs) {
+@media (max-width: bp.$breakpoint-mobile-xs) {
   .board {
     padding: 16px 12px;
     &__header {
       margin-bottom: 2rem;
     }
+  }
+}
+
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
+  .board-page {
+    --mobile-bottom-nav-height: var(--layout-mobile-landscape-bottom-nav-height);
+  }
+
+  app-sidebar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--layout-mobile-landscape-bottom-nav-height);
+    flex: 0 0 var(--layout-mobile-landscape-bottom-nav-height);
+  }
+
+  .right-wrapper {
+    padding-bottom: var(--layout-mobile-landscape-bottom-nav-height);
+  }
+
+  app-header {
+    height: var(--layout-mobile-landscape-header-height);
   }
 }
 
