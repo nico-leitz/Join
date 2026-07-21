@@ -1,1 +1,37 @@
-<p>legal-notice works!</p>
+<section class="legal-notice-page">
+	<app-sidebar></app-sidebar>
+
+	<div class="right-wrapper">
+		<app-header></app-header>
+
+		<main class="legal-notice-page__content">
+			<section class="legal-notice-page__hero">
+				<h1 class="legal-notice-page__title">Legal Notice</h1>
+
+				<button type="button" class="legal-notice-page__back" aria-label="Go back" (click)="goBack()">
+					<img
+						ngSrc="assets/contact-details/arrow-left.svg"
+						width="24"
+						height="23"
+						alt=""
+						aria-hidden="true"
+					/>
+				</button>
+			</section>
+
+			<section class="legal-notice-page__section">
+				<h2>Imprint</h2>
+				<ul>
+					<li>[Student Names List]</li>
+					<li>[Address of the JOIN operator - e.g. one of the students]</li>
+					<li>[Postcode and city]</li>
+				</ul>
+			</section>
+
+			<section class="legal-notice-page__section">
+				<h2>Exploring the Board</h2>
+				<p>Email: [Email]</p>
+			</section>
+		</main>
+	</div>
+</section>

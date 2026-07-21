@@ -1,21 +1,69 @@
 <div class="task_card" (click)="cardClick.emit()">
-  <div class="task_card__type">User Story</div>
-  <h2 class="task_card__title">Kochwelt Page & Recipe Recommender</h2>
-  <p class="task_card__desc">Build start page with recipe recommendation...</p>
+  <div class="task_card__topbar">
+    <div class="task_card__type">
+      {{ task().category === 'technical_task' ? 'Technical Task' : 'User Story' }}
+    </div>
+
+    <div class="task_card__move_action">
+      <button
+        type="button"
+        class="task_card__move_btn"
+        [attr.aria-expanded]="moveMenuOpen()"
+        aria-haspopup="menu"
+        aria-label="Open move menu"
+        (click)="toggleMoveMenu($event)"
+      >
+        <img class="task_card__move_icon" src="assets/board/board-card/swap_horiz.svg" alt="" aria-hidden="true" />
+      </button>
+
+      @if (moveMenuOpen()) {
+        <div class="task_card__move_menu" role="menu" aria-label="Move task menu" (click)="$event.stopPropagation()">
+          <p class="task_card__move_menu_title">Move to</p>
+          <button
+            type="button"
+            class="task_card__move_menu_item"
+            role="menuitem"
+            (click)="requestMove($event, 'todo')"
+          >
+            <span aria-hidden="true">&uarr;</span>
+            <span>To-do</span>
+          </button>
+          <button
+            type="button"
+            class="task_card__move_menu_item"
+            role="menuitem"
+            (click)="requestMove($event, 'awaiting_feedback')"
+          >
+            <span aria-hidden="true">&darr;</span>
+            <span>Review</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <h2 class="task_card__title">{{ task().title }}</h2>
+  <p class="task_card__desc">{{ task().description }}</p>
+
   <div class="task_card__subtasks_wrapper">
     <div class="task_card__progress">
-      <div class="task_card__progress_fill" style="width: 50%"></div>
+      <div class="task_card__progress_fill" [style.width.%]="progressPercentage()"></div>
     </div>
-    <span class="task_card__subtasks_text">1/2 Subtasks</span>
+    <span class="task_card__subtasks_text">
+      {{ subtasks().filter((s) => s.isCompleted).length }}/{{ subtasks().length }} Subtasks
+    </span>
   </div>
+
   <div class="task_card__footer">
     <div class="task_card__badges">
-      <div class="task_card__badge" style="background-color: #ff7a00">AM</div>
-      <div class="task_card__badge" style="background-color: #1fd7c1">EM</div>
-      <div class="task_card__badge" style="background-color: #462f8a">MB</div>
+      @for (contact of assignedContacts(); track contact.id) {
+        <div class="task_card__badge" [style.background-color]="contact.badgeColor">
+          {{ contact.firstName.charAt(0) }}{{ contact.lastName.charAt(0) }}
+        </div>
+      }
     </div>
     <div class="task_card__priority">
-      <img src="assets/board/board-card/medium.svg" alt="priority icon">
+      <img [src]="'assets/board/board-card/' + task().priority + '.svg'" alt="priority icon" />
     </div>
   </div>
 </div>

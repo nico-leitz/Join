@@ -5,6 +5,7 @@ import { Board } from './features/board/pages/board/board';
 import { Contacts } from './features/contacts/pages/contacts/contacts';
 import { Login } from './features/auth/pages/login/login';
 import { Signup } from './features/auth/pages/signup/signup';
+import { Help } from './features/help/pages/help/help';
 import { LegalNotice } from './features/legal/legal-notice/legal-notice';
 import { PrivacyPolicy } from './features/legal/privacy-policy/privacy-policy';
 import { AddTaskPage } from './features/add-task/pages/add-task-page/add-task-page';
@@ -49,8 +50,7 @@ export const routes: Routes = [
   },
   {
     path: 'help',
-    redirectTo: 'summary',
-    pathMatch: 'full',
+    component: Help,
   },
   {
     path: '**',
