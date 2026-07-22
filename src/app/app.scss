@@ -1,9 +1,4 @@
-:host {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-}
+
 
 app-sidebar {
   flex-shrink: 0;
@@ -22,6 +17,10 @@ app-sidebar {
 app-header {
   z-index: 10;
   flex-shrink: 0;
+}
+
+app-add-task-page{
+  min-width: 100%;
 }
 
 .app-main {

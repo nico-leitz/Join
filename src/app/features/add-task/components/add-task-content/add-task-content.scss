@@ -1,0 +1,58 @@
+@use 'abstracts/breakpoints' as breakpoints;
+
+.add_task_component{
+    display: flex;
+    flex-direction: column;
+    gap: 8rem;
+    max-height: 80vh;
+}
+
+.add_task_field{
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    margin-inline: 10%;
+}
+
+.add_task_field_title{
+
+}
+
+.add_task_field_details{
+    display: flex;
+    justify-content: space-between;
+}
+
+.task_detail_section{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.divider{
+    min-height: 100%;
+    width: 1.2px;
+    background-color: rgba(104, 104, 104, 1);
+    margin-inline: 24px;
+}
+
+.priority_button_container{
+    display: flex;
+    gap: 16px;
+}
+
+.task_controls{
+    display: flex;
+    justify-content: space-between;
+    margin-inline: 10%;
+}
+
+.input{
+    border-radius: 6px;
+    border-width: 1px;
+    padding: 6px;
+}
+
+.title_input{
+    
+}

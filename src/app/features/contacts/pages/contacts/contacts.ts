@@ -13,6 +13,7 @@ import {
 } from '../../../../core/models/contact.model';
 import { Sidebar } from '../../../../layout/sidebar/sidebar';
 import { Header } from '../../../../layout/header/header';
+import { MobileNav } from "../../../../layout/mobile-nav/mobile-nav";
 
 @Component({
   selector: 'app-contacts',
