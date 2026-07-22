@@ -13,6 +13,7 @@ import {
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
+import { Router } from '@angular/router';
 import { Contact } from '../../../../core/models/contact.model';
 import { Subtask } from '../../../../core/models/subtask.model';
 import { TaskAssignmentRow } from '../../../../core/models/task-assignment.model';
@@ -28,6 +29,7 @@ import {
 } from '../../../../core/utils/task-filter.utils';
 import { Header } from '../../../../layout/header/header';
 import { Sidebar } from '../../../../layout/sidebar/sidebar';
+import { AddTaskDialog } from '../../../add-task/components/add-task-dialog/add-task-dialog';
 import {
   BoardCardsDialog,
   TaskDialogUpdate,
@@ -41,6 +43,7 @@ import { TaskCard } from '../../components/task-card/task-card';
     Header,
     Sidebar,
     TaskCard,
+    AddTaskDialog,
     BoardCardsDialog,
     CdkDropListGroup,
     CdkDropList,
@@ -73,6 +76,9 @@ export class Board implements OnInit {
   private readonly contactService =
     inject(ContactService);
 
+  private readonly router =
+    inject(Router);
+
   private horizontalScrollElement:
     HTMLElement | null = null;
 
@@ -85,13 +91,29 @@ export class Board implements OnInit {
   private horizontalPointerCaptured = false;
   private suppressNextCardClick = false;
 
-  readonly isDialogOpen = signal(false);
-  readonly isBoardLoading = signal(false);
-  readonly isBoardUpdating = signal(false);
-  readonly isDragging = signal(false);
+  readonly isDialogOpen =
+    signal(false);
 
-  readonly boardError = signal('');
-  readonly searchTerm = signal('');
+  readonly isAddTaskDialogOpen =
+    signal(false);
+
+  readonly addTaskStatus =
+    signal<TaskStatus>('todo');
+
+  readonly isBoardLoading =
+    signal(false);
+
+  readonly isBoardUpdating =
+    signal(false);
+
+  readonly isDragging =
+    signal(false);
+
+  readonly boardError =
+    signal('');
+
+  readonly searchTerm =
+    signal('');
 
   protected readonly isMobileViewport =
     signal(this.getIsMobileViewport());
@@ -236,6 +258,43 @@ export class Board implements OnInit {
     );
   }
 
+  openAddTaskDialog(
+    status: TaskStatus = 'todo',
+  ): void {
+    if (this.isBoardUpdating()) {
+      return;
+    }
+
+    if (this.isMobileViewport()) {
+      this.openMobileAddTaskPage(status);
+      return;
+    }
+
+    this.addTaskStatus.set(status);
+    this.isAddTaskDialogOpen.set(true);
+  }
+
+  closeAddTaskDialog(): void {
+    this.isAddTaskDialogOpen.set(false);
+    this.clearTaskSelectionState();
+  }
+
+  async handleTaskCreated():
+    Promise<void> {
+    this.isAddTaskDialogOpen.set(false);
+    this.boardError.set('');
+
+    try {
+      await this.refreshBoardRelations();
+    } catch {
+      this.boardError.set(
+        'Task was created, but the board could not be refreshed completely.',
+      );
+    } finally {
+      this.clearTaskSelectionState();
+    }
+  }
+
   openDialog(task: Task): void {
     if (this.suppressNextCardClick) {
       this.suppressNextCardClick = false;
@@ -272,18 +331,7 @@ export class Board implements OnInit {
     this.dialogTask.set(null);
     this.dialogSubtasks.set([]);
     this.dialogContacts.set([]);
-
-    this.taskService.selectedTask.set(
-      null,
-    );
-
-    this.taskService.selectedSubtasks.set(
-      [],
-    );
-
-    this.taskService.assignedContacts.set(
-      [],
-    );
+    this.clearTaskSelectionState();
   }
 
   handleSubtaskUpdated(
@@ -351,17 +399,7 @@ export class Board implements OnInit {
     this.boardError.set('');
 
     try {
-      const boardData =
-        await this.taskService
-          .loadAllBoardData();
-
-      this.allSubtasks.set(
-        boardData.subtasks,
-      );
-
-      this.allAssignments.set(
-        boardData.assignments,
-      );
+      await this.refreshBoardRelations();
     } catch (error) {
       console.error(
         'Task was saved, but board relations could not be refreshed.',
@@ -538,6 +576,19 @@ export class Board implements OnInit {
     );
   }
 
+  private openMobileAddTaskPage(
+    status: TaskStatus,
+  ): void {
+    void this.router.navigate(
+      ['/add-task'],
+      {
+        queryParams: {
+          status,
+        },
+      },
+    );
+  }
+
   private startHorizontalMouseScroll(
     event: PointerEvent,
   ): void {
@@ -634,6 +685,33 @@ export class Board implements OnInit {
     );
 
     this.allContacts.set(contacts);
+  }
+
+  private async refreshBoardRelations():
+    Promise<void> {
+    const boardData =
+      await this.taskService
+        .loadAllBoardData();
+
+    this.allSubtasks.set(
+      boardData.subtasks,
+    );
+
+    this.allAssignments.set(
+      boardData.assignments,
+    );
+  }
+
+  private clearTaskSelectionState(): void {
+    this.taskService.selectedTask.set(null);
+
+    this.taskService.selectedSubtasks.set(
+      [],
+    );
+
+    this.taskService.assignedContacts.set(
+      [],
+    );
   }
 
   private getContactsByIds(
