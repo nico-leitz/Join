@@ -17,9 +17,18 @@
             <form [formGroup]="taskForm" class="task_detail_section" (ngSubmit)="newTaskSubmit()">
                 <label>Priority</label>
                 <div class="priority_button_container">
-                    <button>Urgent</button>
-                    <button>Medium</button>
-                    <button>Low</button>
+                    <button class="priority_buttons_bright" type="button">
+                        Urgent
+                        <span class="priority_icon priority_urgent_icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="priority_buttons_colored" type="button">
+                        Medium
+                        <span class="priority_icon priority_medium_icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="priority_buttons_bright" type="button">
+                        Low
+                        <span class="priority_icon priority_low_icon" aria-hidden="true"></span>
+                    </button>
                 </div>
                 <label for="assignedTo">Assigned to</label>
                 <input id="assignedTo" type="text" formControlName= "assignedTo" class="input">
@@ -34,7 +43,7 @@
 
     <div class="task_controls">
         <div>
-            <p><span>*</span>This field is required</p>
+            <p class="required_legend"><span>*</span>This field is required</p>
         </div>
         <div>
             <button (click)="resetInputFields()">Clear</button>

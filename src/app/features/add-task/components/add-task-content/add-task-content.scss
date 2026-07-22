@@ -1,3 +1,4 @@
+@use 'abstracts/variables';
 @use 'abstracts/breakpoints' as breakpoints;
 
 .add_task_component{
@@ -5,6 +6,7 @@
     flex-direction: column;
     gap: 8rem;
     max-height: 80vh;
+    max-width: 1440px;
 }
 
 .add_task_field{
@@ -12,6 +14,7 @@
     flex-direction: column;
     max-width: 100%;
     margin-inline: 10%;
+    margin-block: 12%;
 }
 
 .add_task_field_title{
@@ -26,18 +29,20 @@
 .task_detail_section{
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
+    width: 100%;
 }
 
 .divider{
     min-height: 100%;
     width: 1.2px;
     background-color: rgba(104, 104, 104, 1);
-    margin-inline: 24px;
+    margin-inline: 64px;
 }
 
 .priority_button_container{
     display: flex;
+    justify-content: space-between;
     gap: 16px;
 }
 
@@ -47,12 +52,100 @@
     margin-inline: 10%;
 }
 
+#description{
+    height: 96px;
+}
+
 .input{
     border-radius: 6px;
     border-width: 1px;
     padding: 6px;
 }
 
+label{
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    font-size: 20px;
+
+    span{
+        color: var(--color-error);
+    }
+}
+
 .title_input{
     
+}
+
+.priority_button_container{
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.priority_buttons_bright,
+.priority_buttons_colored{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-family: var(--font-primary);
+    font-weight: 700;
+    font-size: 21px;
+    padding: 16px 18px;
+    border-style: none;
+    border-radius: 10px;
+    min-width: 124px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.priority_buttons_bright{
+    background-color: white;
+    color: var(--color-text);
+    box-shadow: 0px 2px 16px rgba(0, 0, 0, 0.1);
+}
+
+.priority_buttons_colored{
+    background-color: rgba(255, 168, 0, 1);
+    color: white;
+    box-shadow: 0 2px 12px rgba(255, 168, 0, 0.25);
+}
+
+.priority_icon{
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.priority_urgent_icon{
+    background-image: url('/assets/add-task/add-task-urgent.svg');
+}
+
+.priority_medium_icon{
+    background-image: url('/assets/add-task/priority-medium.svg');
+}
+
+.priority_low_icon{
+    background-image: url('/assets/add-task/priority-low.svg');
+}
+
+#dueDate{
+    cursor: text;
+}
+
+.required_legend{
+    font-family: var(--font-primary);
+    color: var(--color-text);
+    font-weight: 400;
+    font-size: 20px;
+
+    span{
+        font-size: 16px;
+        color: var(--color-error);
+    }
 }
