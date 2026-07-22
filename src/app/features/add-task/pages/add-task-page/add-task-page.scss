@@ -1,17 +1,119 @@
-@use 'abstracts/breakpoints' as breakpoints;
+@use 'abstracts/breakpoints' as bp;
 
-.add_task_page{
-    display: flex;
-    flex-direction: row;
-    width: 100%;
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.add_task_content{
-    width: 100%;
+.add-task-page {
+  --add-task-header-height:
+    var(--layout-mobile-header-height);
+
+  --add-task-bottom-nav-height:
+    var(--layout-mobile-bottom-nav-height);
+
+  position: relative;
+  display: flex;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-bg-main);
 }
 
-@media (max-width: breakpoints.$breakpoint-tablet-xl){
-    app-sidebar{
-        display: none;
-    }
+.add-task-page__right {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding-bottom:
+    var(--add-task-bottom-nav-height);
+}
+
+app-header {
+  z-index: 50;
+  display: block;
+  width: 100%;
+  height: var(--add-task-header-height);
+  flex-shrink: 0;
+}
+
+app-sidebar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: block;
+  width: 100%;
+  height: var(--add-task-bottom-nav-height);
+  flex-shrink: 0;
+}
+
+.add-task-page__content {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: var(--color-bg-main);
+}
+
+.add-task-page__content > app-add-task-content {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (
+  min-width:
+    #{bp.$breakpoint-tablet-xl + 1px}
+) {
+  .add-task-page {
+    --add-task-header-height:
+      var(--layout-header-height);
+
+    --add-task-bottom-nav-height: 0px;
+  }
+
+  .add-task-page__right {
+    padding-bottom: 0;
+  }
+
+  app-sidebar {
+    position: static;
+    display: block;
+    width: var(--contact-sidebar-width);
+    height: 100%;
+    flex: 0 0 var(--contact-sidebar-width);
+  }
+}
+
+@media (
+  orientation: landscape
+) and (
+  max-height:
+    bp.$breakpoint-landscape-height-md
+) and (
+  max-width:
+    bp.$breakpoint-landscape-width-lg
+) {
+  .add-task-page {
+    --add-task-header-height:
+      var(
+        --layout-mobile-landscape-header-height
+      );
+
+    --add-task-bottom-nav-height:
+      var(
+        --layout-mobile-landscape-bottom-nav-height
+      );
+  }
 }
