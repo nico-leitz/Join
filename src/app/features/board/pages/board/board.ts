@@ -28,7 +28,10 @@ import {
 } from '../../../../core/utils/task-filter.utils';
 import { Header } from '../../../../layout/header/header';
 import { Sidebar } from '../../../../layout/sidebar/sidebar';
-import { BoardCardsDialog } from '../../components/board-cards-dialog/board-cards-dialog';
+import {
+  BoardCardsDialog,
+  TaskDialogUpdate,
+} from '../../components/board-cards-dialog/board-cards-dialog';
 import { TaskCard } from '../../components/task-card/task-card';
 
 @Component({
@@ -47,31 +50,69 @@ import { TaskCard } from '../../components/task-card/task-card';
   styleUrl: './board.scss',
   host: {
     '(window:resize)': 'onWindowResize()',
+    '(pointerdown)':
+      'onHorizontalPointerDown($event)',
+    '(pointermove)':
+      'onHorizontalPointerMove($event)',
+    '(pointerup)':
+      'onHorizontalPointerEnd($event)',
+    '(pointercancel)':
+      'onHorizontalPointerEnd($event)',
   },
 })
 export class Board implements OnInit {
-  private readonly taskService = inject(TaskService);
-  private readonly contactService = inject(ContactService);
+  private readonly horizontalLayoutMaxWidth =
+    798;
+
+  private readonly horizontalMoveThreshold =
+    5;
+
+  private readonly taskService =
+    inject(TaskService);
+
+  private readonly contactService =
+    inject(ContactService);
+
+  private horizontalScrollElement:
+    HTMLElement | null = null;
+
+  private horizontalScrollPointerId:
+    number | null = null;
+
+  private horizontalScrollStartX = 0;
+  private horizontalScrollStartLeft = 0;
+  private horizontalScrollMoved = false;
+  private horizontalPointerCaptured = false;
+  private suppressNextCardClick = false;
 
   readonly isDialogOpen = signal(false);
   readonly isBoardLoading = signal(false);
   readonly isBoardUpdating = signal(false);
+  readonly isDragging = signal(false);
+
   readonly boardError = signal('');
   readonly searchTerm = signal('');
 
-  protected readonly isMobileViewport = signal(
-    this.getIsMobileViewport(),
-  );
+  protected readonly isMobileViewport =
+    signal(this.getIsMobileViewport());
 
-  readonly allSubtasks = signal<Subtask[]>([]);
+  readonly allSubtasks =
+    signal<Subtask[]>([]);
+
   readonly allAssignments =
     signal<TaskAssignmentRow[]>([]);
+
   readonly allContacts =
     this.contactService.allContacts;
 
-  readonly dialogTask = signal<Task | null>(null);
-  readonly dialogSubtasks = signal<Subtask[]>([]);
-  readonly dialogContacts = signal<Contact[]>([]);
+  readonly dialogTask =
+    signal<Task | null>(null);
+
+  readonly dialogSubtasks =
+    signal<Subtask[]>([]);
+
+  readonly dialogContacts =
+    signal<Contact[]>([]);
 
   readonly filteredTasks = computed(() => {
     return filterTasksBySearchTerm(
@@ -109,7 +150,9 @@ export class Board implements OnInit {
   });
 
   readonly isSearchActive = computed(() => {
-    return this.searchTerm().trim().length > 0;
+    return (
+      this.searchTerm().trim().length > 0
+    );
   });
 
   readonly isDragDisabled = computed(() => {
@@ -175,7 +218,8 @@ export class Board implements OnInit {
     taskId: string,
   ): Subtask[] {
     return (
-      this.subtasksByTaskId().get(taskId) ?? []
+      this.subtasksByTaskId().get(taskId) ??
+      []
     );
   }
 
@@ -183,12 +227,21 @@ export class Board implements OnInit {
     taskId: string,
   ): Contact[] {
     const contactIds =
-      this.contactIdsByTaskId().get(taskId) ?? [];
+      this.contactIdsByTaskId().get(
+        taskId,
+      ) ?? [];
 
-    return this.getContactsByIds(contactIds);
+    return this.getContactsByIds(
+      contactIds,
+    );
   }
 
   openDialog(task: Task): void {
+    if (this.suppressNextCardClick) {
+      this.suppressNextCardClick = false;
+      return;
+    }
+
     const subtasks =
       this.getSubtasksForTask(task.id);
 
@@ -199,10 +252,14 @@ export class Board implements OnInit {
     this.dialogSubtasks.set(subtasks);
     this.dialogContacts.set(contacts);
 
-    this.taskService.selectedTask.set(task);
+    this.taskService.selectedTask.set(
+      task,
+    );
+
     this.taskService.selectedSubtasks.set(
       subtasks,
     );
+
     this.taskService.assignedContacts.set(
       contacts,
     );
@@ -216,42 +273,61 @@ export class Board implements OnInit {
     this.dialogSubtasks.set([]);
     this.dialogContacts.set([]);
 
-    this.taskService.selectedTask.set(null);
-    this.taskService.selectedSubtasks.set([]);
-    this.taskService.assignedContacts.set([]);
+    this.taskService.selectedTask.set(
+      null,
+    );
+
+    this.taskService.selectedSubtasks.set(
+      [],
+    );
+
+    this.taskService.assignedContacts.set(
+      [],
+    );
   }
 
   handleSubtaskUpdated(
     updatedSubtask: Subtask,
   ): void {
-    this.allSubtasks.update((subtasks) => {
-      return replaceSubtask(
-        subtasks,
-        updatedSubtask,
-      );
-    });
+    this.allSubtasks.update(
+      (subtasks) => {
+        return replaceSubtask(
+          subtasks,
+          updatedSubtask,
+        );
+      },
+    );
 
-    this.dialogSubtasks.update((subtasks) => {
-      return replaceSubtask(
-        subtasks,
-        updatedSubtask,
-      );
-    });
+    this.dialogSubtasks.update(
+      (subtasks) => {
+        return replaceSubtask(
+          subtasks,
+          updatedSubtask,
+        );
+      },
+    );
   }
 
   handleTaskDeleted(taskId: string): void {
-    this.allSubtasks.update((subtasks) => {
-      return subtasks.filter((subtask) => {
-        return subtask.taskId !== taskId;
-      });
-    });
+    this.allSubtasks.update(
+      (subtasks) => {
+        return subtasks.filter(
+          (subtask) => {
+            return (
+              subtask.taskId !== taskId
+            );
+          },
+        );
+      },
+    );
 
     this.allAssignments.update(
       (assignments) => {
         return assignments.filter(
           (assignment) => {
             return (
-              assignment.task_id !== taskId
+              assignment.task_id !==
+              taskId
             );
           },
         );
@@ -259,10 +335,168 @@ export class Board implements OnInit {
     );
   }
 
+  async handleTaskUpdated(
+    update: TaskDialogUpdate,
+  ): Promise<void> {
+    this.dialogTask.set(update.task);
+
+    this.dialogSubtasks.set(
+      update.subtasks,
+    );
+
+    this.dialogContacts.set(
+      update.assignedContacts,
+    );
+
+    this.boardError.set('');
+
+    try {
+      const boardData =
+        await this.taskService
+          .loadAllBoardData();
+
+      this.allSubtasks.set(
+        boardData.subtasks,
+      );
+
+      this.allAssignments.set(
+        boardData.assignments,
+      );
+    } catch (error) {
+      console.error(
+        'Task was saved, but board relations could not be refreshed.',
+        error,
+      );
+
+      this.boardError.set(
+        'Task was saved, but the board could not be refreshed completely.',
+      );
+    }
+  }
+
+  protected startDragging(): void {
+    this.isDragging.set(true);
+  }
+
+  protected stopDragging(): void {
+    this.isDragging.set(false);
+  }
+
   protected onWindowResize(): void {
     this.isMobileViewport.set(
       this.getIsMobileViewport(),
     );
+
+    if (!this.isMobileViewport()) {
+      this.resetHorizontalScroll();
+    }
+  }
+
+  protected onHorizontalPointerDown(
+    event: PointerEvent,
+  ): void {
+    if (
+      !this.canStartHorizontalScroll(event)
+    ) {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (this.isInteractiveTarget(target)) {
+      return;
+    }
+
+    const scrollElement =
+      target.closest<HTMLElement>(
+        '.board__column_content',
+      );
+
+    if (
+      !scrollElement ||
+      scrollElement.scrollWidth <=
+        scrollElement.clientWidth
+    ) {
+      return;
+    }
+
+    this.horizontalScrollElement =
+      scrollElement;
+
+    this.horizontalScrollPointerId =
+      event.pointerId;
+
+    this.horizontalScrollStartX =
+      event.clientX;
+
+    this.horizontalScrollStartLeft =
+      scrollElement.scrollLeft;
+
+    this.horizontalScrollMoved = false;
+    this.horizontalPointerCaptured = false;
+  }
+
+  protected onHorizontalPointerMove(
+    event: PointerEvent,
+  ): void {
+    if (
+      !this.horizontalScrollElement ||
+      this.horizontalScrollPointerId !==
+        event.pointerId
+    ) {
+      return;
+    }
+
+    const distance =
+      event.clientX -
+      this.horizontalScrollStartX;
+
+    if (
+      !this.horizontalScrollMoved &&
+      Math.abs(distance) <
+        this.horizontalMoveThreshold
+    ) {
+      return;
+    }
+
+    if (!this.horizontalScrollMoved) {
+      this.startHorizontalMouseScroll(
+        event,
+      );
+    }
+
+    event.preventDefault();
+
+    this.horizontalScrollElement.scrollLeft =
+      this.horizontalScrollStartLeft -
+      distance;
+  }
+
+  protected onHorizontalPointerEnd(
+    event: PointerEvent,
+  ): void {
+    if (
+      !this.horizontalScrollElement ||
+      this.horizontalScrollPointerId !==
+        event.pointerId
+    ) {
+      return;
+    }
+
+    if (this.horizontalScrollMoved) {
+      this.suppressNextCardClick = true;
+
+      window.setTimeout(() => {
+        this.suppressNextCardClick = false;
+      });
+    }
+
+    this.releaseHorizontalPointer(event);
+    this.resetHorizontalScroll();
   }
 
   protected async moveTaskToStatus(
@@ -304,12 +538,91 @@ export class Board implements OnInit {
     );
   }
 
-  private async loadBoardContent(): Promise<void> {
+  private startHorizontalMouseScroll(
+    event: PointerEvent,
+  ): void {
+    if (!this.horizontalScrollElement) {
+      return;
+    }
+
+    this.horizontalScrollMoved = true;
+
+    this.horizontalScrollElement
+      .classList.add(
+        'board__column_content--mouse-dragging',
+      );
+
+    this.horizontalScrollElement
+      .setPointerCapture(event.pointerId);
+
+    this.horizontalPointerCaptured = true;
+  }
+
+  private canStartHorizontalScroll(
+    event: PointerEvent,
+  ): boolean {
+    return (
+      this.isMobileViewport() &&
+      event.pointerType === 'mouse' &&
+      event.button === 0 &&
+      !this.isDragging()
+    );
+  }
+
+  private isInteractiveTarget(
+    target: Element,
+  ): boolean {
+    return Boolean(
+      target.closest(
+        'button, input, select, textarea, a, label',
+      ),
+    );
+  }
+
+  private releaseHorizontalPointer(
+    event: PointerEvent,
+  ): void {
+    if (
+      !this.horizontalScrollElement ||
+      !this.horizontalPointerCaptured
+    ) {
+      return;
+    }
+
+    if (
+      this.horizontalScrollElement
+        .hasPointerCapture(event.pointerId)
+    ) {
+      this.horizontalScrollElement
+        .releasePointerCapture(
+          event.pointerId,
+        );
+    }
+  }
+
+  private resetHorizontalScroll(): void {
+    this.horizontalScrollElement
+      ?.classList.remove(
+        'board__column_content--mouse-dragging',
+      );
+
+    this.horizontalScrollElement = null;
+    this.horizontalScrollPointerId = null;
+    this.horizontalScrollStartX = 0;
+    this.horizontalScrollStartLeft = 0;
+    this.horizontalScrollMoved = false;
+    this.horizontalPointerCaptured = false;
+  }
+
+  private async loadBoardContent():
+    Promise<void> {
     const [, boardData, contacts] =
       await Promise.all([
         this.taskService.getTasks(),
-        this.taskService.loadAllBoardData(),
-        this.contactService.getContacts(),
+        this.taskService
+          .loadAllBoardData(),
+        this.contactService
+          .getContacts(),
       ]);
 
     this.allSubtasks.set(
@@ -334,7 +647,9 @@ export class Board implements OnInit {
         const contact =
           contactsById.get(contactId);
 
-        return contact ? [contact] : [];
+        return contact
+          ? [contact]
+          : [];
       },
     );
   }
@@ -427,7 +742,10 @@ export class Board implements OnInit {
 
     const normalizedTarget =
       this.normalizeColumnTasks(
-        [...targetTasks, movedTask],
+        [
+          ...targetTasks,
+          movedTask,
+        ],
         targetStatus,
       );
 
@@ -449,25 +767,32 @@ export class Board implements OnInit {
           task.id !== excludedTaskId
         );
       })
-      .sort((firstTask, secondTask) => {
-        return (
-          firstTask.sortOrder -
-          secondTask.sortOrder
-        );
-      });
+      .sort(
+        (
+          firstTask,
+          secondTask,
+        ) => {
+          return (
+            firstTask.sortOrder -
+            secondTask.sortOrder
+          );
+        },
+      );
   }
 
   private normalizeColumnTasks(
     tasks: Task[],
     status: TaskStatus,
   ): Task[] {
-    return tasks.map((task, index) => {
-      return {
-        ...task,
-        status,
-        sortOrder: index,
-      };
-    });
+    return tasks.map(
+      (task, index) => {
+        return {
+          ...task,
+          status,
+          sortOrder: index,
+        };
+      },
+    );
   }
 
   private getChangedTasks(
@@ -477,16 +802,21 @@ export class Board implements OnInit {
       this.taskService
         .allTasks()
         .map((task) => {
-          return [task.id, task];
+          return [
+            task.id,
+            task,
+          ];
         }),
     );
 
-    return updatedTasks.filter((task) => {
-      return this.hasTaskChanged(
-        currentTasks.get(task.id),
-        task,
-      );
-    });
+    return updatedTasks.filter(
+      (task) => {
+        return this.hasTaskChanged(
+          currentTasks.get(task.id),
+          task,
+        );
+      },
+    );
   }
 
   private hasTaskChanged(
@@ -515,7 +845,9 @@ export class Board implements OnInit {
     this.boardError.set('');
 
     try {
-      await this.updateTasks(updatedTasks);
+      await this.updateTasks(
+        updatedTasks,
+      );
     } catch (error) {
       await this.handleTaskUpdateError(
         error,
@@ -530,13 +862,15 @@ export class Board implements OnInit {
   ): Promise<void> {
     await Promise.all(
       updatedTasks.map((task) => {
-        return this.taskService.updateTask(
-          task.id,
-          {
-            status: task.status,
-            sortOrder: task.sortOrder,
-          },
-        );
+        return this.taskService
+          .updateTask(
+            task.id,
+            {
+              status: task.status,
+              sortOrder:
+                task.sortOrder,
+            },
+          );
       }),
     );
   }
@@ -572,7 +906,8 @@ export class Board implements OnInit {
   private getIsMobileViewport(): boolean {
     return (
       typeof window !== 'undefined' &&
-      window.innerWidth <= 640
+      window.innerWidth <=
+        this.horizontalLayoutMaxWidth
     );
   }
 }
@@ -585,11 +920,16 @@ function groupSubtasksByTaskId(
 
   for (const subtask of subtasks) {
     const taskSubtasks =
-      groupedSubtasks.get(subtask.taskId) ?? [];
+      groupedSubtasks.get(
+        subtask.taskId,
+      ) ?? [];
 
     groupedSubtasks.set(
       subtask.taskId,
-      [...taskSubtasks, subtask],
+      [
+        ...taskSubtasks,
+        subtask,
+      ],
     );
   }
 
@@ -638,8 +978,10 @@ function replaceSubtask(
   updatedSubtask: Subtask,
 ): Subtask[] {
   return subtasks.map((subtask) => {
-    return subtask.id ===
+    return (
+      subtask.id ===
       updatedSubtask.id
+    )
       ? updatedSubtask
       : subtask;
   });

@@ -13,8 +13,12 @@
         [task]="selectedTask"
         [subtasks]="dialogSubtasks()"
         [assignedContacts]="dialogContacts()"
+        [availableContacts]="allContacts()"
         (subtaskUpdated)="
           handleSubtaskUpdated($event)
+        "
+        (taskUpdated)="
+          handleTaskUpdated($event)
         "
         (taskDeleted)="
           handleTaskDeleted($event)
@@ -59,7 +63,8 @@
               (click)="searchInput.focus()"
             >
               <img
-                src="assets/img/search-icon.svg"
+                class="board__search_icon"
+                src="assets/board/board-card/search_icon.svg"
                 alt=""
                 aria-hidden="true"
               />
@@ -74,11 +79,12 @@
               Add task
             </span>
 
-            <img
-              src="assets/img/add-white.svg"
-              alt=""
+            <span
+              class="board__add_icon"
               aria-hidden="true"
-            />
+            >
+              +
+            </span>
           </button>
         </div>
       </header>
@@ -119,7 +125,8 @@
                 aria-label="Add new task to To do"
               >
                 <img
-                  src="assets/img/plus-button.svg"
+                  class="board__column_add_icon"
+                  src="assets/board/board-card/plus-button-mobile.svg"
                   alt=""
                   aria-hidden="true"
                 />
@@ -159,11 +166,27 @@
                     [assignedContacts]="
                       getContactsForTask(task.id)
                     "
+                    (cdkDragStarted)="
+                      startDragging()
+                    "
+                    (cdkDragEnded)="
+                      stopDragging()
+                    "
                     (cardClick)="openDialog(task)"
                     (moveRequested)="
-                      moveTaskToStatus(task, $event)
+                      moveTaskToStatus(
+                        task,
+                        $event
+                      )
                     "
                   ></app-task-card>
+                }
+
+                @if (isDragging()) {
+                  <div
+                    class="board__drag_drop_zone"
+                    aria-hidden="true"
+                  ></div>
                 }
               }
             </div>
@@ -187,7 +210,8 @@
                 aria-label="Add new task to In progress"
               >
                 <img
-                  src="assets/img/plus-button.svg"
+                  class="board__column_add_icon"
+                  src="assets/board/board-card/plus-button-mobile.svg"
                   alt=""
                   aria-hidden="true"
                 />
@@ -227,11 +251,27 @@
                     [assignedContacts]="
                       getContactsForTask(task.id)
                     "
+                    (cdkDragStarted)="
+                      startDragging()
+                    "
+                    (cdkDragEnded)="
+                      stopDragging()
+                    "
                     (cardClick)="openDialog(task)"
                     (moveRequested)="
-                      moveTaskToStatus(task, $event)
+                      moveTaskToStatus(
+                        task,
+                        $event
+                      )
                     "
                   ></app-task-card>
+                }
+
+                @if (isDragging()) {
+                  <div
+                    class="board__drag_drop_zone"
+                    aria-hidden="true"
+                  ></div>
                 }
               }
             </div>
@@ -255,7 +295,8 @@
                 aria-label="Add new task to Await feedback"
               >
                 <img
-                  src="assets/img/plus-button.svg"
+                  class="board__column_add_icon"
+                  src="assets/board/board-card/plus-button-mobile.svg"
                   alt=""
                   aria-hidden="true"
                 />
@@ -299,11 +340,27 @@
                     [assignedContacts]="
                       getContactsForTask(task.id)
                     "
+                    (cdkDragStarted)="
+                      startDragging()
+                    "
+                    (cdkDragEnded)="
+                      stopDragging()
+                    "
                     (cardClick)="openDialog(task)"
                     (moveRequested)="
-                      moveTaskToStatus(task, $event)
+                      moveTaskToStatus(
+                        task,
+                        $event
+                      )
                     "
                   ></app-task-card>
+                }
+
+                @if (isDragging()) {
+                  <div
+                    class="board__drag_drop_zone"
+                    aria-hidden="true"
+                  ></div>
                 }
               }
             </div>
@@ -355,11 +412,27 @@
                     [assignedContacts]="
                       getContactsForTask(task.id)
                     "
+                    (cdkDragStarted)="
+                      startDragging()
+                    "
+                    (cdkDragEnded)="
+                      stopDragging()
+                    "
                     (cardClick)="openDialog(task)"
                     (moveRequested)="
-                      moveTaskToStatus(task, $event)
+                      moveTaskToStatus(
+                        task,
+                        $event
+                      )
                     "
                   ></app-task-card>
+                }
+
+                @if (isDragging()) {
+                  <div
+                    class="board__drag_drop_zone"
+                    aria-hidden="true"
+                  ></div>
                 }
               }
             </div>

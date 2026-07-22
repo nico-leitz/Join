@@ -28,7 +28,8 @@
     'Inter',
     sans-serif
   );
-  cursor: pointer;
+  cursor: grab;
+  transform-origin: center;
   transition:
     transform
     var(
@@ -40,6 +41,10 @@
       --transition-fast,
       0.2s ease-in-out
     );
+
+  &:active {
+    cursor: grabbing;
+  }
 
   &:hover {
     transform: translateY(-0.2rem);
@@ -63,7 +68,9 @@
 
   &__type {
     width: fit-content;
+    max-width: 100%;
     padding: 0.25rem 1rem;
+    overflow: hidden;
     border-radius: var(
       --radius-sm,
       0.5rem
@@ -76,6 +83,8 @@
       --font-size-md,
       1rem
     );
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     &--technical {
       background-color: #1fd7c1;
@@ -202,12 +211,14 @@
       center
     );
 
+    min-width: 0;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
   }
 
   &__progress {
     height: 0.5rem;
+    min-width: 0;
     flex-grow: 1;
     overflow: hidden;
     border-radius: var(
@@ -248,6 +259,7 @@
       --font-size-xs,
       0.75rem
     );
+    white-space: nowrap;
   }
 
   &__footer {
@@ -257,6 +269,7 @@
       center
     );
 
+    min-width: 0;
     margin-top: auto;
   }
 
@@ -266,6 +279,8 @@
       flex-start,
       center
     );
+
+    min-width: 0;
   }
 
   &__badge {
@@ -277,6 +292,7 @@
 
     width: 2rem;
     height: 2rem;
+    flex-shrink: 0;
     border: 0.125rem solid var(
       --color-bg-light,
       #ffffff
@@ -303,6 +319,8 @@
       center
     );
 
+    flex-shrink: 0;
+
     img {
       width: 1.25rem;
       height: 1.25rem;
@@ -316,27 +334,14 @@
     calc(#{bp.$breakpoint-tablet-xl} + 1px)
 ) {
   .task_card {
-    width: 252px;
+    width: 100%;
     max-width: 252px;
   }
 }
 
 @media (
-  min-width:
-    calc(#{bp.$breakpoint-mobile-l} + 1px)
-) and (
   max-width:
     bp.$breakpoint-tablet-xl
-) {
-  .task_card {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-@media (
-  max-width:
-    bp.$breakpoint-mobile-l
 ) {
   .task_card {
     width: 252px;
@@ -345,5 +350,60 @@
     &__move_action {
       display: block;
     }
+  }
+}
+
+:host(.cdk-drag-preview) {
+  display: block;
+  overflow: visible !important;
+  pointer-events: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .task_card {
+    overflow: hidden;
+    cursor: grabbing;
+    animation:
+      task-card-drag-pickup
+      180ms
+      cubic-bezier(
+        0.2,
+        0.8,
+        0.2,
+        1
+      )
+      forwards;
+    box-shadow:
+      0 16px 32px
+        rgba(0, 0, 0, 0.2),
+      0 6px 12px
+        rgba(0, 0, 0, 0.12);
+    transition: none;
+  }
+}
+
+@keyframes task-card-drag-pickup {
+  0% {
+    transform:
+      rotate(0deg)
+      scale(1);
+  }
+
+  65% {
+    transform:
+      rotate(5deg)
+      scale(1.035);
+  }
+
+  100% {
+    transform:
+      rotate(4deg)
+      scale(1.025);
   }
 }

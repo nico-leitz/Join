@@ -67,6 +67,7 @@ app-header {
 app-task-card {
   display: block;
   width: 100%;
+  min-width: 0;
   height: max-content;
   margin: 0;
 }
@@ -141,7 +142,7 @@ app-task-card {
 
     width: 19.5rem;
     height: 3rem;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
     border: 1px solid var(
       --color-border-main,
       #a8a8a8
@@ -159,6 +160,7 @@ app-task-card {
 
   &__search_input {
     width: 100%;
+    min-width: 0;
     flex-grow: 1;
     border: none;
     outline: none;
@@ -173,7 +175,7 @@ app-task-card {
   &__search_divider {
     width: 1px;
     height: 1.875rem;
-    margin: 0 1rem;
+    margin: 0 0.5rem 0 1rem;
     background-color: #d1d1d1;
   }
 
@@ -186,6 +188,36 @@ app-task-card {
     border: none;
     background: none;
     cursor: pointer;
+  }
+
+  &__search_btn {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border-radius: 45px;
+    opacity: 1;
+    transition:
+      background-color
+      120ms ease;
+
+    &:hover,
+    &:focus-visible {
+      background-color: #eeeeee;
+      outline: none;
+    }
+
+    &:active {
+      background-color: #eeeeee;
+      transition-duration: 0ms;
+    }
+  }
+
+  &__search_icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    pointer-events: none;
   }
 
   &__add_btn {
@@ -214,6 +246,16 @@ app-task-card {
     font-size: 1.25rem;
     font-weight: 700;
     cursor: pointer;
+  }
+
+  &__add_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 1;
   }
 
   &__loading,
@@ -276,15 +318,26 @@ app-task-card {
     flex-shrink: 0;
   }
 
+  &__column_add_icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
   &__column_content {
     @include mx.flexbox(column);
 
+    min-width: 0;
     min-height: 20rem;
     flex: 1;
     gap: 1rem;
     padding: 0.5rem 0.5rem 2rem;
     overflow-x: hidden;
     overflow-y: auto;
+    transition:
+      background-color
+      180ms ease;
 
     &::-webkit-scrollbar {
       width: 6px;
@@ -302,11 +355,49 @@ app-task-card {
     &:hover::-webkit-scrollbar-thumb {
       background-color: #a8a8a8;
     }
+
+    &.cdk-drop-list-dragging {
+      app-task-card:not(
+        .cdk-drag-placeholder
+      ) {
+        transition:
+          transform
+          250ms
+          cubic-bezier(
+            0,
+            0,
+            0.2,
+            1
+          );
+      }
+    }
+
+    &.cdk-drop-list-receiving {
+      border-radius: 20px;
+      background-color:
+        rgba(41, 171, 226, 0.04);
+    }
+  }
+
+  &__drag_drop_zone {
+    width: 100%;
+    max-width: 252px;
+    min-height: 160px;
+    flex: 0 0 160px;
+    border: 1px dashed #a8a8a8;
+    border-radius: 24px;
+    box-sizing: border-box;
+    background-color: transparent;
+    pointer-events: none;
+    animation:
+      board-drop-zone-fade-in
+      160ms ease-out both;
   }
 
   &__no_tasks {
     display: flex;
-    height: 4.5rem;
+    width: calc(100% - 1rem);
+    min-height: 4.5rem;
     align-items: center;
     justify-content: center;
     margin: 0.5rem;
@@ -315,6 +406,7 @@ app-task-card {
       --radius-md,
       0.625rem
     );
+    box-sizing: border-box;
     background-color: #f1f1f1;
     color: #a8a8a8;
     font-size: 1rem;
@@ -348,6 +440,38 @@ app-task-card {
 
   .board-page__right {
     padding-bottom: 0;
+  }
+}
+
+@media (
+  min-width:
+    calc(#{bp.$breakpoint-tablet-xl} + 1px)
+) and (
+  max-width:
+    1440px
+) {
+  .board {
+    padding: 3rem 2rem;
+
+    &__header {
+      margin-bottom: 2rem;
+    }
+
+    &__controls {
+      gap: 1rem;
+    }
+
+    &__search_wrapper {
+      width: 16rem;
+    }
+
+    &__grid {
+      gap: 1rem;
+    }
+
+    &__column_content {
+      padding-inline: 0.25rem;
+    }
   }
 }
 
@@ -392,23 +516,90 @@ app-task-card {
     }
 
     &__grid {
+      width: 100%;
       height: auto;
       flex: 0 0 auto;
       grid-template-columns: 1fr;
-      gap: 2rem;
+      gap: 1.5rem;
       overflow: visible;
     }
 
     &__column {
+      width: 100%;
+      min-width: 0;
       height: auto;
+      gap: 0.5rem;
+    }
+
+    &__column_header {
+      width: 100%;
+      padding-inline: 0;
+      box-sizing: border-box;
     }
 
     &__column_content {
-      min-height: 8rem;
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
+      flex: 0 0 auto;
+      flex-direction: row;
       align-items: flex-start;
-      gap: 1.5rem;
-      padding: 1rem 0;
-      overflow: visible;
+      gap: 1rem;
+      padding: 0.5rem 0 0.75rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      cursor: grab;
+      scroll-behavior: smooth;
+      scroll-padding-inline: 0;
+      scroll-snap-type: x proximity;
+      overscroll-behavior-inline: contain;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      -webkit-overflow-scrolling: touch;
+
+      &::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+
+      &--mouse-dragging {
+        cursor: grabbing;
+        scroll-behavior: auto;
+        scroll-snap-type: none;
+        user-select: none;
+      }
+
+      app-task-card {
+        width: 252px;
+        min-width: 252px;
+        max-width: 252px;
+        flex: 0 0 252px;
+        scroll-snap-align: start;
+      }
+    }
+
+    &__no_tasks {
+      width: 100%;
+      min-width: 100%;
+      max-width: none;
+      min-height: 4.5rem;
+      flex: 0 0 100%;
+      margin: 0;
+      align-self: stretch;
+    }
+
+    &__drag_drop_zone {
+      width: 100%;
+      min-width: 100%;
+      max-width: none;
+      min-height: 4.5rem;
+      flex: 0 0 100%;
+      align-self: stretch;
+      border-radius: var(
+        --radius-md,
+        0.625rem
+      );
     }
   }
 }
@@ -423,6 +614,29 @@ app-task-card {
 
   .board {
     padding: 16px 12px;
+
+    &__column_content {
+      gap: 0.75rem;
+
+      app-task-card {
+        width: min(
+          252px,
+          calc(100vw - 40px)
+        );
+        min-width: min(
+          252px,
+          calc(100vw - 40px)
+        );
+        max-width: min(
+          252px,
+          calc(100vw - 40px)
+        );
+        flex-basis: min(
+          252px,
+          calc(100vw - 40px)
+        );
+      }
+    }
   }
 }
 
@@ -450,17 +664,20 @@ app-task-card {
 .cdk-drag-preview {
   box-sizing: border-box;
   margin: 0;
+  overflow: visible !important;
   border-radius: var(
     --radius-lg,
     1.5rem
   );
-  box-shadow:
-    0 5px 5px -3px
-      rgba(0, 0, 0, 0.2),
-    0 8px 10px 1px
-      rgba(0, 0, 0, 0.14),
-    0 3px 14px 2px
-      rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 .cdk-drag-placeholder {
@@ -471,5 +688,22 @@ app-task-card {
   transition:
     transform
     250ms
-    cubic-bezier(0, 0, 0.2, 1);
+    cubic-bezier(
+      0,
+      0,
+      0.2,
+      1
+    );
+}
+
+@keyframes board-drop-zone-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
