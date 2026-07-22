@@ -37,7 +37,6 @@ export class AddTaskContent {
   resetInputFields(){
     this.taskForm.reset()
   }
-
   
 }
 
