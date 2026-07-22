@@ -92,10 +92,66 @@
     background-image: url('/assets/add-task/description_icon.svg');
 }
 
+.input_icon__due_date{
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    background-image: url('/assets/add-task/due_date_icon.svg');
+    height: 18px;
+}
+
+input[type="date"]{
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-clear-button,
+input[type="date"]::-webkit-inner-spin-button {
+    display: none;
+}
+
 .input{
     border-radius: 6px;
     border-width: 1px;
     padding: 6px;
+}
+
+.category_input_wrapper{
+    position: relative;
+}
+
+.category_select_menu{
+    position: absolute;
+    z-index: 10;
+    top: calc(100% - 1px);
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-top: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.category_select_option{
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-primary);
+    font-size: 18px;
+    color: var(--color-text);
+}
+
+.category_select_option:hover,
+.category_select_option:focus{
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 label{
@@ -134,12 +190,16 @@ label{
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     background-color: white;
-    color: var(--color-text);
+    color: black;
     box-shadow: 0px 2px 16px rgba(0, 0, 0, 0.1);
 }
 
 .priority_button--selected{
     color: white;
+}
+
+.priority_button--selected .priority_icon{
+    filter: brightness(0) saturate(100%) invert(1);
 }
 
 .priority_button--urgent.priority_button--selected{
@@ -155,6 +215,18 @@ label{
 .priority_button--low.priority_button--selected{
     background-color: #3dbe57;
     box-shadow: 0 2px 12px rgba(46, 139, 64, 0.25);
+}
+
+.priority_button:not(.priority_button--selected) .priority_urgent_icon{
+    filter: none;
+}
+
+.priority_button:not(.priority_button--selected) .priority_medium_icon{
+    filter: none;
+}
+
+.priority_button:not(.priority_button--selected) .priority_low_icon{
+    filter: none;
 }
 
 .priority_button:hover{
@@ -188,11 +260,11 @@ label{
 }
 
 #assignedTo{
-
+    cursor: pointer;
 }
 
 #category{
-
+    cursor: pointer;
 }
 
 .required_legend{

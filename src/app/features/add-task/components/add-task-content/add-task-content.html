@@ -11,7 +11,10 @@
                     <span class="input_icon input_icon__description" aria-hidden="true"></span>
                 </div>
                 <label for="dueDate">Due date<span>*</span></label>
-                <input id="dueDate" type="date" formControlName="dueDate" class="input">
+                <div class="input_icon_wrapper">
+                    <input id="dueDate" type="date" formControlName="dueDate" class="input input_with_icon">
+                    <span class="input_icon input_icon__due_date" aria-hidden="true"></span>
+                </div>
                 <p>{{taskForm.get("title")?.valid}}</p>
                 <p>{{"date:" + taskForm.get("dueDate")?.valid}}</p>
                 <p>{{taskForm.valid}}</p>
@@ -48,9 +51,14 @@
                     <span class="input_icon input_icon__dropdown" aria-hidden="true"></span>
                 </div>
                 <label for="category">Category<span>*</span></label>
-                <div class="input_icon_wrapper">
-                    <input id="category" type="text" formControlName="category" class="input input_with_icon select_input" placeholder="Select task category">
+                <div class="input_icon_wrapper category_input_wrapper" #categoryWrapper (click)="toggleCategoryMenu()">
+                    <input id="category" type="text" readonly [value]="categoryDisplayValue" class="input input_with_icon select_input" placeholder="Select task category">
                     <span class="input_icon input_icon__dropdown" aria-hidden="true"></span>
+                    <div class="category_select_menu" *ngIf="categoryMenuOpen">
+                        <button class="category_select_option" type="button" *ngFor="let option of categoryOptions" (click)="selectCategory(option.value, $event)">
+                            {{ option.label }}
+                        </button>
+                    </div>
                 </div>
                 <label for="subtasks">Subtasks</label>
                 <input id="subtasks" type="text" formControlName="subtasks" class="input" placeholder="Add new Subtask">

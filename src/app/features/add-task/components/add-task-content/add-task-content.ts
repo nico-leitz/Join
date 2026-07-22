@@ -1,15 +1,24 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-add-task-content',
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './add-task-content.html',
   styleUrl: './add-task-content.scss',
 })
 export class AddTaskContent {
 
+  @ViewChild('categoryWrapper', { read: ElementRef })
+  categoryWrapper?: ElementRef<HTMLElement>;
+
   selectedPriority: 'urgent' | 'medium' | 'low' = 'medium';
+  categoryMenuOpen = false;
+  categoryOptions = [
+    { value: 'technical_task', label: 'Technical Task' },
+    { value: 'user_story', label: 'User Story' },
+  ];
 
   taskForm = new FormGroup({
     title : new FormControl('',{
@@ -33,6 +42,28 @@ export class AddTaskContent {
     priority:new FormControl('medium'),
   });
 
+  get categoryDisplayValue(): string {
+    const categoryValue = this.taskForm.controls.category.value;
+    return this.categoryOptions.find(option => option.value === categoryValue)?.label || '';
+  }
+
+  toggleCategoryMenu(): void {
+    this.categoryMenuOpen = !this.categoryMenuOpen;
+  }
+
+  selectCategory(value: string, event: Event): void {
+    event.stopPropagation();
+    this.taskForm.controls.category.setValue(value);
+    this.categoryMenuOpen = false;
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  closeCategoryMenu(target: EventTarget | null): void {
+    if (target instanceof HTMLElement && !this.categoryWrapper?.nativeElement.contains(target)) {
+      this.categoryMenuOpen = false;
+    }
+  }
+
   setPriority(priority: 'urgent' | 'medium' | 'low'){
     this.selectedPriority = priority;
     this.taskForm.controls.priority.setValue(priority);
@@ -45,6 +76,7 @@ export class AddTaskContent {
   resetInputFields(){
     this.taskForm.reset({ priority: 'medium' });
     this.selectedPriority = 'medium';
+    this.categoryMenuOpen = false;
   }
   
 }
