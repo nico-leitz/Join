@@ -3,45 +3,103 @@
 
 .task_card {
   @include mx.flexbox(column);
+
   position: relative;
   width: 100%;
-  height: 100%;
+  max-width: 16rem;
+  padding: 1.1rem;
+  border: 0;
+  border-radius: var(
+    --radius-lg,
+    1.5rem
+  );
   box-sizing: border-box;
-  background: var(--color-bg-light, #ffffff);
-  border-radius: var(--radius-lg, 1.5rem);
-  box-shadow: var(--shadow-card, 0px 0px 0.625rem 0.2rem rgba(0, 0, 0, 0.04));
-  padding: 1rem;
-  font-family: var(--font-primary, 'Inter', sans-serif);
+  background: var(
+    --color-bg-light,
+    #ffffff
+  );
+  box-shadow: var(
+    --shadow-card,
+    0 0 0.625rem 0.2rem
+      rgba(0, 0, 0, 0.04)
+  );
+  font-family: var(
+    --font-primary,
+    'Inter',
+    sans-serif
+  );
+  cursor: grab;
+  transform-origin: center;
+  transition:
+    transform
+    var(
+      --transition-fast,
+      0.2s ease-in-out
+    ),
+    box-shadow
+    var(
+      --transition-fast,
+      0.2s ease-in-out
+    );
 
-  transition: transform var(--transition-fast, 0.2s ease-in-out);
-
-  cursor: pointer;
+  &:active {
+    cursor: grabbing;
+  }
 
   &:hover {
     transform: translateY(-0.2rem);
   }
 
+  &:focus-visible {
+    outline: 2px solid #29abe2;
+    outline-offset: 3px;
+  }
+
   &__topbar {
-    @include mx.flexbox(row, space-between, flex-start);
+    @include mx.flexbox(
+      row,
+      space-between,
+      flex-start
+    );
+
     gap: 0.75rem;
-    margin-bottom: 0.9rem;
+    margin-bottom: 1.25rem;
   }
 
   &__type {
-    background-color: var(--color-primary, #0038ff);
-    color: var(--color-text-light, #ffffff);
-    border-radius: var(--radius-sm, 0.5rem);
-    font-size: 0.875rem;
-    line-height: 1.2;
-    padding: 0.25rem 0.75rem;
     width: fit-content;
+    max-width: 100%;
+    padding: 0.25rem 1rem;
+    overflow: hidden;
+    border-radius: var(
+      --radius-sm,
+      0.5rem
+    );
+    color: var(
+      --color-text-light,
+      #ffffff
+    );
+    font-size: var(
+      --font-size-md,
+      1rem
+    );
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &--technical {
+      background-color: #1fd7c1;
+    }
+
+    &--user-story {
+      background-color: #0038ff;
+    }
   }
 
   &__move_action {
     position: relative;
     display: none;
-    margin-left: auto;
     flex-shrink: 0;
+    margin-left: auto;
   }
 
   &__move_btn {
@@ -53,9 +111,16 @@
     padding: 0;
     border: 1px solid #2a3647;
     border-radius: 8px;
-    background: #ffffff;
+    background-color: #ffffff;
     color: #2a3647;
     cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: #29abe2;
+      color: #29abe2;
+      outline: none;
+    }
   }
 
   &__move_icon {
@@ -76,7 +141,9 @@
     padding: 10px;
     border-radius: 20px 0 20px 20px;
     background-color: #2a3647;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.16);
+    box-shadow:
+      0 4px 8px 0
+      rgba(0, 0, 0, 0.16);
   }
 
   &__move_menu_title {
@@ -98,72 +165,147 @@
     line-height: 1.2;
     text-align: left;
     cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      color: #29abe2;
+      outline: none;
+    }
   }
 
   &__title {
-    margin: 0;
-    margin-bottom: 0.25rem;
-    color: var(--color-text-main, #2a3647);
-    font-size: 16px;
-    line-height: 1.2;
+    margin: 0 0 0.5rem;
+    color: var(
+      --color-text-main,
+      #2a3647
+    );
+    font-size: var(
+      --font-size-md,
+      1rem
+    );
     font-weight: 700;
+    overflow-wrap: anywhere;
   }
 
   &__desc {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    margin: 0;
-    margin-bottom: 1rem;
-    color: var(--color-text-muted, #a8a8a8);
-    font-size: 0.875rem;
-    line-height: 1.2;
+    margin: 0 0 1.5rem;
     overflow: hidden;
+    color: var(
+      --color-text-muted,
+      #a8a8a8
+    );
+    font-size: var(
+      --font-size-md,
+      1rem
+    );
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   &__subtasks_wrapper {
-    @include mx.flexbox(row, space-between, center);
-    margin-bottom: 1rem;
+    @include mx.flexbox(
+      row,
+      space-between,
+      center
+    );
+
+    min-width: 0;
     gap: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
   &__progress {
-    flex-grow: 1;
     height: 0.5rem;
-    background-color: var(--color-border-light, #f4f4f4);
-    border-radius: var(--radius-sm, 0.5rem);
+    min-width: 0;
+    flex-grow: 1;
     overflow: hidden;
+    border-radius: var(
+      --radius-sm,
+      0.5rem
+    );
+    background-color: var(
+      --color-border-light,
+      #f4f4f4
+    );
   }
 
   &__progress_fill {
     height: 100%;
-    background-color: var(--color-secondary, #4589ff);
-    border-radius: var(--radius-sm, 0.5rem);
-    transition: width var(--transition-fast, 0.3s ease);
+    border-radius: var(
+      --radius-sm,
+      0.5rem
+    );
+    background-color: var(
+      --color-secondary,
+      #4589ff
+    );
+    transition:
+      width
+      var(
+        --transition-fast,
+        0.3s ease
+      );
   }
 
   &__subtasks_text {
-    font-size: var(--font-size-xs, 0.75rem);
-    color: var(--color-text-main, #000000);
+    flex-shrink: 0;
+    color: var(
+      --color-text-main,
+      #000000
+    );
+    font-size: var(
+      --font-size-xs,
+      0.75rem
+    );
+    white-space: nowrap;
   }
 
   &__footer {
-    @include mx.flexbox(row, space-between, center);
+    @include mx.flexbox(
+      row,
+      space-between,
+      center
+    );
+
+    min-width: 0;
     margin-top: auto;
   }
 
   &__badges {
-    @include mx.flexbox();
+    @include mx.flexbox(
+      row,
+      flex-start,
+      center
+    );
+
+    min-width: 0;
   }
 
   &__badge {
-    @include mx.flexbox(row, center, center);
+    @include mx.flexbox(
+      row,
+      center,
+      center
+    );
+
     width: 2rem;
     height: 2rem;
+    flex-shrink: 0;
+    border: 0.125rem solid var(
+      --color-bg-light,
+      #ffffff
+    );
     border-radius: 50%;
-    color: var(--color-text-light, #ffffff);
-    font-size: var(--font-size-sm, 0.75rem);
-    border: 0.125rem solid var(--color-bg-light, #ffffff);
+    color: var(
+      --color-text-light,
+      #ffffff
+    );
+    font-size: var(
+      --font-size-sm,
+      0.75rem
+    );
 
     &:not(:first-child) {
       margin-left: -0.5rem;
@@ -171,26 +313,36 @@
   }
 
   &__priority {
-    @include mx.flexbox(row, center, center);
+    @include mx.flexbox(
+      row,
+      center,
+      center
+    );
+
+    flex-shrink: 0;
+
+    img {
+      width: 1.25rem;
+      height: 1.25rem;
+      object-fit: contain;
+    }
   }
 }
 
-@media (min-width: calc(#{bp.$breakpoint-tablet-xl} + 1px)) {
+@media (
+  min-width:
+    calc(#{bp.$breakpoint-tablet-xl} + 1px)
+) {
   .task_card {
-    width: 252px;
-    height: 244px;
+    width: 100%;
     max-width: 252px;
   }
 }
 
-@media (min-width: calc(#{bp.$breakpoint-mobile-l} + 1px)) and (max-width: bp.$breakpoint-tablet-xl) {
-  .task_card {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-@media (max-width: bp.$breakpoint-mobile-l) {
+@media (
+  max-width:
+    bp.$breakpoint-tablet-xl
+) {
   .task_card {
     width: 252px;
     max-width: 252px;
@@ -198,5 +350,60 @@
     &__move_action {
       display: block;
     }
+  }
+}
+
+:host(.cdk-drag-preview) {
+  display: block;
+  overflow: visible !important;
+  pointer-events: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .task_card {
+    overflow: hidden;
+    cursor: grabbing;
+    animation:
+      task-card-drag-pickup
+      180ms
+      cubic-bezier(
+        0.2,
+        0.8,
+        0.2,
+        1
+      )
+      forwards;
+    box-shadow:
+      0 16px 32px
+        rgba(0, 0, 0, 0.2),
+      0 6px 12px
+        rgba(0, 0, 0, 0.12);
+    transition: none;
+  }
+}
+
+@keyframes task-card-drag-pickup {
+  0% {
+    transform:
+      rotate(0deg)
+      scale(1);
+  }
+
+  65% {
+    transform:
+      rotate(5deg)
+      scale(1.035);
+  }
+
+  100% {
+    transform:
+      rotate(4deg)
+      scale(1.025);
   }
 }
