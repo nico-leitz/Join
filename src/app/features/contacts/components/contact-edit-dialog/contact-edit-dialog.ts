@@ -1,4 +1,10 @@
-import { Component, input, OnInit, output, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -7,39 +13,68 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { Contact, UpdateContact } from '../../../../core/models/contact.model';
+import {
+  Contact,
+  UpdateContact,
+} from '../../../../core/models/contact.model';
 
 @Component({
   selector: 'app-contact-edit-dialog',
   imports: [ReactiveFormsModule],
-  templateUrl: './contact-edit-dialog.html',
-  styleUrl: './contact-edit-dialog.scss',
+  templateUrl:
+    './contact-edit-dialog.html',
+  styleUrl:
+    './contact-edit-dialog.scss',
 })
-export class ContactEditDialog implements OnInit {
+export class ContactEditDialog
+  implements OnInit
+{
   private readonly closeAnimationMs = 200;
-  private readonly fallbackLastName = 'Unknown';
-  private readonly namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿÄÖÜäöüß' -]+$/;
-  private readonly phonePattern = /^\+?[0-9 ]+$/;
 
-  contact = input.required<Contact>();
+  private readonly fallbackLastName =
+    'Unknown';
 
-  cancelled = output<void>();
-  submitted = output<UpdateContact>();
-  deleted = output<string>();
-  isClosing = signal(false);
+  private readonly namePattern =
+    /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/;
 
-  contactForm = new FormGroup({
+  private readonly phonePattern =
+    /^\+?[0-9 ]+$/;
+
+  readonly contact =
+    input.required<Contact>();
+
+  readonly cancelled = output<void>();
+
+  readonly submitted =
+    output<UpdateContact>();
+
+  readonly deleted = output<string>();
+
+  readonly isClosing = signal(false);
+
+  readonly contactForm = new FormGroup({
     fullName: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, this.validateName.bind(this)],
+      validators: [
+        Validators.required,
+        this.validateName.bind(this),
+      ],
     }),
     email: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.email],
+      validators: [
+        Validators.required,
+        Validators.email,
+      ],
     }),
     phone: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.pattern(this.phonePattern)],
+      validators: [
+        Validators.required,
+        Validators.pattern(
+          this.phonePattern,
+        ),
+      ],
     }),
   });
 
@@ -53,19 +88,28 @@ export class ContactEditDialog implements OnInit {
     }
 
     this.isClosing.set(true);
-    window.setTimeout(() => this.cancelled.emit(), this.closeAnimationMs);
+
+    window.setTimeout(
+      () => {
+        this.cancelled.emit();
+      },
+      this.closeAnimationMs,
+    );
   }
 
   submitForm(): void {
     this.sanitizePhoneInput();
     this.contactForm.markAllAsTouched();
-    this.contactForm.updateValueAndValidity();
+    this.contactForm
+      .updateValueAndValidity();
 
     if (this.contactForm.invalid) {
       return;
     }
 
-    this.submitted.emit(this.createContactPayload());
+    this.submitted.emit(
+      this.createContactPayload(),
+    );
   }
 
   deleteContact(): void {
@@ -73,106 +117,213 @@ export class ContactEditDialog implements OnInit {
   }
 
   sanitizePhoneInput(): void {
-    const phoneControl = this.contactForm.controls.phone;
-    const sanitizedPhone = this.createSanitizedPhone(phoneControl.value);
+    const phoneControl =
+      this.contactForm.controls.phone;
 
-    if (phoneControl.value !== sanitizedPhone) {
-      phoneControl.setValue(sanitizedPhone, { emitEvent: false });
+    const sanitizedPhone =
+      this.createSanitizedPhone(
+        phoneControl.value,
+      );
+
+    if (
+      phoneControl.value ===
+      sanitizedPhone
+    ) {
+      return;
     }
+
+    phoneControl.setValue(
+      sanitizedPhone,
+      {
+        emitEvent: false,
+      },
+    );
   }
 
   hasNameError(): boolean {
-    return this.hasTouchedError(this.contactForm.controls.fullName);
+    return this.hasTouchedError(
+      this.contactForm.controls.fullName,
+    );
   }
 
   hasEmailError(): boolean {
-    return this.hasTouchedError(this.contactForm.controls.email);
+    return this.hasTouchedError(
+      this.contactForm.controls.email,
+    );
   }
 
   hasPhoneError(): boolean {
-    return this.hasTouchedError(this.contactForm.controls.phone);
+    return this.hasTouchedError(
+      this.contactForm.controls.phone,
+    );
   }
 
   getNameErrorMessage(): string {
-    const control = this.contactForm.controls.fullName;
+    const control =
+      this.contactForm.controls.fullName;
 
-    if (!control.touched) return '';
-    if (control.hasError('required')) return 'Name is required.';
-    if (control.hasError('nameHasNumber')) return 'Name must not contain numbers.';
-    if (control.hasError('invalidName')) return 'Use letters, spaces, hyphens or apostrophes only.';
+    if (!control.touched) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return 'Name is required.';
+    }
+
+    if (
+      control.hasError('nameHasNumber')
+    ) {
+      return 'Name must not contain numbers.';
+    }
+
+    if (control.hasError('invalidName')) {
+      return 'Use letters, spaces, hyphens or apostrophes only.';
+    }
 
     return '';
   }
 
   getEmailErrorMessage(): string {
-    const control = this.contactForm.controls.email;
+    const control =
+      this.contactForm.controls.email;
 
-    if (!control.touched) return '';
-    if (control.hasError('required')) return 'Email is required.';
-    if (control.hasError('email')) return 'Enter a valid email address.';
+    if (!control.touched) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return 'Email is required.';
+    }
+
+    if (control.hasError('email')) {
+      return 'Enter a valid email address.';
+    }
 
     return '';
   }
 
   getPhoneErrorMessage(): string {
-    const control = this.contactForm.controls.phone;
+    const control =
+      this.contactForm.controls.phone;
 
-    if (!control.touched) return '';
-    if (control.hasError('required')) return 'Phone is required.';
-    if (control.hasError('pattern')) return 'Only numbers, spaces and one leading + are allowed.';
+    if (!control.touched) {
+      return '';
+    }
+
+    if (control.hasError('required')) {
+      return 'Phone is required.';
+    }
+
+    if (control.hasError('pattern')) {
+      return 'Only numbers, spaces and one leading + are allowed.';
+    }
 
     return '';
   }
 
   getInitials(): string {
     const contact = this.contact();
-    return `${contact.firstName.charAt(0)}${contact.lastName.charAt(0)}`.toUpperCase();
+
+    return (
+      contact.firstName.charAt(0) +
+      contact.lastName.charAt(0)
+    ).toUpperCase();
   }
 
   private setInitialFormValues(): void {
     const contact = this.contact();
 
     this.contactForm.setValue({
-      fullName: `${contact.firstName} ${contact.lastName}`,
+      fullName:
+        `${contact.firstName} ${contact.lastName}`,
       email: contact.email,
       phone: contact.phone ?? '',
     });
   }
 
-  private validateName(control: AbstractControl<string>): ValidationErrors | null {
-    const fullName = control.value.trim();
+  private validateName(
+    control: AbstractControl<string>,
+  ): ValidationErrors | null {
+    const fullName =
+      control.value.trim();
 
-    if (!fullName) return null;
-    if (/\d/.test(fullName)) return { nameHasNumber: true };
-    if (!this.namePattern.test(fullName)) return { invalidName: true };
+    if (!fullName) {
+      return null;
+    }
+
+    if (/\d/.test(fullName)) {
+      return {
+        nameHasNumber: true,
+      };
+    }
+
+    if (
+      !this.namePattern.test(fullName)
+    ) {
+      return {
+        invalidName: true,
+      };
+    }
 
     return null;
   }
 
-  private hasTouchedError(control: AbstractControl): boolean {
-    return control.touched && control.invalid;
+  private hasTouchedError(
+    control: AbstractControl,
+  ): boolean {
+    return (
+      control.touched &&
+      control.invalid
+    );
   }
 
-  private createContactPayload(): UpdateContact {
-    const fullNameParts = this.contactForm.controls.fullName.value.trim().split(/\s+/);
-    const firstName = fullNameParts.shift() ?? '';
+  private createContactPayload():
+    UpdateContact {
+    const fullNameParts =
+      this.contactForm.controls
+        .fullName.value
+        .trim()
+        .split(/\s+/);
+
+    const firstName =
+      fullNameParts.shift() ?? '';
 
     return {
       firstName,
-      lastName: fullNameParts.join(' ') || this.fallbackLastName,
-      email: this.contactForm.controls.email.value.trim(),
-      phone: this.contactForm.controls.phone.value.trim(),
+      lastName:
+        fullNameParts.join(' ') ||
+        this.fallbackLastName,
+      email:
+        this.contactForm.controls
+          .email.value.trim(),
+      phone:
+        this.contactForm.controls
+          .phone.value.trim(),
     };
   }
 
-  private createSanitizedPhone(phone: string): string {
-    const validCharactersOnly = phone.replace(/[^\d+\s]/g, '').replace(/\s+/g, ' ');
-    return this.normalizePhonePlus(validCharactersOnly.trimStart());
+  private createSanitizedPhone(
+    phone: string,
+  ): string {
+    const validCharactersOnly = phone
+      .replace(/[^\d+\s]/g, '')
+      .replace(/\s+/g, ' ');
+
+    return this.normalizePhonePlus(
+      validCharactersOnly.trimStart(),
+    );
   }
 
-  private normalizePhonePlus(phone: string): string {
+  private normalizePhonePlus(
+    phone: string,
+  ): string {
     if (phone.startsWith('+')) {
-      return `+${phone.slice(1).replace(/\+/g, '')}`;
+      return (
+        '+' +
+        phone
+          .slice(1)
+          .replace(/\+/g, '')
+      );
     }
 
     return phone.replace(/\+/g, '');

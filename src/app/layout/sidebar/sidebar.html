@@ -5,14 +5,21 @@
     alt="Join Logo"
   />
 
-  <nav class="sidebar__nav" aria-label="Main navigation">
+  <nav
+    class="sidebar__nav"
+    aria-label="Main navigation"
+  >
     <a
       class="sidebar__link"
       routerLink="/summary"
       routerLinkActive="sidebar__link--active"
       [routerLinkActiveOptions]="{ exact: true }"
     >
-      <img src="assets/sidebar/icons/nav-summary-icon.svg" alt="" />
+      <img
+        src="assets/sidebar/icons/nav-summary-icon.svg"
+        alt=""
+        aria-hidden="true"
+      />
       <span>Summary</span>
     </a>
 
@@ -22,7 +29,11 @@
       routerLinkActive="sidebar__link--active"
       [routerLinkActiveOptions]="{ exact: true }"
     >
-      <img src="assets/sidebar/icons/nav-addTask-icon.svg" alt="" />
+      <img
+        src="assets/sidebar/icons/nav-addTask-icon.svg"
+        alt=""
+        aria-hidden="true"
+      />
       <span>Add Task</span>
     </a>
 
@@ -32,7 +43,11 @@
       routerLinkActive="sidebar__link--active"
       [routerLinkActiveOptions]="{ exact: true }"
     >
-      <img src="assets/sidebar/icons/nav-board-icon.svg" alt="" />
+      <img
+        src="assets/sidebar/icons/nav-board-icon.svg"
+        alt=""
+        aria-hidden="true"
+      />
       <span>Board</span>
     </a>
 
@@ -42,8 +57,35 @@
       routerLinkActive="sidebar__link--active"
       [routerLinkActiveOptions]="{ exact: true }"
     >
-      <img src="assets/sidebar/icons/nav-contacts-icon.svg" alt="" />
+      <img
+        src="assets/sidebar/icons/nav-contacts-icon.svg"
+        alt=""
+        aria-hidden="true"
+      />
       <span>Contacts</span>
+    </a>
+  </nav>
+
+  <nav
+    class="sidebar__legal"
+    aria-label="Legal navigation"
+  >
+    <a
+      class="sidebar__legal-link"
+      routerLink="/privacy-policy"
+      routerLinkActive="sidebar__legal-link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Privacy Policy
+    </a>
+
+    <a
+      class="sidebar__legal-link"
+      routerLink="/legal-notice"
+      routerLinkActive="sidebar__legal-link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Legal Notice
     </a>
   </nav>
 </aside>

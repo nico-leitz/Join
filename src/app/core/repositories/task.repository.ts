@@ -32,7 +32,9 @@ export class TaskRepository {
   private readonly taskTableName = 'tasks';
   private readonly subtaskTableName = 'subtasks';
   private readonly assignmentTableName = 'task_assignments';
-  private readonly supabase = inject(SupabaseService).client;
+
+  private readonly supabase =
+    inject(SupabaseService).client;
 
   async getTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
@@ -64,7 +66,9 @@ export class TaskRepository {
     return data as TaskRow | null;
   }
 
-  async createTask(task: CreateTask): Promise<TaskRow> {
+  async createTask(
+    task: CreateTask,
+  ): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
       .insert(createTaskInsertPayload(task))
@@ -114,6 +118,21 @@ export class TaskRepository {
       .from(this.subtaskTableName)
       .select('*')
       .eq('task_id', taskId)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []) as SubtaskRow[];
+  }
+
+  async getAllSubtaskRows(): Promise<SubtaskRow[]> {
+    const { data, error } = await this.supabase
+      .from(this.subtaskTableName)
+      .select('*')
+      .order('task_id', { ascending: true })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
 
@@ -233,14 +252,30 @@ export class TaskRepository {
       throw error;
     }
 
-    const assignmentRows = (data ?? []) as Pick<
+    const assignments = (data ?? []) as Pick<
       TaskAssignmentRow,
       'contact_id'
     >[];
 
-    return assignmentRows.map((assignment) => {
+    return assignments.map((assignment) => {
       return assignment.contact_id;
     });
+  }
+
+  async getAllAssignmentRows(): Promise<
+    TaskAssignmentRow[]
+  > {
+    const { data, error } = await this.supabase
+      .from(this.assignmentTableName)
+      .select('*')
+      .order('task_id', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []) as TaskAssignmentRow[];
   }
 
   async createTaskAssignment(
@@ -316,23 +351,4 @@ export class TaskRepository {
       throw error;
     }
   }
-
-async getAllSubtaskRows(): Promise<SubtaskRow[]> {
-  const { data, error } = await this.supabase
-    .from(this.subtaskTableName)
-    .select('*');
-
-  if (error) throw error;
-  return (data ?? []) as SubtaskRow[];
-}
-
-async getAllAssignmentRows(): Promise<TaskAssignmentRow[]> {
-  const { data, error } = await this.supabase
-    .from(this.assignmentTableName)
-    .select('*');
-
-  if (error) throw error;
-  return (data ?? []) as TaskAssignmentRow[];
-}
-  
 }

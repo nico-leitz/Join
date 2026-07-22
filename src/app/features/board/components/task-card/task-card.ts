@@ -1,10 +1,25 @@
-import { Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
-import { Task, TaskStatus } from '../../../../core/models/task.model';
-import { Subtask } from '../../../../core/models/subtask.model';
+import {
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { Contact } from '../../../../core/models/contact.model';
+import { Subtask } from '../../../../core/models/subtask.model';
+import {
+  Task,
+  TaskStatus,
+} from '../../../../core/models/task.model';
+import {
+  calculateSubtaskProgress,
+} from '../../../../core/utils/subtask-progress.utils';
 
 @Component({
   selector: 'app-task-card',
+  standalone: true,
   imports: [],
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
@@ -14,47 +29,83 @@ import { Contact } from '../../../../core/models/contact.model';
   },
 })
 export class TaskCard {
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly elementRef =
+    inject(ElementRef<HTMLElement>);
 
-  task = input.required<Task>();
-  subtasks = input<Subtask[]>([]);
-  assignedContacts = input<Contact[]>([]);
+  readonly task = input.required<Task>();
+  readonly subtasks = input<Subtask[]>([]);
+  readonly assignedContacts =
+    input<Contact[]>([]);
 
-  cardClick = output<void>();
-  moveRequested = output<TaskStatus>();
-  protected readonly moveMenuOpen = signal(false);
+  readonly cardClick = output<void>();
+  readonly moveRequested = output<TaskStatus>();
 
-  protected toggleMoveMenu(event: Event): void {
+  protected readonly moveMenuOpen =
+    signal(false);
+
+  readonly progress = computed(() => {
+    return calculateSubtaskProgress(
+      this.subtasks(),
+    );
+  });
+
+  readonly categoryLabel = computed(() => {
+    return this.task().category ===
+      'technical_task'
+      ? 'Technical Task'
+      : 'User Story';
+  });
+
+  openCard(): void {
+    this.cardClick.emit();
+  }
+
+  getInitials(contact: Contact): string {
+    return (
+      contact.firstName.charAt(0) +
+      contact.lastName.charAt(0)
+    ).toUpperCase();
+  }
+
+  protected toggleMoveMenu(
+    event: Event,
+  ): void {
     event.stopPropagation();
-    this.moveMenuOpen.update((isOpen) => !isOpen);
+
+    this.moveMenuOpen.update((isOpen) => {
+      return !isOpen;
+    });
   }
 
   protected closeMoveMenu(): void {
     this.moveMenuOpen.set(false);
   }
 
-  protected requestMove(event: Event, status: TaskStatus): void {
+  protected requestMove(
+    event: Event,
+    status: TaskStatus,
+  ): void {
     event.stopPropagation();
+
     this.moveRequested.emit(status);
     this.closeMoveMenu();
   }
 
-  protected onDocumentClick(event: Event): void {
+  protected onDocumentClick(
+    event: Event,
+  ): void {
     const target = event.target;
 
     if (!(target instanceof Node)) {
       return;
     }
 
-    if (!this.elementRef.nativeElement.contains(target)) {
+    if (
+      !this.elementRef.nativeElement.contains(
+        target,
+      )
+    ) {
       this.closeMoveMenu();
     }
   }
-
-  progressPercentage = computed(() => {
-    const total = this.subtasks().length;
-    if (total === 0) return 0;
-    const done = this.subtasks().filter((s) => s.isCompleted).length;
-    return (done / total) * 100;
-  });
 }
