@@ -56,6 +56,42 @@
     height: 96px;
 }
 
+.input_icon_wrapper{
+    position: relative;
+    width: 100%;
+}
+
+.input_with_icon{
+    width: 100%;
+    padding-right: 44px;
+}
+
+.input_icon{
+    position: absolute;
+    right: 14px;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+}
+
+.input_icon__dropdown{
+    top: 50%;
+    transform: translateY(-50%);
+    background-image: url('/assets/add-task/drop_down_icon.svg');
+    height: 6px;
+}
+
+.input_icon__description{
+    top: auto;
+    bottom: 8px;
+    right: 6px;
+    height: 16px;
+    background-image: url('/assets/add-task/description_icon.svg');
+}
+
 .input{
     border-radius: 6px;
     border-width: 1px;
@@ -83,8 +119,7 @@ label{
     flex-wrap: wrap;
 }
 
-.priority_buttons_bright,
-.priority_buttons_colored{
+.priority_button{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -98,18 +133,32 @@ label{
     min-width: 124px;
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.priority_buttons_bright{
     background-color: white;
     color: var(--color-text);
     box-shadow: 0px 2px 16px rgba(0, 0, 0, 0.1);
 }
 
-.priority_buttons_colored{
-    background-color: rgba(255, 168, 0, 1);
+.priority_button--selected{
     color: white;
+}
+
+.priority_button--urgent.priority_button--selected{
+    background-color: #f44343;
+    box-shadow: 0 2px 12px rgba(212, 34, 34, 0.25);
+}
+
+.priority_button--medium.priority_button--selected{
+    background-color: rgba(255, 168, 0, 1);
     box-shadow: 0 2px 12px rgba(255, 168, 0, 0.25);
+}
+
+.priority_button--low.priority_button--selected{
+    background-color: #3dbe57;
+    box-shadow: 0 2px 12px rgba(46, 139, 64, 0.25);
+}
+
+.priority_button:hover{
+    transform: translateY(-1px);
 }
 
 .priority_icon{
@@ -136,6 +185,14 @@ label{
 
 #dueDate{
     cursor: text;
+}
+
+#assignedTo{
+
+}
+
+#category{
+
 }
 
 .required_legend{

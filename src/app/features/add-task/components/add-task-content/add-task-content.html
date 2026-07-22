@@ -4,11 +4,14 @@
         <div class="add_task_field_details">
             <form [formGroup]="taskForm" class="task_detail_section" (ngSubmit)="newTaskSubmit()">
                 <label for="title">Title<span>*</span></label>
-                <input id="title" type="text" formControlName= "title" class="input title_input">
+                <input id="title" type="text" formControlName="title" class="input title_input" placeholder="Enter a Title">
                 <label for="description">Description</label>
-                <input id="description" type="text" formControlName= "description" class="input">
+                <div class="input_icon_wrapper">
+                    <input id="description" type="text" formControlName="description" class="input input_with_icon description_input" placeholder="Enter a Description">
+                    <span class="input_icon input_icon__description" aria-hidden="true"></span>
+                </div>
                 <label for="dueDate">Due date<span>*</span></label>
-                <input id="dueDate" type="date" formControlName= "dueDate" class="input">
+                <input id="dueDate" type="date" formControlName="dueDate" class="input">
                 <p>{{taskForm.get("title")?.valid}}</p>
                 <p>{{"date:" + taskForm.get("dueDate")?.valid}}</p>
                 <p>{{taskForm.valid}}</p>
@@ -17,25 +20,40 @@
             <form [formGroup]="taskForm" class="task_detail_section" (ngSubmit)="newTaskSubmit()">
                 <label>Priority</label>
                 <div class="priority_button_container">
-                    <button class="priority_buttons_bright" type="button">
+                    <button class="priority_button priority_button--urgent"
+                        type="button"
+                        [class.priority_button--selected]="selectedPriority === 'urgent'"
+                        (click)="setPriority('urgent')">
                         Urgent
                         <span class="priority_icon priority_urgent_icon" aria-hidden="true"></span>
                     </button>
-                    <button class="priority_buttons_colored" type="button">
+                    <button class="priority_button priority_button--medium"
+                        type="button"
+                        [class.priority_button--selected]="selectedPriority === 'medium'"
+                        (click)="setPriority('medium')">
                         Medium
                         <span class="priority_icon priority_medium_icon" aria-hidden="true"></span>
                     </button>
-                    <button class="priority_buttons_bright" type="button">
+                    <button class="priority_button priority_button--low"
+                        type="button"
+                        [class.priority_button--selected]="selectedPriority === 'low'"
+                        (click)="setPriority('low')">
                         Low
                         <span class="priority_icon priority_low_icon" aria-hidden="true"></span>
                     </button>
                 </div>
                 <label for="assignedTo">Assigned to</label>
-                <input id="assignedTo" type="text" formControlName= "assignedTo" class="input">
+                <div class="input_icon_wrapper">
+                    <input id="assignedTo" type="text" formControlName="assignedTo" class="input input_with_icon select_input" placeholder="Select contacts to assign">
+                    <span class="input_icon input_icon__dropdown" aria-hidden="true"></span>
+                </div>
                 <label for="category">Category<span>*</span></label>
-                <input id="category" type="text" formControlName= "category" class="input">
+                <div class="input_icon_wrapper">
+                    <input id="category" type="text" formControlName="category" class="input input_with_icon select_input" placeholder="Select task category">
+                    <span class="input_icon input_icon__dropdown" aria-hidden="true"></span>
+                </div>
                 <label for="subtasks">Subtasks</label>
-                <input id="subtasks" type="text" formControlName= "subtasks" class="input">
+                <input id="subtasks" type="text" formControlName="subtasks" class="input" placeholder="Add new Subtask">
                 <p>{{taskForm.get("category")?.valid}}</p>
             </form>
         </div>

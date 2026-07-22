@@ -9,6 +9,8 @@ import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validatio
 })
 export class AddTaskContent {
 
+  selectedPriority: 'urgent' | 'medium' | 'low' = 'medium';
+
   taskForm = new FormGroup({
     title : new FormControl('',{
       validators: [Validators.required]
@@ -28,14 +30,21 @@ export class AddTaskContent {
     subtasks:new FormControl('',{
       validators: [Validators.required]
   }),
+    priority:new FormControl('medium'),
   });
+
+  setPriority(priority: 'urgent' | 'medium' | 'low'){
+    this.selectedPriority = priority;
+    this.taskForm.controls.priority.setValue(priority);
+  }
 
   newTaskSubmit(){
     this.taskForm.value
   }
 
   resetInputFields(){
-    this.taskForm.reset()
+    this.taskForm.reset({ priority: 'medium' });
+    this.selectedPriority = 'medium';
   }
   
 }
