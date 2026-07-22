@@ -7,45 +7,61 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
   padding: 24px;
+  box-sizing: border-box;
   background: rgba(0, 0, 0, 0.2);
-  animation: contact-dialog-backdrop-fade-in 300ms ease-out both;
+  overscroll-behavior: contain;
+  animation:
+    contact-dialog-backdrop-fade-in
+    300ms ease-out both;
 
   &--closing {
-    animation: contact-dialog-backdrop-fade-out 200ms ease-in both;
+    animation:
+      contact-dialog-backdrop-fade-out
+      200ms ease-in both;
   }
 }
 
 .contact-dialog {
   --dialog-side-width: 467px;
-  --dialog-mobile-side-height: 352px;
+  --dialog-mobile-side-height: 320px;
 
   position: relative;
   display: grid;
-  width: min(1212px, calc(100dvw - 48px));
+  width: min(
+    1212px,
+    calc(100dvw - 48px)
+  );
   min-height: 592px;
   max-height: calc(100dvh - 48px);
-  grid-template-columns: var(--dialog-side-width) minmax(0, 1fr);
+  grid-template-columns:
+    var(--dialog-side-width)
+    minmax(0, 1fr);
   overflow: hidden;
   border-radius: var(--radius-dialog);
   background: var(--color-bg-light);
   box-shadow: var(--shadow-overlay);
   font-family: var(--font-primary);
-  animation: contact-dialog-slide-in 300ms ease-out both;
+  animation:
+    contact-dialog-slide-in
+    300ms ease-out both;
   will-change: transform, opacity;
 
   &--closing {
-    animation: contact-dialog-slide-out 200ms ease-in both;
+    animation:
+      contact-dialog-slide-out
+      200ms ease-in both;
   }
 
   &__side {
     display: flex;
     min-width: 0;
+    min-height: 0;
     flex-direction: column;
     justify-content: center;
     padding: 66px 48px;
+    box-sizing: border-box;
     background: var(--color-primary);
     color: var(--color-text-light);
   }
@@ -93,11 +109,19 @@
     display: grid;
     min-width: 0;
     min-height: 0;
-    grid-template-columns: 120px minmax(0, 422px);
+    grid-template-columns:
+      120px
+      minmax(0, 422px);
     align-content: start;
     column-gap: 72px;
     row-gap: 12px;
     padding: 137px 48px 66px 83px;
+    box-sizing: border-box;
+    background: var(--color-bg-light);
+  }
+
+  &__form-content {
+    display: contents;
   }
 
   &__close {
@@ -112,18 +136,21 @@
     justify-content: center;
     padding: 0;
     border: unset;
-    border-radius: 56px;
+    border-radius: 50%;
     background: transparent;
     color: var(--color-primary);
     font-size: 28px;
     line-height: 1;
+    cursor: pointer;
     transition:
       background-color var(--transition-fast),
       color var(--transition-fast),
       transform var(--transition-fast);
 
-    &:hover {
+    &:hover,
+    &:focus-visible {
       background: #eeeeee;
+      outline: none;
       transform: scale(1.04);
     }
   }
@@ -138,7 +165,8 @@
     justify-content: center;
     gap: 10px;
     border: 3px solid #ffffff;
-    border-radius: 70px;
+    border-radius: 50%;
+    box-sizing: border-box;
     background: #d1d1d1;
     color: var(--color-text-light);
     box-shadow: var(--shadow-avatar);
@@ -159,18 +187,29 @@
   }
 
   &__field {
+    position: relative;
+    width: 100%;
+    min-width: 0;
     min-height: 73px;
+    box-sizing: border-box;
+  }
+
+  &__input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   &__input.form-input--invalid,
   &__input.form-input--invalid:focus {
-    border-color: var(--color-error);
+    border-color: #e60026;
   }
 
   &__error {
     display: block;
     min-height: 19px;
     margin-top: 4px;
+    color: #e60026;
   }
 
   &__field-icon {
@@ -199,35 +238,62 @@
       min-width: 214px;
     }
   }
+
+  &__button-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    object-fit: contain;
+    pointer-events: none;
+  }
 }
 
 .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
   white-space: nowrap;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
 }
 
-@media (max-width: bp.$breakpoint-desktop-s) {
+@media (
+  max-width:
+    bp.$breakpoint-desktop-s
+) {
   .contact-dialog-backdrop {
     padding: 16px;
   }
 
   .contact-dialog {
-    --dialog-mobile-side-height: clamp(280px, 46dvh, 352px);
+    --dialog-mobile-side-height:
+      clamp(240px, 34dvh, 320px);
 
-    width: min(560px, calc(100dvw - 32px));
-    height: min(var(--dialog-mobile-height), calc(100dvh - 32px));
+    width: min(
+      560px,
+      calc(100dvw - 32px)
+    );
+    height: min(
+      900px,
+      calc(100dvh - 32px)
+    );
     min-height: 0;
     max-height: calc(100dvh - 32px);
-    grid-template-columns: 1fr;
-    grid-template-rows: var(--dialog-mobile-side-height) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows:
+      var(--dialog-mobile-side-height)
+      minmax(0, 1fr);
     overflow: hidden;
 
     &__side {
+      min-height: 0;
       justify-content: flex-start;
-      padding: clamp(48px, 8dvh, 66px) 24px;
+      padding:
+        clamp(42px, 7dvh, 60px)
+        24px;
     }
 
     &__logo {
@@ -235,7 +301,7 @@
     }
 
     &__heading {
-      width: min(282px, 100%);
+      width: min(100%, 420px);
 
       h2 {
         font-size: var(--font-size-2xl);
@@ -248,30 +314,63 @@
 
     &__form {
       position: static;
+      display: grid;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows:
+        minmax(0, 1fr)
+        auto;
+      align-content: stretch;
+      column-gap: 0;
+      row-gap: 0;
+      padding: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: var(--color-bg-light);
+    }
+
+    &__form-content {
+      grid-column: 1 / -1;
+      grid-row: 1;
       display: flex;
+      width: 100%;
+      min-width: 0;
       min-height: 0;
       flex-direction: column;
+      align-items: stretch;
+      overflow-x: hidden;
       overflow-y: auto;
+      padding: 82px 16px 16px;
+      box-sizing: border-box;
+      background: var(--color-bg-light);
       overscroll-behavior: contain;
-      padding: 92px 16px 16px;
+      scrollbar-gutter: stable both-edges;
     }
 
     &__close {
-      top: 24px;
-      right: 16px;
+      top: 20px;
+      right: 20px;
       color: var(--color-text-light);
 
-      &:hover {
-        background: rgba(255, 255, 255, 0.14);
-        transform: scale(1.04);
+      &:hover,
+      &:focus-visible {
+        background:
+          rgba(255, 255, 255, 0.14);
       }
     }
 
     &__avatar {
       position: absolute;
-      top: calc(var(--dialog-mobile-side-height) - 60px);
+      top: calc(
+        var(--dialog-mobile-side-height) -
+        60px
+      );
       left: 50%;
       z-index: 5;
+      grid-row: auto;
       width: 120px;
       height: 120px;
       margin: 0;
@@ -279,14 +378,22 @@
     }
 
     &__field {
+      width: 100%;
+      min-width: 0;
+      max-width: none;
       min-height: 64px;
       flex: 0 0 auto;
+      align-self: stretch;
       margin-bottom: 15px;
+      box-sizing: border-box;
     }
 
     &__input {
+      width: 100%;
+      min-width: 0;
       height: 41px;
       padding: 8px 52px 9px 21px;
+      box-sizing: border-box;
     }
 
     &__field-icon {
@@ -294,23 +401,32 @@
     }
 
     &__actions {
-      position: sticky;
-      bottom: 0;
-      z-index: 4;
+      position: relative;
+      z-index: 10;
+      grid-column: 1 / -1;
+      grid-row: 2;
       display: flex;
       width: 100%;
+      min-width: 0;
+      min-height: 72px;
       flex: 0 0 auto;
+      align-self: end;
+      align-items: center;
       justify-content: center;
       gap: 20px;
-      margin-top: 2px;
-      padding-bottom: 16px;
+      margin: 0;
+      padding: 10px 16px 16px;
+      overflow: hidden;
+      box-sizing: border-box;
       background: var(--color-bg-light);
+      isolation: isolate;
 
       .button {
         height: 51px;
         min-height: 51px;
-        padding: 18px 10px;
+        padding: 0 16px;
         border-radius: var(--radius-md);
+        box-sizing: border-box;
         font-size: var(--font-size-lg);
       }
     }
@@ -331,41 +447,72 @@
   }
 }
 
-@media (max-width: bp.$breakpoint-mobile-m) {
+@media (
+  max-width:
+    bp.$breakpoint-mobile-m
+) {
   .contact-dialog {
-    width: min(var(--dialog-mobile-width), calc(100dvw - 24px));
+    width: min(
+      var(--dialog-mobile-width),
+      calc(100dvw - 24px)
+    );
 
     &__side {
       padding-inline: 24px;
     }
-  }
-}
 
-@media (max-width: bp.$breakpoint-mobile-m) and (orientation: portrait) {
-  .contact-dialog {
-    animation: contact-dialog-mobile-slide-up-in 300ms ease-out both;
+    &__form-content {
+      padding-inline: 16px;
+    }
 
-    &--closing {
-      animation: contact-dialog-mobile-slide-down-out 200ms ease-in both;
+    &__field {
+      width: 100%;
+      min-width: 0;
+      max-width: none;
     }
   }
 }
 
-@media (max-width: bp.$breakpoint-mobile-xs) {
+@media (
+  max-width:
+    bp.$breakpoint-mobile-m
+) and (
+  orientation: portrait
+) {
+  .contact-dialog {
+    animation:
+      contact-dialog-mobile-slide-up-in
+      300ms ease-out both;
+
+    &--closing {
+      animation:
+        contact-dialog-mobile-slide-down-out
+        200ms ease-in both;
+    }
+  }
+}
+
+@media (
+  max-width:
+    bp.$breakpoint-mobile-xs
+) {
   .contact-dialog-backdrop {
     padding: 8px;
   }
 
   .contact-dialog {
-    --dialog-mobile-side-height: clamp(250px, 44dvh, 320px);
+    --dialog-mobile-side-height:
+      clamp(220px, 34dvh, 280px);
 
     width: calc(100dvw - 16px);
-    height: min(var(--dialog-mobile-height), calc(100dvh - 16px));
+    height: calc(100dvh - 16px);
     max-height: calc(100dvh - 16px);
-    border-radius: var(--radius-dialog);
 
     &__side {
-      padding-inline: 20px;
+      padding:
+        42px
+        20px
+        24px;
     }
 
     &__heading {
@@ -378,12 +525,20 @@
       }
     }
 
-    &__form {
-      padding: 82px 12px 16px;
+    &__form-content {
+      padding: 72px 12px 12px;
+    }
+
+    &__actions {
+      min-height: 68px;
+      padding: 8px 12px 12px;
     }
 
     &__avatar {
-      top: calc(var(--dialog-mobile-side-height) - 52px);
+      top: calc(
+        var(--dialog-mobile-side-height) -
+        52px
+      );
       width: 104px;
       height: 104px;
     }
@@ -394,6 +549,9 @@
     }
 
     &__field {
+      width: 100%;
+      min-width: 0;
+      max-width: none;
       min-height: 64px;
       margin-bottom: 10px;
     }
@@ -415,24 +573,38 @@
   }
 }
 
-@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
+@media (
+  orientation: landscape
+) and (
+  max-height:
+    bp.$breakpoint-landscape-height-md
+) and (
+  max-width:
+    bp.$breakpoint-landscape-width-lg
+) {
   .contact-dialog-backdrop {
     padding: 8px;
   }
 
   .contact-dialog {
-    width: min(860px, calc(100dvw - 16px));
+    width: min(
+      860px,
+      calc(100dvw - 16px)
+    );
     height: calc(100dvh - 16px);
     min-height: 0;
     max-height: calc(100dvh - 16px);
-    grid-template-columns: minmax(210px, 32%) minmax(0, 1fr);
-    grid-template-rows: auto;
+    grid-template-columns:
+      minmax(210px, 32%)
+      minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     overflow: hidden;
 
     &__side {
       min-height: 0;
       justify-content: center;
-      padding: clamp(16px, 5dvh, 24px);
+      padding:
+        clamp(16px, 5dvh, 24px);
     }
 
     &__logo {
@@ -441,11 +613,13 @@
 
     &__heading {
       h2 {
-        font-size: clamp(28px, 8dvh, 40px);
+        font-size:
+          clamp(28px, 8dvh, 40px);
       }
 
       p {
-        font-size: clamp(14px, 4dvh, 18px);
+        font-size:
+          clamp(14px, 4dvh, 18px);
       }
     }
 
@@ -457,70 +631,128 @@
     &__form {
       position: relative;
       display: grid;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
       min-height: 0;
-      grid-template-columns: clamp(58px, 14dvh, 72px) minmax(0, 1fr);
-      align-content: start;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows:
+        minmax(0, 1fr)
+        auto;
+      align-content: stretch;
+      column-gap: 0;
+      row-gap: 0;
+      padding: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: var(--color-bg-light);
+    }
+
+    &__form-content {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      display: grid;
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
+      grid-template-columns:
+        clamp(58px, 14dvh, 72px)
+        minmax(0, 1fr);
+      align-content: center;
+      justify-content: stretch;
       column-gap: 16px;
       row-gap: 8px;
+      overflow-x: hidden;
       overflow-y: auto;
-      padding: 58px 56px 0 20px;
+      padding: 52px 32px 12px;
+      box-sizing: border-box;
+      background: var(--color-bg-light);
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable both-edges;
     }
 
     &__close {
-      top: 16px;
-      right: 18px;
-      background: transparent;
+      top: 12px;
+      right: 16px;
       color: var(--color-primary);
 
-      &:hover {
+      &:hover,
+      &:focus-visible {
         background: #eeeeee;
-        transform: scale(1.04);
       }
     }
 
     &__avatar {
       position: static;
-      width: clamp(58px, 14dvh, 72px);
-      height: clamp(58px, 14dvh, 72px);
+      grid-column: 1;
+      grid-row: 1 / span 3;
+      width:
+        clamp(58px, 14dvh, 72px);
+      height:
+        clamp(58px, 14dvh, 72px);
       align-self: center;
       margin: 0;
-      font-size: clamp(22px, 6dvh, 28px);
+      font-size:
+        clamp(22px, 6dvh, 28px);
       transform: none;
     }
 
     &__avatar-icon {
-      width: clamp(32px, 8dvh, 42px);
-      height: clamp(32px, 8dvh, 42px);
+      width:
+        clamp(32px, 8dvh, 42px);
+      height:
+        clamp(32px, 8dvh, 42px);
     }
 
     &__field {
+      grid-column: 2;
+      width: 100%;
+      min-width: 0;
+      max-width: none;
       min-height: 63px;
       margin-bottom: 0;
     }
 
     &__input {
+      width: 100%;
+      min-width: 0;
       height: 40px;
-      padding-block: 8px;
+      padding:
+        8px
+        48px
+        8px
+        16px;
     }
 
     &__field-icon {
       top: 8px;
+      right: 16px;
     }
 
     &__actions {
-      position: sticky;
-      bottom: 0;
-      grid-column: 2;
-      justify-content: flex-start;
+      position: relative;
+      z-index: 10;
+      grid-column: 1 / -1;
+      grid-row: 2;
+      display: flex;
+      width: 100%;
+      min-width: 0;
+      min-height: 60px;
+      align-self: end;
+      align-items: center;
+      justify-content: center;
       gap: 10px;
-      margin-top: 0;
-      padding: 10px 0 12px;
+      margin: 0;
+      padding: 8px 16px 12px;
+      overflow: hidden;
+      box-sizing: border-box;
       background: var(--color-bg-light);
+      isolation: isolate;
 
       .button {
         height: 40px;
         min-height: 40px;
-        padding: 8px 12px;
+        padding: 0 12px;
         font-size: 16px;
       }
 
@@ -535,6 +767,10 @@
 
     &--create {
       .contact-dialog__actions {
+        .button-clean {
+          display: none;
+        }
+
         .button-primary {
           width: 170px;
           min-width: 170px;
@@ -544,9 +780,19 @@
   }
 }
 
-@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-sm) and (max-width: bp.$breakpoint-landscape-width-md) {
+@media (
+  orientation: landscape
+) and (
+  max-height:
+    bp.$breakpoint-landscape-height-sm
+) and (
+  max-width:
+    bp.$breakpoint-landscape-width-md
+) {
   .contact-dialog {
-    grid-template-columns: 190px minmax(0, 1fr);
+    grid-template-columns:
+      190px
+      minmax(0, 1fr);
 
     &__side {
       padding: 16px;
@@ -562,14 +808,17 @@
       }
     }
 
-    &__form {
-      grid-template-columns: 56px minmax(0, 1fr);
-      padding: 52px 48px 0 16px;
+    &__form-content {
+      grid-template-columns:
+        56px
+        minmax(0, 1fr);
+      align-content: start;
+      padding: 44px 20px 8px;
     }
 
     &__close {
-      top: 12px;
-      right: 14px;
+      top: 8px;
+      right: 12px;
     }
 
     &__avatar {
@@ -588,6 +837,9 @@
     }
 
     &__actions {
+      min-height: 52px;
+      padding: 6px 12px 10px;
+
       .button {
         height: 36px;
         min-height: 36px;
