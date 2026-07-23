@@ -2,215 +2,218 @@
 
 Join ist eine responsive Single-Page-Anwendung für Aufgaben-, Board- und Kontaktmanagement. Das Projekt wird als Gruppenprojekt mit Angular, TypeScript, SCSS und Supabase umgesetzt.
 
-Der aktuelle Sprint-2-Fokus liegt auf:
-
-* Kanban-Board mit vier Statusspalten
-* Erstellen, Bearbeiten und Löschen von Tasks
-* Subtasks und Fortschrittsanzeigen
-* Kontaktzuweisungen
-* Suche über Titel und Beschreibung
-* persistente Speicherung in Supabase
+Der aktuelle Schwerpunkt liegt auf dem Kontaktbereich, dem Task-System und dem Kanban-Board.
 
 ---
 
-## Inhaltsverzeichnis
+## Projektziel
 
-- [Join](#join)
-  - [Inhaltsverzeichnis](#inhaltsverzeichnis)
-  - [Projektstatus](#projektstatus)
-    - [Bereits vorhanden](#bereits-vorhanden)
-    - [Durch die Feature-Komponenten anzubinden](#durch-die-feature-komponenten-anzubinden)
-  - [Team und Zuständigkeiten](#team-und-zuständigkeiten)
-  - [Techstack](#techstack)
-  - [Voraussetzungen](#voraussetzungen)
-  - [Projekt lokal einrichten](#projekt-lokal-einrichten)
-    - [1. Repository klonen](#1-repository-klonen)
-    - [2. Eigenen Entwicklungsbranch auschecken](#2-eigenen-entwicklungsbranch-auschecken)
-    - [3. Abhängigkeiten installieren](#3-abhängigkeiten-installieren)
-  - [Supabase konfigurieren](#supabase-konfigurieren)
-    - [`src/environments/environment.ts`](#srcenvironmentsenvironmentts)
-    - [`src/environments/environment.development.ts`](#srcenvironmentsenvironmentdevelopmentts)
-  - [Anwendung starten](#anwendung-starten)
-  - [Projektstruktur](#projektstruktur)
-  - [Architektur](#architektur)
-    - [Architekturregeln](#architekturregeln)
-  - [Task-System](#task-system)
-  - [Dokumentation](#dokumentation)
-  - [Git-Workflow](#git-workflow)
-    - [Grundregeln](#grundregeln)
-    - [Commit-Beispiele](#commit-beispiele)
-  - [Qualitätsregeln](#qualitätsregeln)
-  - [Build und Tests](#build-und-tests)
-  - [Sicherheitshinweis](#sicherheitshinweis)
+Die Anwendung soll typische Projektmanagement-Funktionen abbilden:
 
----
+```text
+Kontakte verwalten
+Tasks erstellen und bearbeiten
+Tasks im Board organisieren
+Subtasks verwalten
+Kontakte Tasks zuweisen
+Fortschritt anzeigen
+Tasks suchen und filtern
+```
 
-## Projektstatus
-
-### Bereits vorhanden
-
-* Angular-Grundstruktur und Routing
-* Sidebar, Header und mobile Navigation
-* Kontaktverwaltung mit Supabase
-* Supabase-Tabellen für Tasks, Subtasks und Kontaktzuweisungen
-* TypeScript-Models für Datenbank- und Anwendungsdaten
-* Mapper zwischen Supabase und Angular
-* Repository-Schicht für Supabase-Zugriffe
-* `TaskService` mit Signals und Geschäftslogik
-* Task-CRUD
-* Subtask-CRUD
-* Kontaktzuweisungen
-* kombinierte Create- und Update-Abläufe
-* Such- und Statusfilter
-* Berechnung des Subtask-Fortschritts
-* realistische Testdaten
-* Datenbank- und Cascade-Delete-Tests
-
-### Durch die Feature-Komponenten anzubinden
-
-* Add-Task-Formular
-* Board-Spalten und Task-Karten
-* Task-Detaildialog
-* Edit-Task-Formular
-* Drag-and-drop
-* mobile Alternative zum Verschieben
-* Sucheingabe
-* Fortschrittsanzeige
-* Lade-, Erfolgs- und Fehlerfeedback
-
----
-
-## Team und Zuständigkeiten
-
-| Teammitglied | Schwerpunkte                                                      |
-| ------------ | ----------------------------------------------------------------- |
-| Basti        | Struktur, Logik, Datenbanken, APIs, Supabase- und Task-Datenebene |
-| Kevin        | Design und Logik                                                  |
-| Nico         | Struktur, Logik, Datenbanken, APIs und SCSS                       |
-| Oliver       | Zuständigkeit wird innerhalb der Sprintplanung abgestimmt         |
-
-Die konkrete Aufgabenverteilung wird im Daily und im Trello-Board abgestimmt.
-
-Aufgaben werden nicht ohne Absprache:
-
-* verschoben
-* übernommen
-* neu verteilt
-* aus dem Sprint entfernt
+Die Anwendung ist für Desktop, Tablet und mobile Ansichten ausgelegt.
 
 ---
 
 ## Techstack
 
-* Angular 21
-* TypeScript 5.9
-* SCSS
-* Supabase JavaScript Client 2
-* RxJS
-* Git und GitHub
-* npm 11
-* Node.js 24
+```text
+Angular 21
+TypeScript
+SCSS
+Supabase
+RxJS
+Git und GitHub
+npm
+Node.js
+```
+
+Die Anwendung verwendet Angular Standalone Components und Signals für zentrale UI- und Datenzustände.
 
 ---
 
-## Voraussetzungen
+## Team
 
-Folgende Programme müssen installiert sein:
+| Teammitglied | Schwerpunkt |
+|---|---|
+| Basti | Struktur, Logik, Datenbanken, APIs, Supabase- und Task-Datenebene |
+| Kevin | Design und Logik |
+| Nico | Struktur, Logik, Datenbanken, APIs und SCSS |
+| Oliver | Abstimmung innerhalb der Sprintplanung |
+
+Die Aufgabenverteilung erfolgt im Daily und über das Trello-Board.
+
+---
+
+## Projektbereiche
+
+### Kontakte
+
+Der Kontaktbereich enthält:
 
 ```text
-Node.js 24.x
-npm 11.x
-Git
-Angular CLI 21.x
-Visual Studio Code
+Kontaktliste
+Kontaktdetails
+Kontakt erstellen
+Kontakt bearbeiten
+Kontakt löschen
+Success-Overlay
+responsive Darstellung
 ```
 
-Versionen prüfen:
+Der zentrale Service ist:
 
-```bash
-node --version
-npm --version
-git --version
-ng version
+```text
+ContactService
+```
+
+Weitere Details:
+
+```text
+docs/contact-service.md
+docs/contact-components.md
 ```
 
 ---
 
-## Projekt lokal einrichten
+### Tasks und Board
 
-### 1. Repository klonen
-
-```bash
-git clone <repository-url>
-cd join
-```
-
-### 2. Eigenen Entwicklungsbranch auschecken
-
-```bash
-git fetch origin
-git switch <dein-branch>
-git pull origin <dein-branch>
-```
-
-Beispiel:
-
-```bash
-git switch Basti
-git pull origin Basti
-```
-
-### 3. Abhängigkeiten installieren
-
-```bash
-npm install
-```
-
-Die Paketversionen werden über diese Dateien festgelegt:
+Der Task-Bereich enthält:
 
 ```text
-package.json
-package-lock.json
+Task-CRUD
+Subtasks
+Kontaktzuweisungen
+Board-Spalten
+Task-Karten
+Task-Detailansicht
+Add-Task
+Edit-Task
+Suche
+Drag-and-drop
 ```
 
-Das Lockfile darf nicht ohne Grund gelöscht oder neu erzeugt werden.
+Der zentrale Service ist:
+
+```text
+TaskService
+```
+
+Weitere Details:
+
+```text
+docs/task-service.md
+docs/task-data-layer.md
+docs/task-service-integration.md
+docs/task-components.md
+```
 
 ---
 
-## Supabase konfigurieren
+### Supabase
 
-Die Environment-Dateien sind aus Sicherheitsgründen von Git ausgeschlossen. Jedes Teammitglied legt sie lokal an.
+Supabase wird für die persistente Speicherung verwendet.
 
-### `src/environments/environment.ts`
-
-```typescript
-export const environment = {
-  production: true,
-  supabaseUrl: 'YOUR_SUPABASE_PROJECT_URL',
-  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
-};
-```
-
-### `src/environments/environment.development.ts`
-
-```typescript
-export const environment = {
-  production: false,
-  supabaseUrl: 'YOUR_SUPABASE_PROJECT_URL',
-  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
-};
-```
-
-Die Werte befinden sich im Supabase-Dashboard in den API-Einstellungen des Projekts.
-
-Die zentrale Konfiguration liegt in:
+Wichtige Tabellen:
 
 ```text
-src/app/core/supabase/supabase.config.ts
-src/app/core/supabase/supabase.ts
+contacts
+tasks
+subtasks
+task_assignments
 ```
 
-Komponenten greifen nicht direkt auf den Supabase Client zu.
+Kontaktzuweisungen werden nicht direkt im Task gespeichert.  
+Sie werden dauerhaft über `task_assignments` als Beziehung zwischen Task und Kontakt gespeichert.
+
+Weitere Details:
+
+```text
+docs/supabase-database.md
+docs/database-architecture.md
+```
+
+---
+
+## Grundarchitektur
+
+Der Datenfluss ist klar geschichtet.
+
+```text
+Component
+  ↓
+Service
+  ↓
+Repository
+  ↓
+Supabase
+```
+
+Beim Lesen werden Datenbankzeilen in Angular-Models gemappt.
+
+```text
+Supabase Row
+  ↓
+Mapper
+  ↓
+Application Model
+  ↓
+Service-State
+  ↓
+Component
+```
+
+Beim Schreiben werden Angular-Daten in Supabase-Payloads umgewandelt.
+
+```text
+Component Input
+  ↓
+Service
+  ↓
+Payload Mapper
+  ↓
+Repository
+  ↓
+Supabase
+```
+
+Weitere Details:
+
+```text
+docs/project-architecture.md
+docs/architecture.md
+docs/state-management.md
+docs/conventions.md
+```
+
+---
+
+## Verantwortlichkeiten
+
+### Components
+
+Components sind zuständig für:
+
+```text
+Darstellung
+Benutzerinteraktion
+Formulare
+Dialoge
+lokalen UI-State
+Inputs und Outputs
+Lade- und Fehlerfeedback
+```
+
+Components greifen nicht direkt auf Supabase zu.
 
 Nicht vorgesehen:
 
@@ -224,30 +227,85 @@ Vorgesehen:
 private readonly taskService = inject(TaskService);
 ```
 
+oder:
+
+```typescript
+private readonly contactService = inject(ContactService);
+```
+
 ---
 
-## Anwendung starten
+### Services
 
-```bash
-npm start
-```
-
-Das npm-Script startet:
-
-```bash
-ng serve -o
-```
-
-Standardmäßig ist die Anwendung erreichbar unter:
+Services sind zuständig für:
 
 ```text
-http://localhost:4200
+Daten laden
+Daten speichern
+Daten aktualisieren
+Daten löschen
+gemeinsamen State
+Fehlerstatus
+Ladezustände
+Koordination mehrerer Datenoperationen
 ```
 
-Ist Port 4200 bereits belegt:
+Beispiele:
 
-```bash
-ng serve --port 4201 -o
+```text
+ContactService
+TaskService
+```
+
+---
+
+### Repository
+
+Repositories kapseln direkte Supabase-Zugriffe.
+
+Beispiel:
+
+```text
+TaskRepository
+```
+
+Das Repository kennt Tabellen, Filter und Supabase-Queries.  
+Components verwenden das Repository nicht direkt.
+
+---
+
+### Mapper
+
+Mapper übersetzen zwischen Datenbank und Angular.
+
+```text
+snake_case → camelCase
+camelCase → snake_case
+```
+
+Beispiele:
+
+```text
+TaskRow → Task
+SubtaskRow → Subtask
+ContactRow → Contact
+CreateTask → Supabase-Payload
+```
+
+---
+
+### Utils
+
+Utils enthalten reine Berechnungen ohne Seiteneffekte.
+
+Beispiele:
+
+```text
+sortTasks()
+filterTasks()
+calculateSubtaskProgress()
+getUniqueIds()
+getMissingIds()
 ```
 
 ---
@@ -271,254 +329,255 @@ src/app/
 │   └── tasks/
 ├── layout/
 └── shared/
+```
 
-src/styles/
-├── abstracts/
-├── base/
-├── components/
-├── layout/
-├── pages/
-├── themes/
-├── utilities/
-└── vendors/
-
+```text
 docs/
-├── project-architecture.md
-├── supabase-database.md
-├── task-data-layer.md
-├── task-service-integration.md
+├── allgemein.md
+├── architecture.md
+├── contact-components.md
+├── contact-service.md
+├── conventions.md
+├── database-architecture.md
 ├── development-workflow.md
+├── project-architecture.md
+├── state-management.md
+├── supabase-database.md
+├── task-components.md
+├── task-data-layer.md
+├── task-service.md
+├── task-service-integration.md
 └── testing-guide.md
 ```
 
 ---
 
-## Architektur
+## Lokales Setup
 
-Der Datenfluss folgt einer klaren Richtung:
+### Repository klonen
 
-```text
-Angular Component
-        ↓
-TaskService
-        ↓
-TaskRepository
-        ↓
-Supabase
+```bash
+git clone <repository-url>
+cd join
 ```
 
-Beim Lesen werden Datenbankfelder über Mapper in Angular-Models umgewandelt:
+### Eigenen Branch auschecken
 
-```text
-Supabase Row
-    ↓
-Mapper
-    ↓
-Application Model
-    ↓
-Service Signal oder Rückgabewert
-    ↓
-Component
+```bash
+git fetch origin
+git switch <dein-branch>
+git pull origin <dein-branch>
 ```
 
-Beim Schreiben läuft die Umwandlung in die andere Richtung:
+Beispiel:
 
-```text
-Component Payload
-    ↓
-TaskService
-    ↓
-Payload Mapper
-    ↓
-TaskRepository
-    ↓
-Supabase
+```bash
+git switch Basti
+git pull origin Basti
 ```
 
-### Architekturregeln
+### Abhängigkeiten installieren
 
-* Komponenten enthalten UI- und Interaktionslogik.
-* Der `TaskService` koordiniert Geschäftsabläufe und State.
-* Das `TaskRepository` enthält direkte Supabase-Abfragen.
-* Mapper übersetzen zwischen `snake_case` und `camelCase`.
-* Utilities bleiben frei von Angular- und Datenbankabhängigkeiten.
-* Drag-and-drop bleibt in der Board-Komponente.
-* Persistiert werden Status und Position über `TaskService.updateTask()`.
+```bash
+npm install
+```
 
-Weitere Informationen:
+### Anwendung starten
 
-[Projektarchitektur](docs/project-architecture.md)
+```bash
+npm start
+```
+
+Standardmäßig läuft die Anwendung unter:
+
+```text
+http://localhost:4200
+```
 
 ---
 
-## Task-System
+## Environment-Dateien
 
-Die zentrale Schnittstelle für Komponenten ist:
+Die Environment-Dateien werden lokal angelegt und nicht committed.
 
 ```text
-src/app/core/services/task.service.ts
+src/environments/environment.ts
+src/environments/environment.development.ts
 ```
 
-Der Service stellt unter anderem folgende Methoden bereit:
+Beispiel:
 
 ```typescript
-getTasks()
-getTaskById()
-getSubtasksByTaskId()
-getAssignedContacts()
-
-createTask()
-createTaskWithRelations()
-
-updateTask()
-updateTaskWithRelations()
-
-deleteTask()
-
-createSubtask()
-updateSubtask()
-toggleSubtaskCompletion()
-deleteSubtask()
-replaceTaskSubtasks()
-
-assignContact()
-removeContactAssignment()
-replaceTaskAssignments()
+export const environment = {
+  production: false,
+  supabaseUrl: 'YOUR_SUPABASE_PROJECT_URL',
+  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
+};
 ```
 
-Komponenten injizieren ausschließlich den Service:
+Wichtig:
 
-```typescript
-private readonly taskService = inject(TaskService);
+```text
+Nur anon public key verwenden.
+Niemals service_role key im Frontend speichern.
 ```
 
-Direkte Supabase-Abfragen aus einer Komponente sind nicht vorgesehen.
+Eine Beispiel-Datei kann committed werden:
 
-Der vollständige Implementierungsleitfaden befindet sich hier:
-
-[TaskService in Komponenten verwenden](docs/task-service-integration.md)
-
----
-
-## Dokumentation
-
-| Dokument                                                    | Inhalt                                                           |
-| ----------------------------------------------------------- | ---------------------------------------------------------------- |
-| [Projektarchitektur](docs/project-architecture.md)          | Ordnerstruktur, Schichten, Datenfluss und Zuständigkeiten        |
-| [Supabase-Datenbank](docs/supabase-database.md)             | Tabellen, Beziehungen, Constraints, RLS und Testdaten            |
-| [Task-Datenebene](docs/task-data-layer.md)                  | Models, Mapper, Repository, Service und Utilities                |
-| [TaskService-Integration](docs/task-service-integration.md) | Konkreter Leitfaden für Board-, Add-Task- und Detail-Komponenten |
-| [Entwicklungsworkflow](docs/development-workflow.md)        | Branches, Commits, Pull Requests, Reviews und Daily              |
-| [Testleitfaden](docs/testing-guide.md)                      | Build, manuelle Tests, Datenbankprüfungen und Abnahmekriterien   |
+```text
+src/environments/environment.example.ts
+```
 
 ---
 
 ## Git-Workflow
 
-### Grundregeln
-
-1. `main` ist der gemeinsame Produktivbranch.
-2. Jedes Teammitglied arbeitet auf dem eigenen Branch.
-3. Vor Arbeitsbeginn wird gepullt.
-4. Nach einem Daily oder Merge wird erneut gepullt.
-5. Config-Dateien werden nur nach Absprache geändert.
-6. Änderungen werden in kleine, nachvollziehbare Commits aufgeteilt.
-7. Pull Requests werden reviewed.
-8. Der Merge in `main` wird im Daily abgestimmt.
-
-Vor Arbeitsbeginn:
-
-```bash
-git switch <dein-branch>
-git pull origin <dein-branch>
-git status
-```
-
-### Commit-Beispiele
+Grundregeln:
 
 ```text
-feat(tasks): add task create operation
-fix(tasks): prevent duplicate assignments
-refactor(tasks): extract Supabase task repository
-docs(tasks): document component integration
-test(tasks): add task filter tests
+main ist der gemeinsame Produktivbranch.
+Jedes Teammitglied arbeitet auf dem eigenen Branch.
+Vor Arbeitsbeginn wird gepullt.
+Commits bleiben klein und nachvollziehbar.
+Reviews sind Pflicht.
+Merges in main werden im Daily abgestimmt.
 ```
 
-Weitere Informationen:
+Commit-Format:
 
-[Entwicklungsworkflow](docs/development-workflow.md)
+```text
+type(scope): message
+```
+
+Beispiele:
+
+```text
+feat(tasks): add task create flow
+fix(contacts): keep selected contact after update
+docs(tasks): document task service data flow
+style(layout): align responsive sidebar
+refactor(tasks): extract task payload mapper
+```
+
+Weitere Details:
+
+```text
+docs/development-workflow.md
+```
 
 ---
 
 ## Qualitätsregeln
 
-* Funktionen haben eine klar erkennbare Aufgabe.
-* Funktionen bleiben möglichst kurz.
-* Dateien sollen möglichst nicht mehr als 400 Zeilen enthalten.
-* Dateinamen sind beschreibend und konsistent.
-* TypeScript verwendet `camelCase`.
-* Datenbankfelder verwenden `snake_case`.
-* Kommentare im Code werden auf Englisch geschrieben.
-* UI-Texte orientieren sich am Figma-Design.
-* Formulare verwenden Angular-Validierung statt Browser-Standardmeldungen.
-* Buttons werden während laufender Speicheroperationen deaktiviert.
-* Es dürfen keine unbehandelten Fehler in der Konsole verbleiben.
-* Debug-Logs werden vor dem Merge entfernt.
-* Responsiveness wird bis mindestens 320 Pixel Breite geprüft.
-* Es dürfen keine horizontalen Scrollbalken entstehen.
-* Bestehende globale SCSS-Strukturen werden nicht ohne Teamabsprache grundlegend verändert.
-
----
-
-## Build und Tests
-
-Produktionsbuild:
+Vor Commits und Reviews prüfen:
 
 ```bash
 npm run build
-```
-
-Unit-Tests:
-
-```bash
-npm test
-```
-
-Git-Differenzen prüfen:
-
-```bash
 git diff --check
-git status
+git status --short
 ```
 
-Nach Konfliktmarkern suchen:
+Nach Pulls oder Konflikten zusätzlich:
 
 ```bash
 git grep -n "<<<<<<<\|=======\|>>>>>>>"
 ```
 
-Weitere Prüfungen:
+Erwartung:
 
-[Testleitfaden](docs/testing-guide.md)
+```text
+Build erfolgreich
+keine Whitespace-Fehler
+keine Konfliktmarker
+keine ungewollten Dateien
+keine echten Environment-Keys
+```
+
+Weitere Details:
+
+```text
+docs/testing-guide.md
+```
+
+---
+
+## Dokumentationsübersicht
+
+| Dokument | Inhalt |
+|---|---|
+| `docs/allgemein.md` | Projektüberblick und Einstieg |
+| `docs/project-architecture.md` | zentrale Architekturübersicht |
+| `docs/architecture.md` | Services und Components |
+| `docs/state-management.md` | Service-State und Component-State |
+| `docs/conventions.md` | Code-Konventionen |
+| `docs/contact-service.md` | ContactService |
+| `docs/contact-components.md` | Contact-Components |
+| `docs/task-service.md` | TaskService |
+| `docs/task-data-layer.md` | Models, Mapper, Repository und Utils |
+| `docs/task-service-integration.md` | Verwendung des TaskService in Components |
+| `docs/task-components.md` | Task- und Board-Components |
+| `docs/supabase-database.md` | Tabellen, Relationen und SQL-Prüfungen |
+| `docs/database-architecture.md` | Datenbankarchitektur |
+| `docs/testing-guide.md` | Test- und Review-Checklisten |
+| `docs/development-workflow.md` | Git-, Branch- und Review-Regeln |
+
+---
+
+## Aktueller Sprint-Fokus
+
+Der aktuelle Sprint-Fokus liegt auf:
+
+```text
+Task-Datenebene
+TaskService
+Task-Erstellung
+Board-Darstellung
+Subtasks
+Kontaktzuweisungen
+Drag-and-drop
+Dokumentation
+```
+
+Noch durch Components vollständig anzubinden:
+
+```text
+Add-Task-Formular
+Board-Spalten
+Task-Karten
+Task-Detaildialog
+Edit-Task-Flow
+mobile Alternative zum Verschieben
+```
 
 ---
 
 ## Sicherheitshinweis
 
-Die aktuellen RLS-Policies sind für die gemeinsame Demo- und Entwicklungsphase offen für:
+Die RLS-Policies können für die gemeinsame Demo- und Entwicklungsphase offen sein.
+
+Diese Konfiguration ist nicht produktionssicher.
+
+Vor einer produktiven Veröffentlichung müssten geprüft werden:
 
 ```text
-anon
-authenticated
+Authentifizierung
+benutzer- oder workspacebezogene Policies
+minimale Datenbankrechte
+Trennung von Demo- und Produktionsdaten
+sichere Environment-Verwaltung
 ```
 
-Diese Konfiguration ist nicht für eine produktive Anwendung mit vertraulichen Daten vorgesehen.
+---
 
-Vor einer produktiven Veröffentlichung müssen mindestens folgende Punkte geprüft werden:
+## Zusammenfassung
 
-* Authentifizierung
-* benutzer- oder workspacebezogene Policies
-* minimale Datenbankrechte
-* Schutz vor unberechtigtem Lesen und Schreiben
-* sichere Verwaltung von Umgebungsvariablen
-* Trennung von Demo- und Produktionsdaten
+Join ist in klar getrennte Bereiche aufgebaut.
+
+Components übernehmen Darstellung und Benutzerinteraktion.  
+Services koordinieren Datenlogik und gemeinsamen State.  
+Repositories sprechen mit Supabase.  
+Mapper übersetzen Datenformen.  
+Utils enthalten reine Berechnungen.  
+Supabase speichert Kontakte, Tasks, Subtasks und Kontaktzuweisungen dauerhaft.
+
+Diese Struktur hält die Anwendung nachvollziehbar, wartbar und für Reviews gut erklärbar.
