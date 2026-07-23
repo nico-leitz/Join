@@ -275,6 +275,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   &__contact-menu,
   &__category-menu {
     position: absolute;
+    display: flex;
+    flex-direction: column;
     top: calc(100% + 4px);
     right: 0;
     left: 0;
@@ -283,6 +285,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-radius: var(--radius-md);
     background-color: var(--color-bg-light);
     box-shadow: 0 4px 10px 0 #00000026;
+    gap: 1px;
   }
 
   &__contact-menu {
@@ -305,6 +308,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
     &:hover {
       background-color: #eeeeee;
+    }
+
+    &:has(input:checked){
+      background-color: var(--color-primary);
+      color: var(--color-text-light);
+      border-radius: 10px;
+
+      .add-task__contact-name {
+        color: var(--color-text-light);
+      }
+
+      .add-task__checkbox {
+        accent-color: var(--color-text-light);
+      }
+
+      &:hover{
+        background-color: var(--color-primary-dark);
+      }
     }
   }
 
@@ -419,7 +440,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
   }
 
-  &__calender_icon {
+  &__calendar_icon {
     background-image: url('/assets/add-task/due_date_icon.svg');
     position: absolute;
     top: 40%;
