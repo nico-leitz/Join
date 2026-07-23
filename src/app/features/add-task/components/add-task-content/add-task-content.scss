@@ -22,6 +22,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: auto;
 }
 
+textarea::-webkit-resizer {
+  display: none;
+}
+textarea::-moz-resizer {
+  display: none;
+}
+
 .add-task {
   display: flex;
   width: 100%;
@@ -135,6 +142,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   &__textarea {
     min-height: 120px;
     resize: vertical;
+  }
+
+  &__description_icon {
+    position: absolute;
+    bottom: 32px;
+    right: 6px;
+    height: 16px;
+    width: 16px;
+    background-image: url('/assets/add-task/description_icon.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
+    pointer-events: none;
   }
 
   &__field-error {
