@@ -1,0 +1,16 @@
+insert into public.contacts (first_name, last_name, email, phone, badge_color) values
+('Anna', 'Müller', 'anna.mueller@example.com', '+49 151 10000001', 'hsl(18 72% 42%)'),
+('Ben', 'Schneider', 'ben.schneider@example.com', '+49 151 10000002', 'hsl(252 70% 43%)'),
+('Clara', 'Fischer', 'clara.fischer@example.com', '+49 151 10000003', 'hsl(198 74% 41%)'),
+('David', 'Weber', 'david.weber@example.com', '+49 151 10000004', 'hsl(315 68% 44%)'),
+('Emma', 'Wagner', 'emma.wagner@example.com', '+49 151 10000005', 'hsl(42 75% 40%)'),
+('Felix', 'Becker', 'felix.becker@example.com', '+49 151 10000006', 'hsl(170 71% 39%)'),
+('Greta', 'Hoffmann', 'greta.hoffmann@example.com', '+49 151 10000007', 'hsl(275 69% 42%)'),
+('Henry', 'Schulz', 'henry.schulz@example.com', '+49 151 10000008', 'hsl(205 76% 38%)'),
+('Ida', 'Koch', 'ida.koch@example.com', '+49 151 10000009', 'hsl(355 70% 45%)'),
+('Jonas', 'Richter', 'jonas.richter@example.com', '+49 151 10000010', 'hsl(82 68% 39%)'),
+('Klara', 'Klein', 'klara.klein@example.com', '+49 151 10000011', 'hsl(12 73% 44%)'),
+('Leon', 'Wolf', 'leon.wolf@example.com', '+49 151 10000012', 'hsl(28 76% 43%)'),
+('Mia', 'Neumann', 'mia.neumann@example.com', '+49 151 10000013', 'hsl(228 72% 41%)'),
+('Noah', 'Schwarz', 'noah.schwarz@example.com', '+49 151 10000014', 'hsl(95 67% 40%)'),
+('Olivia', 'Zimmermann', 'olivia.zimmermann@example.com', '+49 151 10000015', 'hsl(48 74% 42%)');

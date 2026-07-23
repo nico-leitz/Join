@@ -1,4 +1,5 @@
 @use 'abstracts/breakpoints' as bp;
+@use 'abstracts/mixins' as mx;
 
 :host {
   display: block;
@@ -37,10 +38,7 @@ textarea::-moz-resizer {
   min-height: 100%;
   max-width: var(--layout-max-width);
   flex-direction: column;
-  padding:
-    clamp(48px, 6vh, 80px)
-    clamp(32px, 6vw, 96px)
-    32px;
+  padding: clamp(48px, 6vh, 80px) clamp(32px, 6vw, 96px) 32px;
   box-sizing: border-box;
   background-color: var(--color-bg-main);
   font-family: var(--font-primary);
@@ -48,6 +46,22 @@ textarea::-moz-resizer {
   &__header {
     flex-shrink: 0;
     margin-bottom: 36px;
+  }
+
+  &__icon-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
   }
 
   &__title {
@@ -120,6 +134,7 @@ textarea::-moz-resizer {
     font-size: var(--font-size-sm);
     line-height: var(--line-height-base);
     outline: none;
+    z-index: 30;
     transition:
       border-color var(--transition-fast),
       box-shadow var(--transition-fast);
@@ -130,7 +145,7 @@ textarea::-moz-resizer {
     }
 
     &:focus {
-      border-color: var(--color-border-focus);
+      border-color: #124658;
     }
 
     &--invalid,
@@ -183,9 +198,8 @@ textarea::-moz-resizer {
     height: 48px;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     padding: 0 10px;
-    border: unset;
+    border: 1px solid rgba(0, 0, 0, 0.137);
     border-radius: var(--radius-md);
     background-color: var(--color-bg-light);
     box-shadow: 0 0 4px 0 #0000001a;
@@ -199,8 +213,8 @@ textarea::-moz-resizer {
       transform var(--transition-fast);
 
     img {
-      width: 20px;
-      height: 20px;
+      width: 2rem;
+      height: 2rem;
       flex-shrink: 0;
       object-fit: contain;
     }
@@ -209,6 +223,7 @@ textarea::-moz-resizer {
     &:focus-visible {
       outline: none;
       transform: translateY(-1px);
+      box-shadow: 0px 5px 4px 0 rgba(0, 0, 0, 0.212);
     }
 
     &--active {
@@ -249,12 +264,16 @@ textarea::-moz-resizer {
     min-width: 0;
     height: 100%;
     padding: 11px 44px 11px 16px;
-    border: unset;
+    border: 0.5px rgba(0, 0, 0, 0) solid;
     border-radius: inherit;
     background: transparent;
     color: var(--color-text-main);
     font: inherit;
     outline: none;
+
+    &:focus {
+      border-color: #124658;
+    }
 
     &::placeholder {
       color: var(--color-text-main);
@@ -295,6 +314,7 @@ textarea::-moz-resizer {
   &__contact-menu,
   &__category-menu {
     position: absolute;
+    top: calc(100% - 0.3rem);
     display: flex;
     flex-direction: column;
     top: calc(100% + 4px);
@@ -362,6 +382,27 @@ textarea::-moz-resizer {
     font-size: 11px;
   }
 
+  &__badge {
+    @include mx.flexbox(row, center, center);
+
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border: 0.125rem solid var(--color-bg-light, #ffffff);
+    border-radius: 50%;
+    color: var(--color-text-light, #ffffff);
+    font-size: var(--font-size-sm, 0.75rem);
+
+    &:not(:first-child) {
+      margin-left: -0.5rem;
+    }
+  }
+
+  &__badge--more {
+    background-color: #dbdbdb;
+    color: #1f1e1e;
+  }
+
   &__contact-name {
     min-width: 0;
     overflow: hidden;
@@ -395,10 +436,12 @@ textarea::-moz-resizer {
   }
 
   &__category-toggle {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     text-align: left;
+    z-index: 31;
     cursor: pointer;
   }
 
@@ -432,10 +475,17 @@ textarea::-moz-resizer {
 
   &__subtask-creator {
     position: relative;
+
+    & > .add-task__input {
+      padding-right: 3rem;
+    }
   }
 
-  &__subtask-creator > .add-task__input {
-    padding-right: 48px;
+  &__subtask-divider {
+    background-color: #a8a8a8;
+    width: 1px;
+    height: 24px;
+    margin: 0 2px;
   }
 
   &__subtask-add {
@@ -443,10 +493,11 @@ textarea::-moz-resizer {
     top: 0;
     right: 0;
     display: flex;
-    width: 48px;
-    height: 48px;
+    width: 4.5rem;
+    height: 3rem;
     align-items: center;
     justify-content: center;
+    gap: 2px;
     padding: 0;
     border: unset;
     background: transparent;
@@ -457,6 +508,18 @@ textarea::-moz-resizer {
     &:disabled {
       cursor: not-allowed;
       opacity: 0.35;
+    }
+
+    img {
+      width: 1.8rem;
+      height: 1.8rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 50%;
+
+      &:hover {
+        background-color: #eeeeee;
+      }
     }
   }
 
@@ -479,11 +542,11 @@ textarea::-moz-resizer {
     flex-direction: column;
     gap: 4px;
     margin-top: 8px;
+    padding: 0;
     overflow-y: auto;
   }
 
-  &__subtask-item,
-  &__subtask-edit {
+  &__subtask-item {
     display: flex;
     min-height: 36px;
     align-items: center;
@@ -492,14 +555,19 @@ textarea::-moz-resizer {
     border-radius: var(--radius-sm);
     box-sizing: border-box;
 
+    &::before {
+      content: '•';
+      flex-shrink: 0;
+    }
+
     &:hover {
       background-color: #eeeeee;
-    }
-  }
 
-  &__subtask-item::before {
-    content: '•';
-    flex-shrink: 0;
+      .add-task__subtask-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
   }
 
   &__subtask-title {
@@ -512,7 +580,11 @@ textarea::-moz-resizer {
 
   &__subtask-actions {
     display: flex;
+    align-items: center;
     flex-shrink: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-fast, 0.15s ease);
   }
 
   &__subtask-action {
@@ -523,9 +595,9 @@ textarea::-moz-resizer {
     justify-content: center;
     padding: 0;
     border: unset;
-    border-radius: var(--radius-sm);
-    background: transparent;
+    background-color: transparent;
     cursor: pointer;
+    border-radius: 50%;
 
     img {
       width: 18px;
@@ -533,10 +605,15 @@ textarea::-moz-resizer {
       object-fit: contain;
     }
 
+    img[alt='Save'] {
+      filter: brightness(0) saturate(100%) invert(22%) sepia(10%) saturate(2256%) hue-rotate(158deg)
+        brightness(96%) contrast(92%);
+    }
+
     &:hover,
     &:focus-visible {
-      background-color: #d8d8d8;
       outline: none;
+      background-color: #d1d1d1;
     }
 
     &:disabled {
@@ -546,7 +623,20 @@ textarea::-moz-resizer {
   }
 
   &__subtask-edit {
-    padding-left: 0;
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 8px 2px 0;
+
+    box-sizing: border-box;
+    background-color: white;
+    border-bottom: 1px solid #124658;
+
+    .add-task__subtask-actions {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 
   &__subtask-edit-input {
@@ -554,6 +644,10 @@ textarea::-moz-resizer {
     min-width: 0;
     flex: 1;
     padding-block: 6px;
+    padding-left: 16px;
+    border: none;
+    background: transparent;
+    outline: none;
   }
 
   &__footer {
@@ -600,10 +694,7 @@ textarea::-moz-resizer {
   &--dialog {
     height: 100%;
     min-height: 0;
-    padding:
-      40px
-      clamp(24px, 5vw, 48px)
-      32px;
+    padding: 40px clamp(24px, 5vw, 48px) 32px;
     overflow: hidden;
   }
 
@@ -638,9 +729,7 @@ textarea::-moz-resizer {
     box-shadow: var(--shadow-fab);
     font-size: var(--font-size-sm);
     transform: translate(-50%, -50%);
-    animation:
-      add-task-success-desktop-in
-      200ms ease-in-out both;
+    animation: add-task-success-desktop-in 200ms ease-in-out both;
 
     img {
       width: 28px;
@@ -650,34 +739,27 @@ textarea::-moz-resizer {
   }
 }
 
-@media (
-  max-width:
-    bp.$breakpoint-tablet-l
-) {
+@media (max-width: bp.$breakpoint-tablet-l) {
   .add-task {
     padding-inline: 32px;
 
     &__form-area {
-      gap: 28px;
+      gap: 1.8rem;
     }
 
     &__priority {
-      gap: 5px;
       padding-inline: 6px;
       font-size: 14px;
 
       img {
-        width: 17px;
-        height: 17px;
+        width: 2rem;
+        height: 2rem;
       }
     }
   }
 }
 
-@media (
-  max-width:
-    bp.$breakpoint-tablet-sm-max
-) {
+@media (max-width: bp.$breakpoint-tablet-sm-max) {
   .add-task {
     height: auto;
     min-height: auto;
@@ -760,17 +842,12 @@ textarea::-moz-resizer {
       min-width: 0;
       max-width: 320px;
       transform: translate(-50%, -50%);
-      animation:
-        add-task-success-mobile-in
-        200ms ease-in-out both;
+      animation: add-task-success-mobile-in 200ms ease-in-out both;
     }
   }
 }
 
-@media (
-  max-width:
-    bp.$breakpoint-mobile-xs
-) {
+@media (max-width: bp.$breakpoint-mobile-xs) {
   .add-task {
     padding-inline: 12px;
 
@@ -799,15 +876,7 @@ textarea::-moz-resizer {
   }
 }
 
-@media (
-  orientation: landscape
-) and (
-  max-height:
-    bp.$breakpoint-landscape-height-md
-) and (
-  max-width:
-    bp.$breakpoint-landscape-width-lg
-) {
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
   .add-task {
     height: auto;
     min-height: 100%;
@@ -908,33 +977,23 @@ textarea::-moz-resizer {
 @keyframes add-task-success-desktop-in {
   from {
     opacity: 0;
-    transform:
-      translate(
-        calc(-50% + 80px),
-        -50%
-      );
+    transform: translate(calc(-50% + 80px), -50%);
   }
 
   to {
     opacity: 1;
-    transform:
-      translate(-50%, -50%);
+    transform: translate(-50%, -50%);
   }
 }
 
 @keyframes add-task-success-mobile-in {
   from {
     opacity: 0;
-    transform:
-      translate(
-        -50%,
-        calc(100vh - 50%)
-      );
+    transform: translate(-50%, calc(100vh - 50%));
   }
 
   to {
     opacity: 1;
-    transform:
-      translate(-50%, -50%);
+    transform: translate(-50%, -50%);
   }
 }
