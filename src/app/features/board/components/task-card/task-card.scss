@@ -279,7 +279,6 @@
       flex-start,
       center
     );
-
     min-width: 0;
   }
 
@@ -322,10 +321,15 @@
     flex-shrink: 0;
 
     img {
-      width: 1.25rem;
-      height: 1.25rem;
+      width: 2rem;
+      height: 2rem;
       object-fit: contain;
     }
+  }
+
+  &__badge--more {
+    background-color: #dbdbdb;
+    color: #1f1e1e;
   }
 }
 
