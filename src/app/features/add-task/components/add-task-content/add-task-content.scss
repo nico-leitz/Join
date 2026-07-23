@@ -8,6 +8,20 @@
   min-height: 0;
 }
 
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
 .add-task {
   display: flex;
   width: 100%;
@@ -85,6 +99,7 @@
   }
 
   &__input {
+    position: relative;
     width: 100%;
     min-width: 0;
     height: 48px;
@@ -402,6 +417,19 @@
       cursor: not-allowed;
       opacity: 0.35;
     }
+  }
+
+  &__calender_icon {
+    background-image: url('/assets/add-task/due_date_icon.svg');
+    position: absolute;
+    top: 40%;
+    right: 3%;
+    width: 24px;
+    height: 24px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px 20px;
+    pointer-events: none;
   }
 
   &__subtask-list {
