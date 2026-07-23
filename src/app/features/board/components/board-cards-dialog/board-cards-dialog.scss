@@ -208,11 +208,10 @@
   &__priority {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
 
     img {
-      width: 20px;
-      height: 20px;
+      width: 2rem;
+      height: 2rem;
       object-fit: contain;
     }
   }
@@ -408,7 +407,6 @@
     min-height: 44px;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     padding: 8px 10px;
     border: none;
     border-radius: 10px;
@@ -426,8 +424,8 @@
       transform 0.15s ease;
 
     img {
-      width: 18px;
-      height: 18px;
+      width: 2rem;
+      height: 2rem;
       object-fit: contain;
     }
 
