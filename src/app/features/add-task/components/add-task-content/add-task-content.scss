@@ -112,7 +112,6 @@
     font-size: var(--font-size-sm);
     line-height: var(--line-height-base);
     outline: none;
-    z-index: 30;
     transition:
       border-color var(--transition-fast),
       box-shadow var(--transition-fast);
@@ -237,10 +236,12 @@
     font: inherit;
     outline: none;
     z-index: 51;
+    cursor: pointer;
 
     &:focus,
     .dropdown-wrapper.is-open & {
       border-color: #124658;
+      z-index: 101;
     }
 
     &::placeholder {
@@ -285,7 +286,7 @@
     top: calc(100% - 0.3rem);
     right: 0;
     left: 0;
-    z-index: 50;
+    z-index: 100;
     overflow-y: auto;
     border-radius: var(--radius-md);
     background-color: var(--color-bg-light);
@@ -387,7 +388,7 @@
     align-items: center;
     justify-content: space-between;
     text-align: left;
-    z-index: 51;
+    z-index: 49;
     cursor: pointer;
   }
 
@@ -598,7 +599,7 @@
   &__required-legend {
     margin: 0 0 12px;
     color: var(--color-primary);
-    font-size: var(--font-size-xs);
+    font-size: 1rem;
 
     span {
       color: var(--color-error);
