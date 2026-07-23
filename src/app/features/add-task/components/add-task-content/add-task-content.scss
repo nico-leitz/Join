@@ -551,7 +551,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   &__required-legend {
     margin: 0 0 12px;
     color: var(--color-primary);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
 
     span {
       color: var(--color-error);
