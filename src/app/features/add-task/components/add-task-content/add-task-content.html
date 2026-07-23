@@ -7,21 +7,13 @@
   novalidate
 >
   <header class="add-task__header">
-    <h1 class="add-task__title">
-      Add Task
-    </h1>
+    <h1 class="add-task__title">Add Task</h1>
   </header>
 
   <div class="add-task__form-area">
-    <section
-      class="add-task__column"
-      aria-label="Task details"
-    >
+    <section class="add-task__column" aria-label="Task details">
       <div class="add-task__field">
-        <label
-          class="add-task__label"
-          for="add_task_title"
-        >
+        <label class="add-task__label" for="add_task_title">
           Title<span aria-hidden="true">*</span>
         </label>
 
@@ -42,19 +34,11 @@
       </div>
 
       <div class="add-task__field">
-        <label
-          class="add-task__label"
-          for="add_task_description"
-        >
-          Description
-        </label>
+        <label class="add-task__label" for="add_task_description">Description</label>
 
         <textarea
           id="add_task_description"
-          class="
-            add-task__input
-            add-task__textarea
-          "
+          class="add-task__input add-task__textarea"
           rows="4"
           maxlength="1000"
           formControlName="description"
@@ -65,10 +49,7 @@
       </div>
 
       <div class="add-task__field">
-        <label
-          class="add-task__label"
-          for="add_task_due_date"
-        >
+        <label class="add-task__label" for="add_task_due_date">
           Due date<span aria-hidden="true">*</span>
         </label>
 
@@ -87,87 +68,41 @@
       </div>
     </section>
 
-    <div
-      class="add-task__divider"
-      aria-hidden="true"
-    ></div>
+    <div class="add-task__divider" aria-hidden="true"></div>
 
-    <section
-      class="add-task__column"
-      aria-label="Task assignment"
-    >
-      <fieldset
-        class="
-          add-task__field
-          add-task__fieldset
-        "
-      >
-        <legend class="add-task__label">
-          Priority
-        </legend>
+    <section class="add-task__column" aria-label="Task assignment">
+      <fieldset class="add-task__field add-task__fieldset">
+        <legend class="add-task__label">Prio</legend>
 
         <div class="add-task__priorities">
           <button
             type="button"
-            class="
-              add-task__priority
-              add-task__priority--urgent
-            "
-            [class.add-task__priority--active]="
-              taskForm.controls.priority.value ===
-              'urgent'
-            "
+            class="add-task__priority add-task__priority--urgent"
+            [class.add-task__priority--active]="taskForm.controls.priority.value === 'urgent'"
             (click)="setPriority('urgent')"
           >
             <span>Urgent</span>
-
-            <img
-              src="assets/board/board-card/urgent.svg"
-              alt=""
-              aria-hidden="true"
-            />
+            <img src="assets/board/board-card/urgent.svg" alt="" aria-hidden="true" />
           </button>
 
           <button
             type="button"
-            class="
-              add-task__priority
-              add-task__priority--medium
-            "
-            [class.add-task__priority--active]="
-              taskForm.controls.priority.value ===
-              'medium'
-            "
+            class="add-task__priority add-task__priority--medium"
+            [class.add-task__priority--active]="taskForm.controls.priority.value === 'medium'"
             (click)="setPriority('medium')"
           >
             <span>Medium</span>
-
-            <img
-              src="assets/board/board-card/medium.svg"
-              alt=""
-              aria-hidden="true"
-            />
+            <img src="assets/board/board-card/medium.svg" alt="" aria-hidden="true" />
           </button>
 
           <button
             type="button"
-            class="
-              add-task__priority
-              add-task__priority--low
-            "
-            [class.add-task__priority--active]="
-              taskForm.controls.priority.value ===
-              'low'
-            "
+            class="add-task__priority add-task__priority--low"
+            [class.add-task__priority--active]="taskForm.controls.priority.value === 'low'"
             (click)="setPriority('low')"
           >
             <span>Low</span>
-
-            <img
-              src="assets/board/board-card/low.svg"
-              alt=""
-              aria-hidden="true"
-            />
+            <img src="assets/board/board-card/low.svg" alt="" aria-hidden="true" />
           </button>
         </div>
 
@@ -175,20 +110,10 @@
       </fieldset>
 
       <div class="add-task__field">
-        <label
-          class="add-task__label"
-          for="add_task_contact_search"
-        >
-          Assigned to
-        </label>
+        <label class="add-task__label" for="add_task_contact_search">Assigned to</label>
 
         <div class="add-task__contact-select">
-          <div
-            class="
-              add-task__input
-              add-task__select-control
-            "
-          >
+          <div class="add-task__input add-task__select-control">
             <input
               id="add_task_contact_search"
               class="add-task__select-search"
@@ -210,9 +135,7 @@
             >
               <span
                 class="add-task__dropdown-arrow"
-                [class.add-task__dropdown-arrow--open]="
-                  contactsMenuOpen()
-                "
+                [class.add-task__dropdown-arrow--open]="contactsMenuOpen()"
                 aria-hidden="true"
               ></span>
             </button>
@@ -226,14 +149,9 @@
               aria-multiselectable="true"
             >
               @if (filteredContacts().length === 0) {
-                <p class="add-task__empty-option">
-                  No contacts found.
-                </p>
+                <p class="add-task__empty-option">No contacts found.</p>
               } @else {
-                @for (
-                  contact of filteredContacts();
-                  track contact.id
-                ) {
+                @for (contact of filteredContacts(); track contact.id) {
                   <label class="add-task__contact-option">
                     <span
                       class="add-task__contact-badge"
@@ -243,8 +161,7 @@
                     </span>
 
                     <span class="add-task__contact-name">
-                      {{ contact.firstName }}
-                      {{ contact.lastName }}
+                      {{ contact.firstName }} {{ contact.lastName }}
                     </span>
 
                     <input
@@ -261,25 +178,21 @@
         </div>
 
         @if (selectedContacts().length > 0) {
-          <div
-            class="add-task__selected-contacts"
-            aria-label="Selected contacts"
-          >
-            @for (
-              contact of selectedContacts();
-              track contact.id
-            ) {
+          <div class="add-task__selected-contacts" aria-label="Selected contacts">
+            @for (contact of selectedContacts() | slice: 0 : 3; track contact.id) {
               <span
                 class="add-task__contact-badge"
                 [style.background-color]="contact.badgeColor"
-                [attr.title]="
-                  contact.firstName +
-                  ' ' +
-                  contact.lastName
-                "
+                [attr.title]="contact.firstName + ' ' + contact.lastName"
               >
                 {{ getInitials(contact) }}
               </span>
+            }
+
+            @if (selectedContacts().length > 3) {
+              <div class="add-task__badge add-task__badge--more">
+                +{{ selectedContacts().length - 3 }}
+              </div>
             }
           </div>
         }
@@ -288,45 +201,30 @@
       </div>
 
       <div class="add-task__field">
-        <span class="add-task__label">
-          Category<span aria-hidden="true">*</span>
-        </span>
+        <span class="add-task__label">Category<span aria-hidden="true">*</span></span>
 
         <div class="add-task__category-select">
           <button
             type="button"
-            class="
-              add-task__input
-              add-task__category-toggle
-            "
+            class="add-task__input add-task__category-toggle"
             [class.add-task__input--invalid]="hasCategoryError()"
             [attr.aria-expanded]="categoryMenuOpen()"
             (click)="toggleCategoryMenu()"
           >
-            <span
-              [class.add-task__placeholder]="!getCategoryLabel()"
-            >
-              {{
-                getCategoryLabel() ||
-                  'Select task category'
-              }}
+            <span [class.add-task__placeholder]="!getCategoryLabel()">
+              {{ getCategoryLabel() || 'Select task category' }}
             </span>
 
             <span
               class="add-task__dropdown-arrow"
-              [class.add-task__dropdown-arrow--open]="
-                categoryMenuOpen()
-              "
+              [class.add-task__dropdown-arrow--open]="categoryMenuOpen()"
               aria-hidden="true"
             ></span>
           </button>
 
           @if (categoryMenuOpen()) {
             <div class="add-task__category-menu">
-              @for (
-                option of categoryOptions;
-                track option.value
-              ) {
+              @for (option of categoryOptions; track option.value) {
                 <button
                   type="button"
                   class="add-task__category-option"
@@ -345,95 +243,87 @@
       </div>
 
       <div class="add-task__field">
-        <label
-          class="add-task__label"
-          for="add_task_subtask"
-        >
-          Subtasks
-        </label>
+        <label class="add-task__label" for="add_task_subtask">Subtasks</label>
 
         <div class="add-task__subtask-creator">
           <input
             id="add_task_subtask"
+            #subtaskInput
             class="add-task__input"
             type="text"
-            maxlength="160"
             placeholder="Add new subtask"
+            (focus)="onInputFocus()"
+            (blur)="onInputBlur()"
             [value]="newSubtaskTitle()"
             (input)="updateNewSubtaskTitle($event)"
-            (keydown.enter)="
-              $event.preventDefault();
-              addSubtask()
-            "
+            (keydown.enter)="$event.preventDefault(); addSubtask()"
           />
 
-          <button
-            type="button"
-            class="add-task__subtask-add"
-            aria-label="Add subtask"
-            [disabled]="!newSubtaskTitle().trim()"
-            (click)="addSubtask()"
-          >
-            +
-          </button>
+          <div class="add-task__subtask-add">
+            @if (isSubtaskFocused() || newSubtaskTitle().trim()) {
+              <button
+                type="button"
+                class="add-task__icon-button"
+                (mousedown)="$event.preventDefault()"
+                (click)="clearInput(subtaskInput)"
+              >
+                <img src="assets/add-task/subtasks_icon_x.svg" alt="Clear input" />
+              </button>
+
+              <div class="add-task__subtask-divider"></div>
+
+              <button
+                type="button"
+                class="add-task__icon-button"
+                (mousedown)="$event.preventDefault()"
+                (click)="addSubtask()"
+              >
+                <img src="assets/add-task/subtasks_icon_checkmark.svg" alt="Add subtask" />
+              </button>
+            } 
+          </div>
         </div>
 
         @if (draftSubtasks().length > 0) {
-          <div class="add-task__subtask-list">
-            @for (
-              subtask of draftSubtasks();
-              track $index;
-              let index = $index
-            ) {
+          <ul class="add-task__subtask-list">
+            @for (subtask of draftSubtasks(); track $index; let index = $index) {
               @if (editingSubtaskIndex() === index) {
-                <div class="add-task__subtask-edit">
+                <li class="add-task__subtask-edit">
                   <input
-                    class="
-                      add-task__input
-                      add-task__subtask-edit-input
-                    "
                     type="text"
+                    class="add-task__input add-task__subtask-edit-input"
                     maxlength="160"
                     [value]="editingSubtaskTitle()"
                     (input)="updateEditingSubtaskTitle($event)"
-                    (keydown.enter)="
-                      $event.preventDefault();
-                      saveSubtaskEdit()
-                    "
+                    (keydown.enter)="$event.preventDefault(); saveSubtaskEdit()"
                   />
 
-                  <button
-                    type="button"
-                    class="add-task__subtask-action"
-                    aria-label="Save subtask"
-                    [disabled]="!editingSubtaskTitle().trim()"
-                    (click)="saveSubtaskEdit()"
-                  >
-                    <img
-                      src="assets/icons/icons_edit/check (1).svg"
-                      alt=""
-                      aria-hidden="true"
-                    />
-                  </button>
+                  <div class="add-task__subtask-actions">
+                    <button
+                      type="button"
+                      class="add-task__subtask-action"
+                      aria-label="Delete subtask"
+                      (click)="removeSubtask(index)"
+                    >
+                      <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
+                    </button>
 
-                  <button
-                    type="button"
-                    class="add-task__subtask-action"
-                    aria-label="Delete subtask"
-                    (click)="removeSubtask(index)"
-                  >
-                    <img
-                      src="assets/icons/icons_edit/delete.svg"
-                      alt=""
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div>
+                    <div class="add-task__subtask-divider"></div>
+
+                    <button
+                      type="button"
+                      class="add-task__subtask-action"
+                      aria-label="Save subtask"
+                      [disabled]="!editingSubtaskTitle().trim()"
+                      (click)="saveSubtaskEdit()"
+                    >
+                      <img src="assets/icons/icons_edit/check (1).svg" alt="Save" />
+                    </button>
+                  </div>
+                </li>
               } @else {
-                <div class="add-task__subtask-item">
-                  <span class="add-task__subtask-title">
-                    {{ subtask.title }}
-                  </span>
+                <li class="add-task__subtask-item">
+                  <span class="add-task__subtask-title">{{ subtask.title }}</span>
 
                   <div class="add-task__subtask-actions">
                     <button
@@ -442,12 +332,10 @@
                       aria-label="Edit subtask"
                       (click)="startEditingSubtask(index)"
                     >
-                      <img
-                        src="assets/icons/icons_edit/edit.svg"
-                        alt=""
-                        aria-hidden="true"
-                      />
+                      <img src="assets/icons/icons_edit/edit.svg" alt="Edit" />
                     </button>
+
+                    <div class="add-task__subtask-divider"></div>
 
                     <button
                       type="button"
@@ -455,17 +343,13 @@
                       aria-label="Delete subtask"
                       (click)="removeSubtask(index)"
                     >
-                      <img
-                        src="assets/icons/icons_edit/delete.svg"
-                        alt=""
-                        aria-hidden="true"
-                      />
+                      <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
                     </button>
                   </div>
-                </div>
+                </li>
               }
             }
-          </div>
+          </ul>
         }
 
         <p class="add-task__field-error"></p>
@@ -474,10 +358,7 @@
   </div>
 
   @if (errorMessage()) {
-    <p
-      class="add-task__form-error"
-      role="alert"
-    >
+    <p class="add-task__form-error" role="alert">
       {{ errorMessage() }}
     </p>
   }
@@ -491,42 +372,25 @@
     <div class="add-task__buttons">
       <button
         type="button"
-        class="
-          button
-          button-clean
-          add-task__secondary-button
-        "
+        class="button button-clean add-task__secondary-button"
         [disabled]="isSubmitting()"
         (click)="handleSecondaryAction()"
       >
         <span>
-          {{
-            mode() === 'dialog'
-              ? 'Cancel'
-              : 'Clear'
-          }}
+          {{ mode() === 'dialog' ? 'Cancel' : 'Clear' }}
         </span>
-
         <span aria-hidden="true">×</span>
       </button>
 
       <button
         type="submit"
-        class="
-          button
-          button-primary
-          add-task__create-button
-        "
-        [disabled]="
-          taskForm.invalid ||
-          isSubmitting()
-        "
+        class="button button-primary add-task__create-button"
+        [disabled]="taskForm.invalid || isSubmitting()"
       >
         @if (isSubmitting()) {
           <span>Creating...</span>
         } @else {
           <span>Create Task</span>
-
           <img
             class="add-task__button-icon"
             src="assets/icons/icons_edit/check (1).svg"
@@ -540,16 +404,8 @@
 </form>
 
 @if (successMessage()) {
-  <div
-    class="add-task__success"
-    role="status"
-  >
+  <div class="add-task__success" role="status">
     <span>{{ successMessage() }}</span>
-
-    <img
-      src="assets/sidebar/icons/nav-board-icon.svg"
-      alt=""
-      aria-hidden="true"
-    />
+    <img src="assets/sidebar/icons/nav-board-icon.svg" alt="" aria-hidden="true" />
   </div>
 }
