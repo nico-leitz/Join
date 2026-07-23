@@ -1,49 +1,84 @@
 # Projektarchitektur
 
-Dieses Dokument beschreibt die technische Struktur des Join-Projekts, die Zuständigkeiten der einzelnen Schichten und den vorgesehenen Datenfluss.
+Dieses Dokument beschreibt die technische Grundstruktur des Join-Projekts. Es erklärt die wichtigsten Schichten, deren Zuständigkeiten und den vorgesehenen Datenfluss zwischen UI, Services und Supabase.
+
+Detailfragen zu einzelnen Bereichen sind in eigenen Dokumenten beschrieben.
 
 ---
 
-## Ziele der Architektur
+## Ziel der Architektur
 
-Die Architektur soll:
+Die Architektur soll verhindern, dass Logik ungeordnet in Components verteilt wird.
 
-- direkte Datenbankzugriffe aus Komponenten verhindern
-- UI-, Geschäfts- und Datenzugriffslogik trennen
-- wiederverwendbare Funktionen zentral bereitstellen
-- Fehler leichter lokalisierbar machen
-- paralleles Arbeiten im Team erleichtern
-- nachvollziehbare Schnittstellen schaffen
-- Supabase-spezifische Feldnamen von Angular-Komponenten fernhalten
+Wichtige Ziele:
+
+- Components bleiben für Darstellung und Benutzerinteraktion zuständig.
+- Services koordinieren Datenlogik und gemeinsamen State.
+- Repository-Klassen kapseln direkte Supabase-Zugriffe.
+- Mapper trennen Datenbankfelder von Angular-Models.
+- Utils enthalten reine Berechnungen.
+- Supabase-spezifische Details bleiben außerhalb der UI.
+- Änderungen bleiben für das Team nachvollziehbar und reviewbar.
+
+---
+
+## Grundprinzip
+
+Der Datenfluss läuft immer über klar getrennte Schichten.
+
+```text
+Component
+  ↓
+Service
+  ↓
+Repository
+  ↓
+Supabase
+```
+
+Beim Lesen werden Daten zurückgemappt:
+
+```text
+Supabase Row
+  ↓
+Mapper
+  ↓
+Application Model
+  ↓
+Service-State oder Rückgabewert
+  ↓
+Component
+```
+
+Beim Schreiben läuft die Umwandlung in die andere Richtung:
+
+```text
+Component Input
+  ↓
+Service
+  ↓
+Payload Mapper
+  ↓
+Repository
+  ↓
+Supabase
+```
 
 ---
 
 ## Verzeichnisstruktur
 
+Die zentrale Struktur liegt unter `src/app`.
+
 ```text
 src/app/
 ├── core/
 │   ├── mappers/
-│   │   ├── task.mapper.ts
-│   │   └── task-payload.mapper.ts
 │   ├── models/
-│   │   ├── contact.model.ts
-│   │   ├── subtask.model.ts
-│   │   ├── task-assignment.model.ts
-│   │   ├── task-persistence.model.ts
-│   │   └── task.model.ts
 │   ├── repositories/
-│   │   └── task.repository.ts
 │   ├── services/
-│   │   ├── contact.service.ts
-│   │   └── task.service.ts
 │   ├── supabase/
-│   │   ├── supabase.config.ts
-│   │   └── supabase.ts
 │   └── utils/
-│       ├── subtask-progress.utils.ts
-│       ├── task-filter.utils.ts
-│       └── task-state.utils.ts
 ├── features/
 │   ├── auth/
 │   ├── board/
@@ -54,35 +89,101 @@ src/app/
 └── shared/
 ```
 
+Die globale SCSS-Struktur liegt unter:
+
+```text
+src/styles/
+├── abstracts/
+├── base/
+├── components/
+├── layout/
+├── pages/
+├── themes/
+├── utilities/
+└── vendors/
+```
+
+---
+
+## Core-Bereich
+
+Der `core`-Bereich enthält Logik, die nicht direkt zu einer einzelnen UI-Component gehört.
+
+Dazu zählen:
+
+```text
+Models
+Mapper
+Payload-Mapper
+Repositories
+Services
+Supabase-Konfiguration
+Utils
+```
+
+Der Core-Bereich bildet die technische Grundlage für Features wie Kontakte, Tasks und Board.
+
+---
+
+## Features-Bereich
+
+Der `features`-Bereich enthält sichtbare Funktionsbereiche der Anwendung.
+
+Beispiele:
+
+```text
+contacts
+tasks
+board
+summary
+auth
+```
+
+Feature-Components dürfen Services verwenden, aber nicht direkt auf Supabase zugreifen.
+
+---
+
+## Layout-Bereich
+
+Der `layout`-Bereich enthält Komponenten, die die Anwendung strukturieren.
+
+Beispiele:
+
+```text
+Header
+Sidebar
+Mobile Navigation
+```
+
+Layout-Components enthalten normalerweise keine Feature-Datenlogik.
+
+---
+
+## Shared-Bereich
+
+Der `shared`-Bereich ist für wiederverwendbare UI-Elemente oder Hilfsstrukturen vorgesehen.
+
+Dort sollte nur Code liegen, der wirklich von mehreren Features genutzt wird.
+
 ---
 
 ## Components
 
-Components befinden sich überwiegend unter:
+Components sind für UI und Benutzerinteraktion zuständig.
 
-```text
-src/app/features/
-```
+Aufgaben einer Component:
 
-### Aufgaben einer Component
-
-- Daten für das Template bereitstellen
-- Benutzerinteraktionen behandeln
-- Formulare verwalten
+- HTML und Darstellung
+- Klicks und Benutzeraktionen
+- Formulare und Validierung
 - Dialoge öffnen und schließen
-- Drag-and-drop behandeln
+- lokale UI-Zustände
+- Lade- und Fehlerfeedback anzeigen
+- Daten per Input empfangen
+- Aktionen per Output melden
 - Service-Methoden aufrufen
-- Lade-, Erfolgs- und Fehlerfeedback darstellen
-- Daten an Child-Komponenten weitergeben
-- Outputs von Child-Komponenten verarbeiten
 
-### Eine Component darf nicht
-
-- direkt auf Supabase zugreifen
-- Datenbankspalten umwandeln
-- SQL-nahe Payloads erzeugen
-- RLS- oder Datenbanklogik enthalten
-- Repository-Methoden direkt verwenden
+Components sollen keine Datenbankdetails kennen.
 
 Nicht vorgesehen:
 
@@ -96,188 +197,143 @@ Vorgesehen:
 private readonly taskService = inject(TaskService);
 ```
 
+oder:
+
+```typescript
+private readonly contactService = inject(ContactService);
+```
+
 ---
 
 ## Services
 
-Services befinden sich unter:
+Services sind die öffentliche Schnittstelle für Components.
+
+Sie koordinieren:
+
+- Daten laden
+- Daten erstellen
+- Daten aktualisieren
+- Daten löschen
+- gemeinsamen State
+- mehrere zusammenhängende Datenoperationen
+- Fehler- und Ladezustände
+- Mapping-Ergebnisse
+- lokale State-Updates nach CRUD-Operationen
+
+Wichtige Services:
 
 ```text
-src/app/core/services/
+ContactService
+TaskService
+SupabaseService
 ```
 
-Der `TaskService` ist die öffentliche Schnittstelle der Task-Datenebene.
-
-### Aufgaben des TaskService
-
-- Geschäftsabläufe koordinieren
-- mehrere Repository-Aufrufe zusammenfassen
-- Relationsdaten synchronisieren
-- Angular Signals verwalten
-- Lade- und Fehlerstatus bereitstellen
-- Anwendungsmodels an Komponenten zurückgeben
-- lokalen State nach Schreiboperationen aktualisieren
-- bei fehlgeschlagenen Abläufen den tatsächlichen Datenbankstand neu laden
-- bei fehlgeschlagenem Create-Flow ein bestmögliches Cleanup durchführen
-
-### Der TaskService enthält nicht
-
-- HTML- oder DOM-Logik
-- Drag-and-drop-Berechnungen
-- FormControls
-- Dialogzustände
-- visuelles Feedback
-- SCSS-Logik
+Der `TaskService` ist komplexer als der `ContactService`, weil ein Task aus mehreren Tabellen und Relationen besteht.
 
 ---
 
-## Repositories
+## Repository-Schicht
 
-Repositories befinden sich unter:
+Repositories kapseln direkte Supabase-Abfragen.
+
+Beispiel:
 
 ```text
-src/app/core/repositories/
+TaskRepository
 ```
 
-Das `TaskRepository` kapselt direkte Supabase-Zugriffe.
+Das Repository führt aus:
 
-### Aufgaben des Repository
+```text
+select
+insert
+update
+delete
+```
 
-- `select`
-- `insert`
-- `update`
-- `delete`
-- Filter über IDs und Fremdschlüssel
-- Rückgabe von Datenbankzeilen
-- Weiterreichen von Supabase-Fehlern
+Es kennt Tabellen, Filter und direkte Supabase-Query-Strukturen.
 
-### Das Repository enthält nicht
+Das Repository enthält keine UI-Logik, keine FormControls und keinen Component-State.
 
-- Component Signals
-- UI-Logik
-- Board-State
-- Dialoglogik
-- Formularvalidierung
-- Benutzermeldungen
+---
+
+## SupabaseService
+
+Der `SupabaseService` erstellt den Supabase Client zentral.
+
+Die Konfiguration kommt aus:
+
+```text
+src/app/core/supabase/supabase.config.ts
+```
+
+Die echten Environment-Werte liegen lokal in:
+
+```text
+src/environments/environment.ts
+src/environments/environment.development.ts
+```
+
+In diese Dateien gehört nur der Supabase `anon public key`, niemals der `service_role` Key.
 
 ---
 
 ## Models
 
-Models befinden sich unter:
+Models beschreiben Datenformen.
+
+Es gibt mehrere Arten:
 
 ```text
-src/app/core/models/
+Row-Models
+Application-Models
+Create-Models
+Update-Models
+Persistence-Models
 ```
-
-Es gibt bewusst mehrere Modellarten.
 
 ### Row-Models
 
 Row-Models spiegeln die Datenbankstruktur wider.
 
+Sie verwenden `snake_case`.
+
+Beispiel:
+
 ```typescript
 export interface TaskRow {
-  id: string;
-  title: string;
-  description: string;
   due_date: string;
-  priority: TaskPriority;
-  category: TaskCategory;
-  status: TaskStatus;
   sort_order: number;
   created_at: string;
-  updated_at: string;
 }
 ```
-
-Row-Models verwenden `snake_case`.
 
 ### Application-Models
 
-Application-Models werden innerhalb der Angular-Anwendung verwendet.
+Application-Models werden in Angular verwendet.
+
+Sie verwenden `camelCase`.
+
+Beispiel:
 
 ```typescript
 export interface Task {
-  id: string;
-  title: string;
-  description: string;
   dueDate: string;
-  priority: TaskPriority;
-  category: TaskCategory;
-  status: TaskStatus;
   sortOrder: number;
   createdAt: string;
-  updatedAt: string;
 }
 ```
 
-Application-Models verwenden `camelCase`.
-
-### Create-Models
-
-Create-Models enthalten die beim Erstellen erlaubten Daten.
-
-```typescript
-export interface CreateTask {
-  title: string;
-  description?: string;
-  dueDate: string;
-  priority?: TaskPriority;
-  category: TaskCategory;
-  status?: TaskStatus;
-  sortOrder?: number;
-}
-```
-
-### Update-Models
-
-Update-Models enthalten ausschließlich optionale Felder.
-
-```typescript
-export interface UpdateTask {
-  title?: string;
-  description?: string;
-  dueDate?: string;
-  priority?: TaskPriority;
-  category?: TaskCategory;
-  status?: TaskStatus;
-  sortOrder?: number;
-}
-```
-
-### Persistence-Models
-
-Persistence-Models beschreiben kombinierte Schreibvorgänge.
-
-```text
-CreateTaskWithRelationsInput
-UpdateTaskWithRelationsInput
-CreateTaskSubtaskInput
-UpdateTaskSubtaskInput
-```
-
-Sie werden für Tasks mit Subtasks und Kontaktzuweisungen verwendet.
+Components sollen mit Application-Models arbeiten, nicht mit Row-Models.
 
 ---
 
 ## Mapper
 
-Mapper befinden sich unter:
+Mapper übersetzen zwischen Datenbank und Anwendung.
 
-```text
-src/app/core/mappers/
-```
-
-### `task.mapper.ts`
-
-Richtung:
-
-```text
-Supabase → Angular
-```
-
-Beispiele:
+Leserichtung:
 
 ```text
 TaskRow → Task
@@ -285,147 +341,244 @@ SubtaskRow → Subtask
 ContactRow → Contact
 ```
 
-### `task-payload.mapper.ts`
-
-Richtung:
+Typische Umwandlungen:
 
 ```text
-Angular → Supabase
+due_date     → dueDate
+sort_order   → sortOrder
+created_at   → createdAt
+task_id      → taskId
+is_completed → isCompleted
 ```
 
-Mapper verhindern, dass Components Datenbankfeldnamen wie `due_date` oder `sort_order` kennen müssen.
+Dadurch müssen Components keine Datenbankfeldnamen kennen.
 
 ---
 
-## Utilities
+## Payload-Mapper
 
-Utilities befinden sich unter:
+Payload-Mapper übersetzen Angular-Daten in Supabase-Payloads.
+
+Schreibrichtung:
 
 ```text
-src/app/core/utils/
+CreateTask → Partial<TaskRow>
+UpdateTask → Partial<TaskRow>
+CreateSubtask → Partial<SubtaskRow>
+UpdateSubtask → Partial<SubtaskRow>
+contactIds → TaskAssignmentRow[]
 ```
 
-Utilities sind reine Funktionen.
-
-Sie:
-
-- injizieren keine Angular Services
-- greifen nicht auf Supabase zu
-- verändern keine Signals
-- haben keine Seiteneffekte
-
-### `task-state.utils.ts`
-
-Enthält:
-
-- Task-Sortierung
-- Subtask-Sortierung
-- Ersetzen eines Tasks im State
-- Ersetzen eines Subtasks im State
-- Entfernen doppelter IDs
-- Ermitteln fehlender IDs
-
-### `task-filter.utils.ts`
-
-Enthält:
-
-- Suche über Titel und Beschreibung
-- Statusfilter
-- kombinierte Filterung
-
-### `subtask-progress.utils.ts`
-
-Enthält:
-
-- Anzahl erledigter Subtasks
-- Gesamtzahl
-- Prozentwert
+Payload-Mapper sind wichtig, damit diese Logik nicht mehrfach in Services oder Components entsteht.
 
 ---
 
-## Datenfluss beim Lesen
+## Utils
+
+Utils enthalten reine Funktionen.
+
+Eine Utility:
+
+- injiziert keine Angular Services
+- ruft kein Supabase auf
+- verändert keine Signals
+- hat keine Seiteneffekte
+- bekommt Daten hinein und gibt ein Ergebnis zurück
+
+Beispiele:
 
 ```text
-Board Component
-    ↓
-TaskService.getTasks()
-    ↓
-TaskRepository.getTaskRows()
-    ↓
-Supabase SELECT
-    ↓
-TaskRow[]
-    ↓
-mapTaskRows()
-    ↓
-Task[]
-    ↓
+sortTasks()
+sortSubtasks()
+filterTasks()
+calculateSubtaskProgress()
+getUniqueIds()
+getMissingIds()
+```
+
+---
+
+## State Management
+
+State wird getrennt nach fachlichem Daten-State und lokalem UI-State.
+
+### Service-State
+
+Service-State liegt in Services, wenn mehrere Components ihn brauchen.
+
+Beispiele:
+
+```text
+ContactService.allContacts
+ContactService.selectedContact
 TaskService.allTasks
-    ↓
-Board Template
+TaskService.selectedTask
+TaskService.selectedSubtasks
+TaskService.assignedContacts
 ```
 
----
+### Component-State
 
-## Datenfluss beim Erstellen
+Component-State bleibt lokal, wenn er nur die Darstellung betrifft.
+
+Beispiele:
 
 ```text
-AddTask Component
-    ↓
-TaskService.createTaskWithRelations()
-    ↓
-TaskRepository.createTask()
-    ↓
-Supabase tasks
-    ↓
-Task-ID
-    ↓
-TaskRepository.createSubtask()
-    ↓
-Supabase subtasks
-    ↓
-TaskRepository.createTaskAssignments()
-    ↓
-Supabase task_assignments
-    ↓
-TaskService Signals
+isCreateDialogOpen
+isEditDialogOpen
+searchTerm
+isMobileMenuOpen
+successMessage
+form
 ```
 
----
-
-## Datenfluss beim Bearbeiten
+Details stehen in:
 
 ```text
-Edit Component
-    ↓
-TaskService.updateTaskWithRelations()
-    ↓
-TaskRepository.updateTask()
-    ↓
-Subtasks synchronisieren
-    ↓
-Kontaktzuweisungen synchronisieren
-    ↓
-Signals aktualisieren
+docs/state-management.md
 ```
 
 ---
 
-## Drag-and-drop-Abgrenzung
+## Kontaktbereich
 
-Die Drag-and-drop-Logik gehört in die Board-Komponente.
+Der Kontaktbereich besteht aus:
 
-Die Component ist verantwortlich für:
+```text
+Contacts Page
+ContactList
+ContactDetail
+ContactCreateDialog
+ContactEditDialog
+ContactSuccessOverlay
+```
 
-- Start- und Zielspalte
-- Zielindex
-- lokale Array-Reihenfolge
-- Angular-CDK-Events
-- visuelles Drag-Feedback
-- Rücksetzen der Darstellung bei Fehlern
-- Neuberechnung von `sortOrder`
+Der zentrale Service ist:
 
-Der Service ist nur für die Persistenz verantwortlich:
+```text
+ContactService
+```
+
+Der `ContactService` verwaltet:
+
+```text
+allContacts
+selectedContact
+CRUD
+Mapping
+Sortierung
+Badge-Farben
+```
+
+Die Components kümmern sich um Anzeige, Dialoge, Formulare und Events.
+
+Details stehen in:
+
+```text
+docs/contact-service.md
+docs/contact-components.md
+```
+
+---
+
+## Task- und Boardbereich
+
+Der Task- und Boardbereich arbeitet mit mehreren Datenarten:
+
+```text
+Tasks
+Subtasks
+Kontaktzuweisungen
+Kontakte
+```
+
+Beteiligte Tabellen:
+
+```text
+tasks
+subtasks
+task_assignments
+contacts
+```
+
+Der zentrale Service ist:
+
+```text
+TaskService
+```
+
+Der `TaskService` koordiniert:
+
+```text
+Task-CRUD
+Subtask-CRUD
+Kontaktzuweisungen
+Relationsdaten
+Signal-State
+Fehlerbehandlung
+```
+
+Details stehen in:
+
+```text
+docs/task-service.md
+docs/task-data-layer.md
+docs/task-service-integration.md
+docs/task-components.md
+```
+
+---
+
+## Kontaktzuweisungen
+
+Kontaktzuweisungen werden nicht direkt im Task gespeichert.
+
+Nicht vorgesehen:
+
+```text
+tasks.assignedContacts
+tasks.contactIds
+```
+
+Vorgesehen:
+
+```text
+task_assignments
+```
+
+Gespeichert wird nur die Beziehung:
+
+```text
+task_id + contact_id
+```
+
+Die eigentlichen Task-Daten bleiben in `tasks`.  
+Die eigentlichen Kontaktdaten bleiben in `contacts`.
+
+Details stehen in:
+
+```text
+docs/supabase-database.md
+docs/task-service.md
+```
+
+---
+
+## Drag-and-drop
+
+Drag-and-drop ist Board-Logik.
+
+Die Board-Component entscheidet:
+
+```text
+Startspalte
+Zielspalte
+Startindex
+Zielindex
+neue lokale Reihenfolge
+```
+
+Persistiert wird über den `TaskService`.
 
 ```typescript
 await this.taskService.updateTask(task.id, {
@@ -434,70 +587,144 @@ await this.taskService.updateTask(task.id, {
 });
 ```
 
-Werden mehrere Tasks neu indexiert, muss die Component alle betroffenen Tasks persistieren.
+Der Service speichert Status und Reihenfolge.  
+Die Berechnung der neuen Reihenfolge bleibt in der Board-Component.
 
 ---
 
 ## Fehlerbehandlung
 
+Fehler laufen von Supabase nach oben.
+
 ```text
 Supabase Error
-    ↓
-TaskRepository wirft Error
-    ↓
-TaskService setzt errorMessage
-    ↓
-TaskService wirft Error weiter
-    ↓
-Component behandelt Fehler
+  ↓
+Repository wirft Error
+  ↓
+Service setzt Fehlermeldung
+  ↓
+Service wirft Error weiter
+  ↓
+Component behandelt UI-Folge
 ```
 
-Beispiel:
+Die Component entscheidet, was im UI passiert:
+
+```text
+Dialog offen lassen
+Fehlermeldung anzeigen
+Board neu laden
+lokalen State zurücksetzen
+```
+
+---
+
+## Ladezustand
+
+Der `TaskService` stellt einen Ladezustand bereit:
 
 ```typescript
-try {
-  await this.taskService.getTasks();
-} catch (error) {
-  console.error('Tasks could not be loaded.', error);
-}
+isLoading
+```
+
+Components verwenden diesen Zustand für:
+
+```text
+Buttons deaktivieren
+Loader anzeigen
+Doppel-Submits verhindern
+```
+
+Bei Bedarf können spätere Features feinere Ladezustände bekommen.
+
+---
+
+## Environment und Sicherheit
+
+Environment-Dateien mit echten Supabase-Werten bleiben lokal.
+
+Nicht committen:
+
+```text
+src/environments/environment.ts
+src/environments/environment.development.ts
+```
+
+Erlaubt als Vorlage:
+
+```text
+src/environments/environment.example.ts
+```
+
+Wichtig:
+
+```text
+Nur anon public key verwenden.
+Niemals service_role key im Frontend speichern.
 ```
 
 ---
 
-## Zuständigkeitsübersicht
+## Qualitätsregeln
 
-| Aufgabe | Zuständige Schicht |
-|---|---|
-| HTML anzeigen | Component |
-| FormControls verwalten | Component |
-| Drag-and-drop berechnen | Component |
-| Ladefeedback anzeigen | Component |
-| Daten laden | TaskService |
-| kombinierten Create-Flow ausführen | TaskService |
-| Relationsdaten synchronisieren | TaskService |
-| Supabase Query ausführen | TaskRepository |
-| Datenbankfelder umwandeln | Mapper |
-| Tasks filtern | Utility |
-| Fortschritt berechnen | Utility |
-| Daten speichern | Supabase |
+Für neue oder geänderte Funktionen gilt:
+
+- Components greifen nicht direkt auf Supabase zu.
+- Components verwenden `camelCase`-Models.
+- Row-Models bleiben datenbanknah.
+- Mapper übernehmen Feldumwandlungen.
+- Payload-Mapper bauen Supabase-Payloads.
+- Services koordinieren Abläufe und State.
+- Utils bleiben frei von Seiteneffekten.
+- Formulare bleiben in Components.
+- Drag-and-drop bleibt im Board.
+- Globale SCSS-Strukturen werden nicht ohne Teamabsprache grundlegend geändert.
 
 ---
 
-## Grundregel für neue Features
+## Entscheidungshilfe
 
-Vor einer neuen Funktion muss geklärt werden:
+| Frage | Zielort |
+|---|---|
+| Betrifft es HTML, CSS, Klicks oder Formularzustand? | Component |
+| Wird Supabase direkt abgefragt? | Repository |
+| Wird ein Ablauf mit mehreren Datenoperationen koordiniert? | Service |
+| Wird `snake_case` zu `camelCase` gewandelt? | Mapper |
+| Wird `camelCase` zu `snake_case` gewandelt? | Payload-Mapper |
+| Ist es eine reine Berechnung? | Utility |
+| Brauchen mehrere Components denselben Datenstand? | Service |
+| Ist es nur ein Dialog-, Menü- oder Animationszustand? | Component |
 
-1. Ist es UI- oder Interaktionslogik?  
-   Dann gehört sie in die Component.
+---
 
-2. Koordiniert sie mehrere Datenoperationen?  
-   Dann gehört sie in den Service.
+## Dokumentationsübersicht
 
-3. Ist es ein direkter Supabase-Zugriff?  
-   Dann gehört sie in das Repository.
+| Dokument | Inhalt |
+|---|---|
+| `docs/project-architecture.md` | zentrale Architekturübersicht |
+| `docs/architecture.md` | Services und Components |
+| `docs/state-management.md` | Service-State und Component-State |
+| `docs/conventions.md` | Code-Konventionen |
+| `docs/contact-service.md` | ContactService |
+| `docs/contact-components.md` | Contact-Components |
+| `docs/task-service.md` | TaskService |
+| `docs/task-data-layer.md` | Models, Mapper, Repository, Utils |
+| `docs/task-service-integration.md` | Nutzung des TaskService in Components |
+| `docs/task-components.md` | Task- und Board-Components |
+| `docs/supabase-database.md` | Tabellen, Relationen und SQL-Prüfungen |
+| `docs/testing-guide.md` | Test- und Review-Checklisten |
+| `docs/development-workflow.md` | Git-, Branch- und Review-Regeln |
 
-4. Wandelt sie Datenstrukturen um?  
-   Dann gehört sie in einen Mapper.
+---
 
-5. Ist es eine reine Berechnung?  
-   Dann gehört sie in eine Utility.
+## Zusammenfassung
+
+Die Architektur trennt UI, Datenlogik und Datenzugriff.
+
+Components zeigen Daten an und reagieren auf Benutzeraktionen.  
+Services koordinieren fachliche Abläufe und gemeinsamen State.  
+Repositories sprechen direkt mit Supabase.  
+Mapper übersetzen zwischen Datenbank und Angular.  
+Utils enthalten reine Berechnungen.
+
+Dadurch bleibt das Projekt verständlich, wartbar und im Team besser reviewbar.
