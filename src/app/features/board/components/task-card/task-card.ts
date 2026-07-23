@@ -16,11 +16,12 @@ import {
 import {
   calculateSubtaskProgress,
 } from '../../../../core/utils/subtask-progress.utils';
+import { SlicePipe } from '@angular/common';
 
 @Component({
   selector: 'app-task-card',
   standalone: true,
-  imports: [],
+  imports: [SlicePipe],
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
   host: {
