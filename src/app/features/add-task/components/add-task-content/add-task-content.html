@@ -112,7 +112,8 @@
       <div class="add-task__field">
         <label class="add-task__label" for="add_task_contact_search">Assigned to</label>
 
-        <div class="add-task__contact-select">
+        <!-- HIER ANGEPASST: dropdown-wrapper und [class.is-open] hinzugefügt -->
+        <div class="add-task__contact-select dropdown-wrapper" [class.is-open]="contactsMenuOpen()">
           <div class="add-task__input add-task__select-control">
             <input
               id="add_task_contact_search"
@@ -203,7 +204,8 @@
       <div class="add-task__field">
         <span class="add-task__label">Category<span aria-hidden="true">*</span></span>
 
-        <div class="add-task__category-select">
+        <!-- HIER ANGEPASST: dropdown-wrapper und [class.is-open] hinzugefügt -->
+        <div class="add-task__category-select dropdown-wrapper" [class.is-open]="categoryMenuOpen()">
           <button
             type="button"
             class="add-task__input add-task__category-toggle"
