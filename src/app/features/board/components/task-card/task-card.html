@@ -12,12 +12,8 @@
   <div class="task_card__topbar">
     <div
       class="task_card__type"
-      [class.task_card__type--technical]="
-        task().category === 'technical_task'
-      "
-      [class.task_card__type--user-story]="
-        task().category === 'user_story'
-      "
+      [class.task_card__type--technical]="task().category === 'technical_task'"
+      [class.task_card__type--user-story]="task().category === 'user_story'"
     >
       {{ categoryLabel() }}
     </div>
@@ -64,12 +60,7 @@
             type="button"
             class="task_card__move_menu_item"
             role="menuitem"
-            (click)="
-              requestMove(
-                $event,
-                'awaiting_feedback'
-              )
-            "
+            (click)="requestMove($event, 'awaiting_feedback')"
           >
             <span aria-hidden="true">↓</span>
             <span>Review</span>
@@ -100,10 +91,7 @@
       </div>
 
       <span class="task_card__subtasks_text">
-        {{ progress().completed }}/{{
-          progress().total
-        }}
-        Subtasks
+        {{ progress().completed }}/{{ progress().total }} Subtasks
       </span>
     </div>
   }
@@ -114,35 +102,29 @@
       aria-label="Assigned contacts"
     >
       @for (
-        contact of assignedContacts();
+        contact of assignedContacts() | slice:0:3;
         track contact.id
       ) {
         <div
           class="task_card__badge"
-          [style.background-color]="
-            contact.badgeColor
-          "
-          [attr.title]="
-            contact.firstName +
-            ' ' +
-            contact.lastName
-          "
+          [style.background-color]="contact.badgeColor"
+          [attr.title]="contact.firstName + ' ' + contact.lastName"
         >
           {{ getInitials(contact) }}
+        </div>
+      }
+      
+      @if (assignedContacts().length > 3) {
+        <div class="task_card__badge task_card__badge--more">
+          +{{ assignedContacts().length - 3 }}
         </div>
       }
     </div>
 
     <div class="task_card__priority">
       <img
-        [src]="
-          'assets/board/board-card/' +
-          task().priority +
-          '.svg'
-        "
-        [alt]="
-          task().priority + ' priority'
-        "
+        [src]="'assets/board/board-card/' + task().priority + '.svg'"
+        [alt]="task().priority + ' priority'"
       />
     </div>
   </div>
