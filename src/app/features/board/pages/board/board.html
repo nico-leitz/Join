@@ -4,6 +4,18 @@
   <div class="board-page__right">
     <app-header></app-header>
 
+    @if (isAddTaskDialogOpen()) {
+      <app-add-task-dialog
+        [status]="addTaskStatus()"
+        (dialogClosed)="
+          closeAddTaskDialog()
+        "
+        (taskCreated)="
+          handleTaskCreated()
+        "
+      ></app-add-task-dialog>
+    }
+
     @if (
       isDialogOpen() &&
       dialogTask();
@@ -74,6 +86,14 @@
           <button
             type="button"
             class="board__add_btn"
+            aria-label="Add task to To do"
+            [disabled]="
+              isBoardLoading() ||
+              isBoardUpdating()
+            "
+            (click)="
+              openAddTaskDialog('todo')
+            "
           >
             <span class="board__add_btn_text">
               Add task
@@ -123,6 +143,10 @@
                 type="button"
                 class="board__column_add_btn"
                 aria-label="Add new task to To do"
+                [disabled]="isBoardUpdating()"
+                (click)="
+                  openAddTaskDialog('todo')
+                "
               >
                 <img
                   class="board__column_add_icon"
@@ -208,6 +232,12 @@
                 type="button"
                 class="board__column_add_btn"
                 aria-label="Add new task to In progress"
+                [disabled]="isBoardUpdating()"
+                (click)="
+                  openAddTaskDialog(
+                    'in_progress'
+                  )
+                "
               >
                 <img
                   class="board__column_add_icon"
@@ -293,6 +323,12 @@
                 type="button"
                 class="board__column_add_btn"
                 aria-label="Add new task to Await feedback"
+                [disabled]="isBoardUpdating()"
+                (click)="
+                  openAddTaskDialog(
+                    'awaiting_feedback'
+                  )
+                "
               >
                 <img
                   class="board__column_add_icon"

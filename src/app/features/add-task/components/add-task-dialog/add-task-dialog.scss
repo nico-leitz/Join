@@ -1,0 +1,234 @@
+@use 'abstracts/breakpoints' as bp;
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: block;
+}
+
+.add-task-dialog__overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.24);
+  animation:
+    add-task-overlay-in
+    200ms ease-in-out both;
+
+  &--closing {
+    animation:
+      add-task-overlay-out
+      200ms ease-in-out both;
+  }
+}
+
+.add-task-dialog {
+  position: relative;
+  width: min(100%, 1000px);
+  height: min(
+    760px,
+    calc(100dvh - 48px)
+  );
+  max-width: 1000px;
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 1px solid #d1d1d1;
+  border-radius: 30px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: var(--color-bg-main);
+  box-shadow:
+    0 0 8px
+    rgba(0, 0, 0, 0.2);
+  animation:
+    add-task-dialog-desktop-in
+    200ms ease-in-out both;
+
+  &--closing {
+    animation:
+      add-task-dialog-desktop-out
+      200ms ease-in-out both;
+  }
+
+  &::backdrop {
+    display: none;
+  }
+
+  app-add-task-content {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  &__hidden-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &__close {
+    position: absolute;
+    top: 28px;
+    right: 32px;
+    z-index: 50;
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: unset;
+    border-radius: 50%;
+    background-color: transparent;
+    color: var(--color-primary);
+    font-family: inherit;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      transform var(--transition-fast);
+
+    &:hover,
+    &:focus-visible {
+      background-color: #eeeeee;
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.45;
+      transform: none;
+    }
+  }
+}
+
+@media (
+  max-width:
+    bp.$breakpoint-tablet-sm-max
+) {
+  .add-task-dialog__overlay {
+    padding: 0;
+  }
+
+  .add-task-dialog {
+    width: 100%;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    border: unset;
+    border-radius: 0;
+    animation:
+      add-task-dialog-mobile-in
+      200ms ease-in-out both;
+
+    &--closing {
+      animation:
+        add-task-dialog-mobile-out
+        200ms ease-in-out both;
+    }
+
+    &__close {
+      top: 18px;
+      right: 16px;
+    }
+  }
+}
+
+@media (
+  orientation: landscape
+) and (
+  max-height:
+    bp.$breakpoint-landscape-height-md
+) and (
+  max-width:
+    bp.$breakpoint-landscape-width-lg
+) {
+  .add-task-dialog {
+    &__close {
+      top: 12px;
+      right: 18px;
+    }
+  }
+}
+
+@keyframes add-task-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes add-task-overlay-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes add-task-dialog-desktop-in {
+  from {
+    opacity: 0;
+    transform: translateX(100vw);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes add-task-dialog-desktop-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(100vw);
+  }
+}
+
+@keyframes add-task-dialog-mobile-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes add-task-dialog-mobile-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}

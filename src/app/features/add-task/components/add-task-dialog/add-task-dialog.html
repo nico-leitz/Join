@@ -1,1 +1,44 @@
-<p>add-task-dialog works!</p>
+<div
+  class="add-task-dialog__overlay"
+  [class.add-task-dialog__overlay--closing]="
+    isClosing()
+  "
+  (click)="closeDialog()"
+>
+  <dialog
+    open
+    class="add-task-dialog"
+    [class.add-task-dialog--closing]="
+      isClosing()
+    "
+    aria-modal="true"
+    aria-labelledby="add-task-dialog-title"
+    (click)="handleDialogClick($event)"
+  >
+    <h2
+      id="add-task-dialog-title"
+      class="add-task-dialog__hidden-title"
+    >
+      Add Task
+    </h2>
+
+    <button
+      type="button"
+      class="add-task-dialog__close"
+      aria-label="Close add task dialog"
+      [disabled]="hasCreatedTask()"
+      (click)="closeDialog()"
+    >
+      &times;
+    </button>
+
+    <app-add-task-content
+      mode="dialog"
+      [status]="status()"
+      (cancelled)="closeDialog()"
+      (taskCreated)="
+        handleTaskCreated($event)
+      "
+    ></app-add-task-content>
+  </dialog>
+</div>

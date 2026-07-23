@@ -1,7 +1,16 @@
-<section class="add_task_page">
-    <app-sidebar></app-sidebar>
-    <section class="add_task_content">
-        <app-header></app-header>
-        <app-add-task-content></app-add-task-content>
-    </section>
+<section class="add-task-page">
+  <app-sidebar></app-sidebar>
+
+  <div class="add-task-page__right">
+    <app-header></app-header>
+
+    <main class="add-task-page__content">
+      <app-add-task-content
+        [status]="taskStatus()"
+        (taskCreated)="
+          handleTaskCreated($event)
+        "
+      ></app-add-task-content>
+    </main>
+  </div>
 </section>
