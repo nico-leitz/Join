@@ -172,11 +172,7 @@
   &__title {
     margin: 0;
     color: #000000;
-    font-size: clamp(
-      2.25rem,
-      6vw,
-      3.8125rem
-    );
+    font-size: clamp(2.25rem, 6vw, 3.8125rem);
     font-weight: 700;
     line-height: 1.1;
     overflow-wrap: anywhere;
@@ -256,6 +252,11 @@
     color: #ffffff;
     font-size: 12px;
     font-weight: 700;
+  }
+
+  &__badge--more {
+    background-color: #dbdbdb;
+    color: #1f1e1e;
   }
 
   &__subtask {
@@ -381,6 +382,31 @@
     }
   }
 
+  &__input[type='date'] {
+    padding-right: 16px;
+    cursor: pointer;
+    color-scheme: light;
+
+    &::-webkit-calendar-picker-indicator {
+      width: 24px;
+      height: 24px;
+      padding: 4px;
+      margin-right: -4px;
+      border-radius: 50%;
+      background-color: transparent;
+      background-image: url('/assets/icons/icon_calender/event.svg');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 24px 24px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    &::-webkit-calendar-picker-indicator:hover {
+      background-color: #eeeeee;
+    }
+  }
+
   &__textarea {
     min-height: 104px;
     resize: vertical;
@@ -482,6 +508,7 @@
 
   &__contact_toggle {
     position: relative;
+    z-index: 21;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -518,7 +545,7 @@
 
   &__contact_menu {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% - 0.3rem);
     right: 0;
     left: 0;
     z-index: 20;
@@ -526,14 +553,14 @@
     max-height: 220px;
     flex-direction: column;
     gap: 2px;
-    padding: 6px;
+    padding: 8px 6px 6px;
     overflow-y: auto;
-    border: 1px solid #d1d1d1;
+    border: none;
     border-radius: 10px;
     background-color: #ffffff;
     box-shadow:
-      0 4px 12px
-      rgba(0, 0, 0, 0.14);
+      0 4px 10px 0
+      rgba(0, 0, 0, 0.15);
 
     &::-webkit-scrollbar {
       width: 6px;
@@ -548,31 +575,67 @@
   &__contact_option {
     display: grid;
     width: 100%;
+    min-height: 56px;
     grid-template-columns:
-      auto
+      32px
       minmax(0, 1fr)
-      auto;
+      24px;
     align-items: center;
-    gap: 10px;
-    padding: 8px;
-    border-radius: 8px;
+    gap: 16px;
+    padding: 7px 16px;
+    border-radius: 10px;
     box-sizing: border-box;
     color: #2a3647;
     font-size: 14px;
     cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
 
     &:hover {
       background-color: #eeeeee;
+
+      .board_dialog__contact_check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_default_hover.svg');
+      }
     }
 
-    input {
-      width: 18px;
-      height: 18px;
-      justify-self: end;
-      margin: 0;
-      accent-color: #2a3647;
-      cursor: pointer;
+    &--selected {
+      background-color: #2a3647;
+      color: #ffffff;
+
+      .board_dialog__contact_check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_checked.svg');
+      }
+
+      &:hover {
+        background-color: #091931;
+
+        .board_dialog__contact_check {
+          background-image: url('/assets/icons/icons_dropdown/check_button_checked_hover.svg');
+        }
+      }
     }
+  }
+
+  &__contact_checkbox {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__contact_check {
+    display: block;
+    width: 24px;
+    height: 24px;
+    justify-self: end;
+    background-image: url('/assets/icons/icons_dropdown/check_button_default.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
   }
 
   &__contact_name {
