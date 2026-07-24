@@ -1,0 +1,279 @@
+@use 'abstracts/breakpoints' as bp;
+@use 'abstracts/mixins' as mx;
+
+:host {
+  --color-bg-page: #f6f7f8;
+  --color-bg-form: #ffffff;
+  --color-text-dark: #2a3647;
+  --color-text-muted: #686868;
+  --color-border: #d1d1d1;
+  --color-cyan: #29abe2;
+
+  display: block;
+  min-height: 100vh;
+  background-color: var(--color-bg-page);
+}
+
+.login-page {
+  max-width: 90rem;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: inherit;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3rem 5rem;
+  }
+
+  &__logo {
+    img {
+      height: 4rem;
+      width: auto;
+    }
+  }
+
+  &__signup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__signup-text {
+    font-size: 1rem;
+    color: var(--color-text-dark);
+  }
+
+  &__btn {
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 0.125rem solid transparent;
+    transition: all 150ms ease-in-out;
+    white-space: nowrap;
+
+    &--primary {
+      background-color: var(--color-text-dark);
+      color: #ffffff;
+
+      &:hover {
+        background-color: var(--color-cyan);
+        border-color: var(--color-cyan);
+      }
+    }
+  }
+
+  &__main {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem 1rem;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  &__footer-link {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 150ms ease-in-out;
+
+    &:hover {
+      color: var(--color-text-dark);
+    }
+  }
+}
+
+.login-card {
+  background-color: var(--color-bg-form);
+  border-radius: 1.875rem;
+  padding: 3rem 5.5rem;
+  box-shadow: 0 0 0.875rem 0.1875rem rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 40.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 7rem;
+
+  &__header {
+    text-align: center;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__title {
+    font-size: 3.875rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--color-text-dark);
+  }
+
+  &__underline {
+    width: 9.375rem;
+    height: 0.1875rem;
+    background-color: var(--color-cyan);
+    border-radius: 0.125rem;
+  }
+
+  &__form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  &__input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.875rem 3rem 0.875rem 1.25rem;
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 0.625rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 150ms ease-in-out;
+    background-color: var(--color-bg-form);
+    color: var(--color-text-dark);
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus {
+      border-color: var(--color-cyan);
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    right: 1rem;
+    color: var(--color-border);
+    font-size: 1.25rem;
+    pointer-events: none;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+
+  &__btn {
+    padding: 0.875rem 2.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 0.125rem solid transparent;
+    transition: all 150ms ease-in-out;
+    white-space: nowrap;
+
+    &--primary {
+      background-color: var(--color-text-dark);
+      color: #ffffff;
+
+      &:hover {
+        background-color: var(--color-cyan);
+        border-color: var(--color-cyan);
+      }
+    }
+
+    &--secondary {
+      background-color: transparent;
+      color: var(--color-text-dark);
+      border-color: var(--color-text-dark);
+
+      &:hover {
+        border-color: var(--color-cyan);
+        color: var(--color-cyan);
+      }
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-tablet-l) {
+  .login-page {
+    &__header {
+      padding: 2rem 2.5rem;
+    }
+  }
+
+  .login-card {
+    padding: 3rem 4rem;
+  }
+}
+
+@media (max-width: bp.$breakpoint-tablet-sm-max) {
+  .login-page {
+    &__header {
+      padding: 1.5rem 1rem;
+    }
+
+    &__signup-text {
+      display: none;
+    }
+  }
+
+  .login-card {
+    padding: 2.5rem 2rem;
+    border-radius: 1.25rem;
+
+    &__title {
+      font-size: 2.75rem;
+    }
+
+    &__actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    &__btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-xs) {
+  .login-page {
+    &__header {
+      padding: 1rem 0.75rem;
+    }
+
+    &__logo img {
+      height: 3rem;
+    }
+  }
+
+  .login-card {
+    padding: 2rem 1.25rem;
+
+    &__title {
+      font-size: 2.25rem;
+    }
+
+    &__input {
+      font-size: 0.875rem;
+    }
+  }
+}
