@@ -260,13 +260,11 @@
     color: var(--color-text-main);
     font: inherit;
     outline: none;
-    z-index: 51;
     cursor: pointer;
 
     &:focus,
     .dropdown-wrapper.is-open & {
       border-color: #124658;
-      z-index: 101;
     }
 
     &::placeholder {
@@ -453,7 +451,6 @@
     align-items: center;
     justify-content: space-between;
     text-align: left;
-    z-index: 49;
     cursor: pointer;
   }
 
