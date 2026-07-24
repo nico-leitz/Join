@@ -122,7 +122,7 @@
               [value]="contactSearch()"
               [placeholder]="contactPlaceholder()"
               [disabled]="isLoadingData()"
-              (focus)="openContactsMenu()"
+              (mousedown)="toggleContactsMenu(); $event.stopPropagation()"
               (input)="updateContactSearch($event)"
             />
 
@@ -152,7 +152,12 @@
                 <p class="add-task__empty-option">No contacts found.</p>
               } @else {
                 @for (contact of filteredContacts(); track contact.id) {
-                  <label class="add-task__contact-option">
+                  <label
+                    class="add-task__contact-option"
+                    [class.add-task__contact-option--selected]="isContactSelected(contact.id)"
+                    [attr.aria-selected]="isContactSelected(contact.id)"
+                    role="option"
+                  >
                     <span
                       class="add-task__contact-badge"
                       [style.background-color]="contact.badgeColor"
@@ -165,11 +170,13 @@
                     </span>
 
                     <input
-                      class="add-task__checkbox"
+                      class="add-task__contact-checkbox"
                       type="checkbox"
                       [checked]="isContactSelected(contact.id)"
                       (change)="toggleContactSelection(contact.id)"
                     />
+
+                    <span class="add-task__contact-check" aria-hidden="true"></span>
                   </label>
                 }
               }
@@ -280,7 +287,7 @@
               >
                 <img src="assets/add-task/subtasks_icon_checkmark.svg" alt="Add subtask" />
               </button>
-            } 
+            }
           </div>
         </div>
 
