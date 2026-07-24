@@ -40,6 +40,10 @@ export const routes: Routes = [
     component: Contacts,
   },
   {
+    path: 'login',
+    component: Login,
+  },
+  {
     path: 'legal-notice',
     component: LegalNotice,
   },
