@@ -1,1 +1,65 @@
-<p>login works!</p>
+<div class="login-page">
+  <header class="login-page__header">
+    <div class="login-page__logo">
+      <img src="assets/log-in/join-logo-blue.svg" alt="Join Logo" />
+    </div>
+
+    <div class="login-page__signup">
+      <span class="login-page__signup-text">Not a Join user?</span>
+      <button type="button" class="login-page__btn login-page__btn--primary">
+        Sign up
+      </button>
+    </div>
+  </header>
+
+  <main class="login-page__main">
+    <div class="login-card">
+      <header class="login-card__header">
+        <h1 class="login-card__title">Log in</h1>
+        <div class="login-card__underline" aria-hidden="true"></div>
+      </header>
+
+      <form class="login-card__form">
+        <div class="login-card__input-group">
+          <input
+            type="email"
+            class="login-card__input"
+            placeholder="Email"
+            autocomplete="email"
+          />
+
+          <span class="login-card__icon" aria-hidden="true">
+            <img src="assets/log-in/mail.svg" alt="mail icon">
+        </span>
+        </div>
+
+        <div class="login-card__input-group">
+          <input
+            type="password"
+            class="login-card__input"
+            placeholder="Password"
+            autocomplete="current-password"
+          />
+
+          <span class="login-card__icon" aria-hidden="true">
+             <img src="assets/log-in/lock.svg" alt="lock icon">
+          </span>
+        </div>
+
+        <div class="login-card__actions">
+          <button type="submit" class="login-card__btn login-card__btn--primary">
+            Log in
+          </button>
+          <button type="button" class="login-card__btn login-card__btn--secondary">
+            Guest Log in
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="login-page__footer">
+    <a href="#" class="login-page__footer-link">Privacy Policy</a>
+    <a href="#" class="login-page__footer-link">Legal notice</a>
+  </footer>
+</div>
