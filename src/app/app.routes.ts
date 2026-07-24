@@ -44,6 +44,10 @@ export const routes: Routes = [
     component: Login,
   },
   {
+    path: 'sign-up',
+    component: Signup,
+  },
+  {
     path: 'legal-notice',
     component: LegalNotice,
   },
