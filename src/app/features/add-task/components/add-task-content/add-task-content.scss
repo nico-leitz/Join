@@ -134,7 +134,6 @@ textarea::-moz-resizer {
     font-size: var(--font-size-sm);
     line-height: var(--line-height-base);
     outline: none;
-    z-index: 30;
     transition:
       border-color var(--transition-fast),
       box-shadow var(--transition-fast);
@@ -144,13 +143,39 @@ textarea::-moz-resizer {
       opacity: 1;
     }
 
-    &:focus {
+    &:focus,
+    .dropdown-wrapper.is-open & {
       border-color: #124658;
     }
 
     &--invalid,
     &--invalid:focus {
       border-color: var(--color-error);
+    }
+  }
+
+  &__input[type='date'] {
+    padding-right: 16px;
+    cursor: pointer;
+    color-scheme: light;
+
+    &::-webkit-calendar-picker-indicator {
+      width: 24px;
+      height: 24px;
+      padding: 4px;
+      margin-right: -4px;
+      border-radius: 50%;
+      background-color: transparent;
+      background-image: url('/assets/icons/icon_calender/event.svg');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 24px 24px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    &::-webkit-calendar-picker-indicator:hover {
+      background-color: #eeeeee;
     }
   }
 
@@ -270,8 +295,10 @@ textarea::-moz-resizer {
     color: var(--color-text-main);
     font: inherit;
     outline: none;
+    cursor: pointer;
 
-    &:focus {
+    &:focus,
+    .dropdown-wrapper.is-open & {
       border-color: #124658;
     }
 
@@ -320,7 +347,7 @@ textarea::-moz-resizer {
     top: calc(100% + 4px);
     right: 0;
     left: 0;
-    z-index: 30;
+    z-index: 100;
     overflow-y: auto;
     border-radius: var(--radius-md);
     background-color: var(--color-bg-light);
@@ -329,25 +356,53 @@ textarea::-moz-resizer {
   }
 
   &__contact-menu {
+    top: calc(100% - 0.3rem);
     max-height: 250px;
-    padding: 8px 0;
+    padding: 8px;
   }
 
   &__contact-option {
     display: grid;
-    min-height: 48px;
+    width: 100%;
+    min-height: 56px;
     grid-template-columns:
       32px
       minmax(0, 1fr)
-      auto;
+      24px;
     align-items: center;
-    gap: 10px;
-    padding: 6px 16px;
+    gap: 16px;
+    padding: 7px 16px;
+    border-radius: 10px;
     box-sizing: border-box;
+    color: var(--color-text-main);
     cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast);
 
     &:hover {
       background-color: #eeeeee;
+
+      .add-task__contact-check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_default_hover.svg');
+      }
+    }
+
+    &--selected {
+      background-color: #2a3647;
+      color: #ffffff;
+
+      .add-task__contact-check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_checked.svg');
+      }
+
+      &:hover {
+        background-color: #091931;
+
+        .add-task__contact-check {
+          background-image: url('/assets/icons/icons_dropdown/check_button_checked_hover.svg');
+        }
+      }
     }
 
     &:has(input:checked){
@@ -382,6 +437,26 @@ textarea::-moz-resizer {
     font-size: 11px;
   }
 
+  &__contact-checkbox {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__contact-check {
+    display: block;
+    width: 24px;
+    height: 24px;
+    justify-self: end;
+    background-image: url('/assets/icons/icons_dropdown/check_button_default.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+  }
+
   &__badge {
     @include mx.flexbox(row, center, center);
 
@@ -410,13 +485,6 @@ textarea::-moz-resizer {
     white-space: nowrap;
   }
 
-  &__checkbox {
-    width: 18px;
-    height: 18px;
-    justify-self: end;
-    accent-color: var(--color-primary);
-  }
-
   &__selected-contacts {
     display: flex;
     min-height: 36px;
@@ -441,7 +509,6 @@ textarea::-moz-resizer {
     align-items: center;
     justify-content: space-between;
     text-align: left;
-    z-index: 31;
     cursor: pointer;
   }
 
@@ -450,6 +517,7 @@ textarea::-moz-resizer {
   }
 
   &__category-menu {
+    top: 100%;
     overflow: hidden;
   }
 
@@ -628,7 +696,6 @@ textarea::-moz-resizer {
     align-items: center;
     gap: 8px;
     padding: 2px 8px 2px 0;
-
     box-sizing: border-box;
     background-color: white;
     border-bottom: 1px solid #124658;
@@ -665,7 +732,7 @@ textarea::-moz-resizer {
   &__required-legend {
     margin: 0 0 12px;
     color: var(--color-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
 
     span {
       color: var(--color-error);

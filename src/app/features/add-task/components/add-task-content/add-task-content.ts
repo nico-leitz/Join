@@ -24,6 +24,7 @@ import { ContactService } from '../../../../core/services/contact.service';
 import { TaskService } from '../../../../core/services/task.service';
 import { SlicePipe } from '@angular/common';
 
+
 /** Defines the operational mode of the component. */
 type AddTaskMode = 'page' | 'dialog';
 
@@ -581,3 +582,8 @@ function createStartOfToday(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
+
+
+
+
+

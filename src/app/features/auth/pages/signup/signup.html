@@ -1,1 +1,91 @@
-<p>signup works!</p>
+<div class="signup-page">
+  <header class="signup-page__header">
+    <div class="signup-page__logo">
+      <img src="assets/sign-up/join-logo-blue.svg" alt="Join Logo" />
+    </div>
+  </header>
+
+  <main class="signup-page__main">
+    <div class="signup-card">
+      <header class="signup-card__header">
+        <button type="button" class="signup-card__back-btn" aria-label="Go back">
+          <span>
+            <img src="assets/sign-up/arrow.svg" alt="lock icon">
+          </span>
+        </button>
+        <div class="signup-card__title-wrapper">
+          <h1 class="signup-card__title">Sign up</h1>
+          <div class="signup-card__underline" aria-hidden="true"></div>
+        </div>
+      </header>
+
+      <form class="signup-card__form">
+        <div class="signup-card__input-group">
+          <input
+            type="text"
+            class="signup-card__input"
+            placeholder="Name"
+            autocomplete="name"
+          />
+          <span class="signup-card__icon" aria-hidden="true">
+            <img src="assets/sign-up/person.svg" alt="">
+          </span>
+        </div>
+
+        <div class="signup-card__input-group">
+          <input
+            type="email"
+            class="signup-card__input"
+            placeholder="Email"
+            autocomplete="email"
+          />
+          <span class="signup-card__icon" aria-hidden="true">
+            <img src="assets/sign-up/mail.svg" alt="mail icon">
+          </span>
+        </div>
+
+        <div class="signup-card__input-group">
+          <input
+            type="password"
+            class="signup-card__input"
+            placeholder="Password"
+            autocomplete="new-password"
+          />
+          <span class="signup-card__icon" aria-hidden="true">
+            <img src="assets/sign-up/lock.svg" alt="lock icon">
+          </span>
+        </div>
+
+        <div class="signup-card__input-group">
+          <input
+            type="password"
+            class="signup-card__input"
+            placeholder="Confirm Password"
+            autocomplete="new-password"
+          />
+          <span class="signup-card__icon" aria-hidden="true">
+            <img src="assets/sign-up/lock.svg" alt="lock icon">
+          </span>
+        </div>
+
+        <label class="signup-card__checkbox-group">
+          <input type="checkbox" class="signup-card__checkbox" />
+          <span class="signup-card__checkbox-text">
+            I accept the <a href="#" class="signup-card__link">Privacy policy</a>
+          </span>
+        </label>
+
+        <div class="signup-card__actions">
+          <button type="submit" class="signup-card__btn signup-card__btn--primary">
+            Sign up
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="signup-page__footer">
+    <a href="#" class="signup-page__footer-link">Privacy Policy</a>
+    <a href="#" class="signup-page__footer-link">Legal notice</a>
+  </footer>
+</div>

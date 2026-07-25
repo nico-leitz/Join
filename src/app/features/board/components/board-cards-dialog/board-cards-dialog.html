@@ -98,29 +98,21 @@
         </div>
 
         <section class="board_dialog__section">
-          <h3
-            class="board_dialog__section_title"
-          >
+          <h3 class="board_dialog__section_title">
             Assigned To:
           </h3>
 
-          @if (
-            assignedContacts().length === 0
-          ) {
+          @if (assignedContacts().length === 0) {
             <p class="board_dialog__empty">
               No contacts assigned.
             </p>
           } @else {
-            <div
-              class="board_dialog__assignees"
-            >
+            <div class="board_dialog__assignees">
               @for (
                 contact of assignedContacts();
                 track contact.id
               ) {
-                <div
-                  class="board_dialog__assignee"
-                >
+                <div class="board_dialog__assignee">
                   <span
                     class="board_dialog__badge"
                     [style.background-color]="
@@ -141,9 +133,7 @@
         </section>
 
         <section class="board_dialog__section">
-          <h3
-            class="board_dialog__section_title"
-          >
+          <h3 class="board_dialog__section_title">
             Subtasks
           </h3>
 
@@ -152,31 +142,21 @@
               No subtasks available.
             </p>
           } @else {
-            <div
-              class="board_dialog__subtasks"
-            >
+            <div class="board_dialog__subtasks">
               @for (
                 subtask of subtasks();
                 track subtask.id
               ) {
-                <label
-                  class="board_dialog__subtask"
-                >
+                <label class="board_dialog__subtask">
                   <input
                     class="board_dialog__checkbox"
                     type="checkbox"
-                    [checked]="
-                      subtask.isCompleted
-                    "
+                    [checked]="subtask.isCompleted"
                     [disabled]="
-                      updatingSubtaskId() ===
-                      subtask.id
+                      updatingSubtaskId() === subtask.id
                     "
                     (change)="
-                      toggleSubtask(
-                        subtask,
-                        $event
-                      )
+                      toggleSubtask(subtask, $event)
                     "
                   />
 
@@ -203,10 +183,7 @@
         <button
           type="button"
           class="board_dialog__action"
-          [disabled]="
-            isDeleting() ||
-            isSaving()
-          "
+          [disabled]="isDeleting() || isSaving()"
           (click)="deleteTask()"
         >
           <img
@@ -225,17 +202,12 @@
           </span>
         </button>
 
-        <div
-          class="board_dialog__action_divider"
-        ></div>
+        <div class="board_dialog__action_divider"></div>
 
         <button
           type="button"
           class="board_dialog__action"
-          [disabled]="
-            isDeleting() ||
-            isSaving()
-          "
+          [disabled]="isDeleting() || isSaving()"
           (click)="startEditing()"
         >
           <img
@@ -286,9 +258,7 @@
               editForm.controls.title.invalid &&
               editForm.controls.title.touched
             ) {
-              <p
-                class="board_dialog__field_error"
-              >
+              <p class="board_dialog__field_error">
                 Please enter a title.
               </p>
             }
@@ -338,9 +308,7 @@
               editForm.controls.dueDate.invalid &&
               editForm.controls.dueDate.touched
             ) {
-              <p
-                class="board_dialog__field_error"
-              >
+              <p class="board_dialog__field_error">
                 Please select a due date.
               </p>
             }
@@ -352,9 +320,7 @@
               board_dialog__fieldset
             "
           >
-            <legend
-              class="board_dialog__field_label"
-            >
+            <legend class="board_dialog__field_label">
               Priority
             </legend>
 
@@ -432,9 +398,7 @@
               Category
             </label>
 
-            <div
-              class="board_dialog__select_control"
-            >
+            <div class="board_dialog__select_control">
               <select
                 id="edit_task_category"
                 class="
@@ -447,9 +411,7 @@
                   User Story
                 </option>
 
-                <option
-                  value="technical_task"
-                >
+                <option value="technical_task">
                   Technical Task
                 </option>
               </select>
@@ -462,15 +424,11 @@
           </div>
 
           <div class="board_dialog__field">
-            <span
-              class="board_dialog__field_label"
-            >
+            <span class="board_dialog__field_label">
               Assigned to
             </span>
 
-            <div
-              class="board_dialog__contact_select"
-            >
+            <div class="board_dialog__contact_select">
               <button
                 type="button"
                 class="
@@ -506,19 +464,23 @@
                   @if (
                     availableContacts().length === 0
                   ) {
-                    <p
-                      class="board_dialog__contact_empty"
-                    >
+                    <p class="board_dialog__contact_empty">
                       No contacts available.
                     </p>
                   } @else {
                     @for (
-                      contact of
-                        availableContacts();
+                      contact of availableContacts();
                       track contact.id
                     ) {
                       <label
                         class="board_dialog__contact_option"
+                        [class.board_dialog__contact_option--selected]="
+                          isContactSelected(contact.id)
+                        "
+                        [attr.aria-selected]="
+                          isContactSelected(contact.id)
+                        "
+                        role="option"
                       >
                         <span
                           class="board_dialog__badge"
@@ -526,31 +488,29 @@
                             contact.badgeColor
                           "
                         >
-                          {{
-                            getInitials(contact)
-                          }}
+                          {{ getInitials(contact) }}
                         </span>
 
-                        <span
-                          class="board_dialog__contact_name"
-                        >
+                        <span class="board_dialog__contact_name">
                           {{ contact.firstName }}
                           {{ contact.lastName }}
                         </span>
 
                         <input
+                          class="board_dialog__contact_checkbox"
                           type="checkbox"
                           [checked]="
-                            isContactSelected(
-                              contact.id
-                            )
+                            isContactSelected(contact.id)
                           "
                           (change)="
-                            toggleContactSelection(
-                              contact.id
-                            )
+                            toggleContactSelection(contact.id)
                           "
                         />
+
+                        <span
+                          class="board_dialog__contact_check"
+                          aria-hidden="true"
+                        ></span>
                       </label>
                     }
                   }
@@ -558,15 +518,13 @@
               }
             </div>
 
-            @if (
-              selectedContacts().length > 0
-            ) {
+            @if (selectedContacts().length > 0) {
               <div
                 class="board_dialog__selected_contacts"
                 aria-label="Selected contacts"
               >
                 @for (
-                  contact of selectedContacts();
+                  contact of selectedContacts() | slice: 0 : 3;
                   track contact.id
                 ) {
                   <span
@@ -583,6 +541,21 @@
                     {{ getInitials(contact) }}
                   </span>
                 }
+
+                @if (selectedContacts().length > 3) {
+                  <span
+                    class="
+                      board_dialog__badge
+                      board_dialog__badge--more
+                    "
+                    [attr.title]="
+                      selectedContacts().length - 3 +
+                      ' more contacts'
+                    "
+                  >
+                    +{{ selectedContacts().length - 3 }}
+                  </span>
+                }
               </div>
             }
           </div>
@@ -595,9 +568,7 @@
               Subtasks
             </label>
 
-            <div
-              class="board_dialog__subtask_creator"
-            >
+            <div class="board_dialog__subtask_creator">
               <input
                 id="edit_new_subtask"
                 class="board_dialog__input"
@@ -605,9 +576,7 @@
                 maxlength="160"
                 placeholder="Add new subtask"
                 [value]="newSubtaskTitle()"
-                (input)="
-                  updateNewSubtaskTitle($event)
-                "
+                (input)="updateNewSubtaskTitle($event)"
                 (keydown.enter)="
                   $event.preventDefault();
                   addSubtask()
@@ -618,30 +587,21 @@
                 type="button"
                 class="board_dialog__subtask_add"
                 aria-label="Add subtask"
-                [disabled]="
-                  !newSubtaskTitle().trim()
-                "
+                [disabled]="!newSubtaskTitle().trim()"
                 (click)="addSubtask()"
               >
                 +
               </button>
             </div>
 
-            @if (
-              editableSubtasks().length > 0
-            ) {
-              <div
-                class="board_dialog__editable_subtasks"
-              >
+            @if (editableSubtasks().length > 0) {
+              <div class="board_dialog__editable_subtasks">
                 @for (
-                  subtask of
-                    editableSubtasks();
+                  subtask of editableSubtasks();
                   track $index;
                   let index = $index
                 ) {
-                  <div
-                    class="board_dialog__editable_subtask"
-                  >
+                  <div class="board_dialog__editable_subtask">
                     <input
                       class="
                         board_dialog__input
@@ -665,11 +625,7 @@
                       type="button"
                       class="board_dialog__subtask_remove"
                       aria-label="Remove subtask"
-                      (click)="
-                        removeEditableSubtask(
-                          index
-                        )
-                      "
+                      (click)="removeEditableSubtask(index)"
                     >
                       &times;
                     </button>

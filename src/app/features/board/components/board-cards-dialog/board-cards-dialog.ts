@@ -23,6 +23,7 @@ import {
   TaskPriority,
 } from '../../../../core/models/task.model';
 import { TaskService } from '../../../../core/services/task.service';
+import { SlicePipe } from '@angular/common';
 
 /**
  * Data structure representing the payload emitted when a task is updated.
@@ -57,7 +58,7 @@ interface EditableSubtask {
 @Component({
   selector: 'app-board-cards-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, SlicePipe],
   templateUrl: './board-cards-dialog.html',
   styleUrl: './board-cards-dialog.scss',
   host: {

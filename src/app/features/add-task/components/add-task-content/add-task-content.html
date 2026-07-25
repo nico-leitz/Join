@@ -116,7 +116,7 @@
       <div class="add-task__field">
         <label class="add-task__label" for="add_task_contact_search">Assigned to</label>
 
-        <div class="add-task__contact-select">
+        <div class="add-task__contact-select dropdown-wrapper" [class.is-open]="contactsMenuOpen()">
           <div class="add-task__input add-task__select-control">
             <input
               id="add_task_contact_search"
@@ -126,7 +126,7 @@
               [value]="contactSearch()"
               [placeholder]="contactPlaceholder()"
               [disabled]="isLoadingData()"
-              (focus)="openContactsMenu()"
+              (mousedown)="toggleContactsMenu(); $event.stopPropagation()"
               (input)="updateContactSearch($event)"
             />
 
@@ -135,7 +135,7 @@
               class="add-task__select-arrow-button"
               aria-label="Toggle contact selection"
               [attr.aria-expanded]="contactsMenuOpen()"
-              (click)="toggleContactsMenu()"
+              (click)="toggleContactsMenu(); $event.stopPropagation()"
             >
               <span
                 class="add-task__dropdown-arrow"
@@ -156,7 +156,12 @@
                 <p class="add-task__empty-option">No contacts found.</p>
               } @else {
                 @for (contact of filteredContacts(); track contact.id) {
-                  <label class="add-task__contact-option">
+                  <label
+                    class="add-task__contact-option"
+                    [class.add-task__contact-option--selected]="isContactSelected(contact.id)"
+                    [attr.aria-selected]="isContactSelected(contact.id)"
+                    role="option"
+                  >
                     <span
                       class="add-task__contact-badge"
                       [style.background-color]="contact.badgeColor"
@@ -169,11 +174,13 @@
                     </span>
 
                     <input
-                      class="add-task__checkbox"
+                      class="add-task__contact-checkbox"
                       type="checkbox"
                       [checked]="isContactSelected(contact.id)"
                       (change)="toggleContactSelection(contact.id)"
                     />
+
+                    <span class="add-task__contact-check" aria-hidden="true"></span>
                   </label>
                 }
               }
@@ -207,13 +214,13 @@
       <div class="add-task__field">
         <span class="add-task__label">Category<span aria-hidden="true">*</span></span>
 
-        <div class="add-task__category-select">
+        <div class="add-task__category-select dropdown-wrapper" [class.is-open]="categoryMenuOpen()">
           <button
             type="button"
             class="add-task__input add-task__category-toggle"
             [class.add-task__input--invalid]="hasCategoryError()"
             [attr.aria-expanded]="categoryMenuOpen()"
-            (click)="toggleCategoryMenu()"
+            (click)="toggleCategoryMenu(); $event.stopPropagation()"
           >
             <span [class.add-task__placeholder]="!getCategoryLabel()">
               {{ getCategoryLabel() || 'Select task category' }}
@@ -284,7 +291,7 @@
               >
                 <img src="assets/add-task/subtasks_icon_checkmark.svg" alt="Add subtask" />
               </button>
-            } 
+            }
           </div>
         </div>
 
