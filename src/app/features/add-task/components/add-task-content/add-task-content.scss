@@ -341,7 +341,6 @@ textarea::-moz-resizer {
   &__contact-menu,
   &__category-menu {
     position: absolute;
-    top: calc(100% - 0.3rem);
     display: flex;
     flex-direction: column;
     top: calc(100% + 4px);
@@ -382,27 +381,6 @@ textarea::-moz-resizer {
 
     &:hover {
       background-color: #eeeeee;
-
-      .add-task__contact-check {
-        background-image: url('/assets/icons/icons_dropdown/check_button_default_hover.svg');
-      }
-    }
-
-    &--selected {
-      background-color: #2a3647;
-      color: #ffffff;
-
-      .add-task__contact-check {
-        background-image: url('/assets/icons/icons_dropdown/check_button_checked.svg');
-      }
-
-      &:hover {
-        background-color: #091931;
-
-        .add-task__contact-check {
-          background-image: url('/assets/icons/icons_dropdown/check_button_checked_hover.svg');
-        }
-      }
     }
 
     &:has(input:checked){
@@ -732,7 +710,7 @@ textarea::-moz-resizer {
   &__required-legend {
     margin: 0 0 12px;
     color: var(--color-primary);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
 
     span {
       color: var(--color-error);
