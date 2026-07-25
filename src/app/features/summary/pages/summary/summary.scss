@@ -1,0 +1,110 @@
+@use 'abstracts/breakpoints' as bp;
+
+.summary_page {
+    display: flex;
+}
+
+.summary_page_content {
+    width: 100%;
+}
+
+.summary_element {
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    max-width: 1440px;
+    margin-block: 10%;
+    margin-inline: 8rem;
+}
+
+
+.title {
+
+    &_wrapper {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    &_title {
+        font-family: var(--font-primary);
+        font-size: var(--font-size-3xl);
+        font-weight: 700;
+    }
+
+    &_divider {
+        background-color: rgba(41, 171, 226, 1);
+        height: 80%;
+        width: 3px;
+        border-radius: 6px;
+    }
+
+    &_paragraph {
+        font-family: var(--font-primary);
+        font-size: var(--font-size-xl);
+        font-weight: 400;
+    }
+}
+
+.summary_content{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 4rem;
+
+    &_upper{
+        display: flex;
+        gap: 2rem;
+    }
+
+    &_mid{
+        display: flex;
+        justify-content: space-between;
+        margin-block: 2rem;
+    }
+
+    &_lower{
+        display: flex;
+        gap: 2rem;
+    }
+}
+
+.card{
+    height: 168px;
+    width: 256px;
+    border-radius: 30px;
+    box-shadow: 0 0 4px 1px #0000001a;
+
+    &_large{
+        height: 168px;
+        width: 560px;
+    }
+
+    &_medium{
+        display: flex;
+    }
+
+    &_small{
+        width: 168px;
+    }
+}
+
+.greeting{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    &_paragraph{
+        color: rgba(42, 54, 71, 1);
+        font-family: var(--font-primary);
+        font-size: var(--font-size-2xl);
+        font-weight: 500;
+    }
+
+    &_name{
+        color: rgba(18, 70, 88, 1);
+        font-family: var(--font-primary);
+        font-size: 64px;
+        font-weight: 700;
+    }
+}
