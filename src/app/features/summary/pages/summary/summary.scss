@@ -2,6 +2,19 @@
 
 .summary_page {
     display: flex;
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        flex-direction: column-reverse;
+    }
+}
+
+.sidebar {
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+    }
 }
 
 .summary_page_content {
@@ -15,6 +28,23 @@
     max-width: 1440px;
     margin-block: 10%;
     margin-inline: 8rem;
+
+    @media(max-width:1500px) {
+        margin-inline: 4rem;
+    }
+
+    @media(max-width: bp.$breakpoint-desktop-s) {
+        margin-inline: 2rem;
+    }
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        margin-inline: 6rem;
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-l) {
+        margin-inline: 3rem;
+    }
+
 }
 
 .title {
@@ -23,12 +53,21 @@
         display: flex;
         align-items: center;
         gap: 30px;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 
     &_title {
         font-family: var(--font-primary);
         font-size: var(--font-size-3xl);
         font-weight: 700;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            font-size: 47px;
+        }
     }
 
     &_divider {
@@ -36,50 +75,109 @@
         height: 80%;
         width: 3px;
         border-radius: 6px;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            display: none;
+        }
+    }
+
+    &_divider_mobile {
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            background-color: rgba(41, 171, 226, 1);
+            border-radius: 6px;
+            height: 3px;
+            width: 90px;
+        }
     }
 
     &_paragraph {
         font-family: var(--font-primary);
         font-size: var(--font-size-xl);
         font-weight: 400;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            font-size: 20px;
+        }
     }
 }
 
 .summary_content {
     display: flex;
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
     width: 100%;
     margin-top: 4rem;
 
     &_upper {
         display: flex;
-        gap: 2rem;
+        justify-content: flex-start;
+        gap: 2.8rem;
+        width: 100%;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            justify-content: center;
+        }
     }
 
     &_mid {
         display: flex;
         justify-content: space-between;
         margin-block: 2rem;
+        height: 168px;
+        width: 100%;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            justify-content: center;
+        }
+
     }
 
     &_lower {
         display: flex;
         gap: 2rem;
+        width: 100%;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            justify-content: center;
+        }
     }
 }
 
 .card {
     height: 168px;
-    width: 256px;
     border-radius: 30px;
     box-shadow: 0 0 4px 1px #0000001a;
+
+    @media(max-width: bp.$breakpoint-mobile-l) {
+        height: 138px;
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-m) {
+        height: 108px;
+    }
 
     &_large {
         display: flex;
         justify-content: space-evenly;
         align-items: center;
-        height: 168px;
-        width: 560px;
+        height: 100%;
+        min-width: 560px;
+        max-width: 660px;
+        width: 44%;
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            min-width: 510px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-l) {
+            min-width: 420px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-m) {
+            min-width: 320px;
+        }
 
         &_icon_wrapper {
             display: flex;
@@ -89,6 +187,11 @@
             width: 64px;
             background-color: rgba(255, 61, 0, 1);
             border-radius: 64px;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                height: 48px;
+                width: 48px;
+            }
         }
 
         &_icon_doubleArrow {
@@ -97,16 +200,32 @@
             width: 2.2rem;
         }
 
-        &_text{
+        &_text {
             font-family: var(--font-primary);
             font-size: var(--font-size-sm);
             font-weight: 400;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: var(--font-size-xs);
+            }
         }
 
-        &_stat{
+        &_stat {
             font-family: var(--font-primary);
             font-size: 64px;
             font-weight: 600;
+
+            @media (max-width: bp.$breakpoint-desktop-fhd) {
+                font-size: 60px;
+            }
+
+            @media(max-width: bp.$breakpoint-desktop-s) {
+                font-size: 54px;
+            }
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: 44px;
+            }
         }
 
         &_content {
@@ -120,8 +239,8 @@
 
             &_divider {
                 background-color: rgba(209, 209, 209, 1);
-                height: 70%;
-                width: 1px;
+                height: 60%;
+                width: 2px;
                 border-radius: 6px;
             }
 
@@ -130,12 +249,22 @@
                     font-family: var(--font-primary);
                     font-size: var(--font-size-lg);
                     font-weight: 700;
+                    text-align: center;
+
+                    @media(max-width: bp.$breakpoint-mobile-m) {
+                        font-size: var(--font-size-sm);
+                    }
                 }
 
-                %_text {
+                &_text {
                     font-family: var(--font-primary);
                     font-size: var(--font-size-sm);
                     font-weight: 400;
+                    text-align: center;
+
+                    @media(max-width: bp.$breakpoint-mobile-m) {
+                        font-size: var(--font-size-xs);
+                    }
                 }
             }
         }
@@ -146,6 +275,21 @@
         justify-content: center;
         align-items: center;
         gap: 2rem;
+        min-width: 256px;
+        max-width: 356px;
+        width: 20%;
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            min-width: 230px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-l) {
+            min-width: 180px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-m) {
+            min-width: 132px;
+        }
 
         &_icon_wrapper {
             display: flex;
@@ -155,6 +299,11 @@
             width: 64px;
             background-color: var(--color-primary);
             border-radius: 64px;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                height: 48px;
+                width: 48px;
+            }
         }
 
         &_icon_pencil {
@@ -181,21 +330,56 @@
             font-size: var(--font-size-md);
             font-weight: 400;
             text-align: center;
+
+            @media (max-width: bp.$breakpoint-desktop-fhd) {
+                font-size: var(--font-size-sm);
+            }
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: var(--font-size-xs);
+            }
+
         }
 
         &_stat {
             font-family: var(--font-primary);
             font-size: 64px;
             font-weight: 600;
+
+            @media (max-width: bp.$breakpoint-desktop-fhd) {
+                font-size: 60px;
+            }
+
+            @media(max-width: bp.$breakpoint-desktop-s) {
+                font-size: 54px;
+            }
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: 44px;
+            }
         }
     }
 
     &_small {
-        width: 168px;
+        min-width: 168px;
+        max-width: 191px;
+        width: 13%;
         display: flex;
         justify-content: center;
         align-items: center;
         flex-direction: column;
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            min-width: 150px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-l) {
+            min-width: 120px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-m) {
+            min-width: 86px;
+        }
     }
 
 
@@ -205,12 +389,25 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
+    height: 100%;
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        display: none;
+    }
 
     &_paragraph {
         color: rgba(42, 54, 71, 1);
         font-family: var(--font-primary);
         font-size: var(--font-size-2xl);
         font-weight: 500;
+
+        @media (max-width: bp.$breakpoint-desktop-fhd) {
+            font-size: 43px;
+        }
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            font-size: 37px;
+        }
     }
 
     &_name {
@@ -218,5 +415,13 @@
         font-family: var(--font-primary);
         font-size: 64px;
         font-weight: 700;
+
+        @media (max-width: bp.$breakpoint-desktop-fhd) {
+            font-size: 60px;
+        }
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            font-size: 54px;
+        }
     }
 }
