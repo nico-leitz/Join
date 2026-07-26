@@ -121,10 +121,18 @@ export class ContactService {
 
   private createUpdatePayload(contact: UpdateContact): Partial<ContactRow> {
     return {
-      ...(contact.firstName !== undefined && { first_name: contact.firstName.trim() }),
-      ...(contact.lastName !== undefined && { last_name: contact.lastName.trim() }),
-      ...(contact.email !== undefined && { email: contact.email.trim() }),
-      ...(contact.phone !== undefined && { phone: contact.phone?.trim() || null }),
+      ...(contact.firstName !== undefined && {
+        first_name: contact.firstName.trim(),
+      }),
+      ...(contact.lastName !== undefined && {
+        last_name: contact.lastName.trim(),
+      }),
+      ...(contact.email !== undefined && {
+        email: contact.email.trim(),
+      }),
+      ...(contact.phone !== undefined && {
+        phone: contact.phone?.trim() || null,
+      }),
       updated_at: new Date().toISOString(),
     };
   }
@@ -142,7 +150,10 @@ export class ContactService {
     });
   }
 
-  private replaceContact(contacts: Contact[], updatedContact: Contact): Contact[] {
+  private replaceContact(
+    contacts: Contact[],
+    updatedContact: Contact
+  ): Contact[] {
     const updatedContacts = contacts.map((contact) => {
       return contact.id === updatedContact.id ? updatedContact : contact;
     });
@@ -210,6 +221,7 @@ export class ContactService {
       email: contactRow.email,
       phone: contactRow.phone,
       badgeColor: contactRow.badge_color,
+      authUserId: contactRow.auth_user_id,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
     };
@@ -221,7 +233,10 @@ export class ContactService {
     });
   }
 
-  private compareContacts(firstContact: Contact, secondContact: Contact): number {
+  private compareContacts(
+    firstContact: Contact,
+    secondContact: Contact
+  ): number {
     return (
       firstContact.firstName.localeCompare(secondContact.firstName) ||
       firstContact.lastName.localeCompare(secondContact.lastName)
