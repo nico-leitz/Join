@@ -154,6 +154,58 @@ describe('AuthRepository', () => {
 
     expect(signOutMock).toHaveBeenCalledOnce();
   });
+
+  it('forwards authentication errors during sign-in', async () => {
+    const error = new Error('Invalid login credentials');
+
+    signInMock.mockResolvedValue({
+      data: { user: null, session: null },
+      error,
+    });
+
+    await expect(
+      repository.signIn({
+        email: 'bastian@example.com',
+        password: 'WrongPassword',
+      })
+    ).rejects.toBe(error);
+  });
+
+  it('rejects a successful response without a user', async () => {
+    signUpMock.mockResolvedValue({
+      data: { user: null, session: null },
+      error: null,
+    });
+
+    await expect(
+      repository.signUp({
+        fullName: 'Bastian Wollny',
+        email: 'bastian@example.com',
+        password: 'Secure123!',
+      })
+    ).rejects.toThrow(
+      'Authentication response did not contain a user.'
+    );
+  });
+
+  it('forwards errors while restoring a session', async () => {
+    const error = new Error('Session could not be restored');
+
+    getSessionMock.mockResolvedValue({
+      data: { session: null },
+      error,
+    });
+
+    await expect(repository.getSession()).rejects.toBe(error);
+  });
+
+  it('forwards errors during sign-out', async () => {
+    const error = new Error('Sign-out failed');
+
+    signOutMock.mockResolvedValue({ error });
+
+    await expect(repository.signOut()).rejects.toBe(error);
+  });
 });
 
 /**
