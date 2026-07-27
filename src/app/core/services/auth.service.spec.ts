@@ -18,10 +18,20 @@ describe('AuthService', () => {
   let authService: AuthService;
   let signUpMock: ReturnType<typeof vi.fn>;
   let signInMock: ReturnType<typeof vi.fn>;
+  let guestSignInMock: ReturnType<typeof vi.fn>;
+  let signOutMock: ReturnType<typeof vi.fn>;
+  let getSessionMock: ReturnType<typeof vi.fn>;
+  let authStateChangeMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     signUpMock = vi.fn();
     signInMock = vi.fn();
+    guestSignInMock = vi.fn();
+    signOutMock = vi.fn();
+    getSessionMock = vi.fn().mockResolvedValue(null);
+    authStateChangeMock = vi.fn().mockReturnValue({
+      unsubscribe: vi.fn(),
+    });
 
     TestBed.configureTestingModule({
       providers: [
@@ -31,6 +41,10 @@ describe('AuthService', () => {
           useValue: {
             signUp: signUpMock,
             signIn: signInMock,
+            signInAnonymously: guestSignInMock,
+            signOut: signOutMock,
+            getSession: getSessionMock,
+            onAuthStateChange: authStateChangeMock,
           },
         },
       ],
@@ -98,6 +112,57 @@ describe('AuthService', () => {
     expect(authService.isAuthenticated()).toBe(true);
     expect(authService.isGuest()).toBe(false);
   });
+
+  it('signs in as an anonymous guest', async () => {
+    const user = createGuestUser();
+
+    guestSignInMock.mockResolvedValue({
+      user,
+      session: createSession(user),
+    });
+
+    const result = await authService.signInAsGuest();
+
+    expect(result).toBe(true);
+    expect(guestSignInMock).toHaveBeenCalledOnce();
+    expect(authService.currentUser()?.fullName).toBe('Guest');
+    expect(authService.isAuthenticated()).toBe(true);
+    expect(authService.isGuest()).toBe(true);
+  });
+
+  it('restores a persisted session exactly once', async () => {
+    const user = createUser();
+    getSessionMock.mockResolvedValue(createSession(user));
+
+    await Promise.all([
+      authService.initialize(),
+      authService.initialize(),
+    ]);
+
+    expect(getSessionMock).toHaveBeenCalledOnce();
+    expect(authStateChangeMock).toHaveBeenCalledOnce();
+    expect(authService.isInitialized()).toBe(true);
+    expect(authService.currentUser()?.id).toBe('user-1');
+    expect(authService.isAuthenticated()).toBe(true);
+  });
+
+  it('signs out and clears the authenticated user', async () => {
+    const user = createUser();
+
+    signInMock.mockResolvedValue({
+      user,
+      session: createSession(user),
+    });
+    signOutMock.mockResolvedValue(undefined);
+
+    await authService.signIn(createLoginCredentials());
+    const result = await authService.signOut();
+
+    expect(result).toBe(true);
+    expect(signOutMock).toHaveBeenCalledOnce();
+    expect(authService.currentUser()).toBeNull();
+    expect(authService.isAuthenticated()).toBe(false);
+  });
 });
 
 /**
@@ -125,7 +190,7 @@ function createLoginCredentials(): LoginCredentials {
 }
 
 /**
- * Creates a complete Supabase user fixture.
+ * Creates a complete permanent Supabase user fixture.
  */
 function createUser(): User {
   return {
@@ -138,6 +203,20 @@ function createUser(): User {
       full_name: 'Bastian Wollny',
     },
     is_anonymous: false,
+  };
+}
+
+/**
+ * Creates a complete anonymous Supabase user fixture.
+ */
+function createGuestUser(): User {
+  return {
+    id: 'guest-1',
+    aud: 'authenticated',
+    created_at: '2026-07-27T10:00:00.000Z',
+    app_metadata: {},
+    user_metadata: {},
+    is_anonymous: true,
   };
 }
 
