@@ -125,13 +125,18 @@
         display: flex;
         justify-content: space-between;
         margin-block: 2rem;
-        height: 168px;
+        min-height: 168px;
         width: 100%;
+        transition: min-height 200ms ease;
+        will-change: min-height;
 
         @media(max-width: bp.$breakpoint-tablet-xl) {
             justify-content: center;
         }
+    }
 
+    &_mid:has(.card_large:hover) {
+        min-height: 188px;
     }
 
     &_lower {
@@ -145,27 +150,11 @@
     }
 }
 
-.card {
-    height: 168px;
-    border-radius: 30px;
-    box-shadow: 0 0 4px 1px #0000001a;
-
-    @media(max-width: bp.$breakpoint-mobile-l) {
-        height: 138px;
-    }
-
-    @media(max-width: bp.$breakpoint-mobile-m) {
-        height: 108px;
-    }
+.hover {
 
     &:hover {
         background-color: var(--color-primary);
         transition: 200ms;
-        transform: matrix3d(
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            -15, 0, 1, 0.95);
 
         .card_medium_icon_wrapper {
             background-color: white;
@@ -177,6 +166,10 @@
             .card_medium_icon_check {
                 background-image: url(/assets/summary/check_dark.svg);
             }
+        }
+
+        .card_small {
+            min-width: 168px;
         }
 
         .card_medium_stat {
@@ -202,6 +195,60 @@
         .card_large_content_right_text {
             color: white;
         }
+    }
+
+    &_left {
+        &:hover {
+            transform: matrix3d(
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    15, 0, 1, 0.95);
+        }
+    }
+
+    &_right {
+        &:hover {
+            transform: matrix3d(
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    -15, 0, 1, 0.95);
+        }
+    }
+
+    &_mid {
+        &:hover {
+            transform: matrix3d(
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 1, 0.9);
+
+            .summary_content_lower {
+                gap: 0rem;
+            }
+        }
+    }
+
+    &_height {
+        .card_large:hover {
+            
+        }
+    }
+}
+
+.card {
+    height: 168px;
+    border-radius: 30px;
+    box-shadow: 0 0 4px 1px #0000001a;
+
+    @media(max-width: bp.$breakpoint-mobile-l) {
+        height: 138px;
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-m) {
+        height: 108px;
     }
 
     &_large {
