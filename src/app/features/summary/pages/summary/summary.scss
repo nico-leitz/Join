@@ -1,0 +1,533 @@
+@use 'abstracts/breakpoints' as bp;
+
+.summary_page {
+    display: flex;
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        flex-direction: column-reverse;
+        --mobile-bottom-nav-height: var(--layout-mobile-bottom-nav-height);
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-xs) {
+        --mobile-bottom-nav-height: 72px;
+    }
+}
+
+app-sidebar {
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        display: block;
+        width: 100%;
+        height: var(--mobile-bottom-nav-height);
+        flex-shrink: 0;
+    }
+}
+
+.summary_page_content {
+    width: 100%;
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        padding-bottom: var(--mobile-bottom-nav-height);
+    }
+}
+
+.summary_element {
+    display: flex;
+    flex-direction: column;
+    min-height: 50dvh;
+    max-width: 1440px;
+    margin-top: 10%;
+    margin-inline: 8rem;
+    padding-bottom: 10%;
+
+    @media(max-width:1500px) {
+        margin-inline: 4rem;
+    }
+
+    @media(max-width: bp.$breakpoint-desktop-s) {
+        margin-inline: 2rem;
+    }
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        margin-inline: 6rem;
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-l) {
+        margin-inline: 3rem;
+    }
+
+}
+
+.title {
+
+    &_wrapper {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    &_title {
+        font-family: var(--font-primary);
+        font-size: var(--font-size-3xl);
+        font-weight: 700;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            font-size: 47px;
+        }
+    }
+
+    &_divider {
+        background-color: rgba(41, 171, 226, 1);
+        height: 80%;
+        width: 3px;
+        border-radius: 6px;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            display: none;
+        }
+    }
+
+    &_divider_mobile {
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            background-color: rgba(41, 171, 226, 1);
+            border-radius: 6px;
+            height: 3px;
+            width: 90px;
+        }
+    }
+
+    &_paragraph {
+        font-family: var(--font-primary);
+        font-size: var(--font-size-xl);
+        font-weight: 400;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            font-size: 20px;
+        }
+    }
+}
+
+.summary_content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 4rem;
+
+    &_upper {
+        display: flex;
+        justify-content: flex-start;
+        gap: 2.8rem;
+        width: 100%;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            justify-content: center;
+        }
+    }
+
+    &_mid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-block: 2rem;
+        height: 168px;
+        width: 100%;
+        transition: height 200ms ease;
+        will-change: height;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            justify-content: center;
+        }
+    }
+
+    &_mid:has(.card_large:hover) {
+        height: 198px;
+    }
+
+    &_lower {
+        display: flex;
+        gap: 2rem;
+        width: 100%;
+
+        @media(max-width: bp.$breakpoint-tablet-xl) {
+            justify-content: center;
+        }
+    }
+}
+
+.hover {
+
+    &:hover {
+        background-color: var(--color-primary);
+        transition: 200ms;
+
+        .card_medium_icon_wrapper {
+            background-color: white;
+
+            .card_medium_icon_pencil {
+                background-image: url(/assets/summary/pencil_dark.svg);
+            }
+
+            .card_medium_icon_check {
+                background-image: url(/assets/summary/check_dark.svg);
+            }
+        }
+
+        .card_small {
+            min-width: 168px;
+        }
+
+        .card_medium_stat {
+            color: white;
+        }
+
+        .card_medium_text {
+            color: white;
+        }
+
+        .card_large_stat {
+            color: white;
+        }
+
+        .card_large_text {
+            color: white;
+        }
+
+        .card_large_content_right_date {
+            color: white;
+        }
+
+        .card_large_content_right_text {
+            color: white;
+        }
+    }
+
+    &_left {
+        &:hover {
+            transform: matrix3d(1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    15, 0, 1, 0.95);
+        }
+    }
+
+    &_right {
+        &:hover {
+            transform: matrix3d(1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    -15, 0, 1, 0.95);
+        }
+    }
+
+    &_mid {
+        &:hover {
+            transform: matrix3d(1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 1, 0.9);
+
+            .summary_content_lower {
+                gap: 0rem;
+            }
+        }
+    }
+
+    &_height {
+        .card_large:hover {
+            
+        }
+    }
+}
+
+.card {
+    height: 168px;
+    border-radius: 30px;
+    box-shadow: 0 0 4px 1px #0000001a;
+
+    @media(max-width: bp.$breakpoint-mobile-l) {
+        height: 128px;
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-m) {
+        height: 98px;
+    }
+
+    &_large {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        height: 100%;
+        min-width: 560px;
+        max-width: 660px;
+        width: 44%;
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            min-width: 510px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-l) {
+            min-width: 420px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-m) {
+            min-width: 320px;
+        }
+
+        &_icon_wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 64px;
+            width: 64px;
+            background-color: rgba(255, 61, 0, 1);
+            border-radius: 64px;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                height: 48px;
+                width: 48px;
+            }
+        }
+
+        &_icon_doubleArrow {
+            background-image: url('/assets/summary/doubleArrow.svg');
+            height: 1.6rem;
+            width: 2.2rem;
+        }
+
+        &_text {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-sm);
+            font-weight: 400;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: var(--font-size-xs);
+            }
+        }
+
+        &_stat {
+            font-family: var(--font-primary);
+            font-size: 64px;
+            font-weight: 600;
+
+            @media (max-width: bp.$breakpoint-desktop-fhd) {
+                font-size: 60px;
+            }
+
+            @media(max-width: bp.$breakpoint-desktop-s) {
+                font-size: 54px;
+            }
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: 44px;
+            }
+        }
+
+        &_content {
+
+            &_left {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            &_divider {
+                background-color: rgba(209, 209, 209, 1);
+                height: 60%;
+                width: 2px;
+                border-radius: 6px;
+            }
+
+            &_right {
+                &_date {
+                    font-family: var(--font-primary);
+                    font-size: var(--font-size-lg);
+                    font-weight: 700;
+                    text-align: center;
+
+                    @media(max-width: bp.$breakpoint-mobile-m) {
+                        font-size: var(--font-size-sm);
+                    }
+                }
+
+                &_text {
+                    font-family: var(--font-primary);
+                    font-size: var(--font-size-sm);
+                    font-weight: 400;
+                    text-align: center;
+
+                    @media(max-width: bp.$breakpoint-mobile-m) {
+                        font-size: var(--font-size-xs);
+                    }
+                }
+            }
+        }
+    }
+
+    &_medium {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        min-width: 256px;
+        max-width: 356px;
+        width: 20%;
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            min-width: 230px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-l) {
+            min-width: 180px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-m) {
+            min-width: 132px;
+        }
+
+        &_icon_wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 64px;
+            width: 64px;
+            background-color: var(--color-primary);
+            border-radius: 64px;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                height: 48px;
+                width: 48px;
+            }
+        }
+
+        &_icon_pencil {
+            background-image: url('/assets/summary/pencil.svg');
+            height: 1.5rem;
+            width: 1.5rem;
+        }
+
+        &_icon_check {
+            background-image: url('/assets/summary/check.svg');
+            height: 1.8rem;
+            width: 2.3rem;
+        }
+
+        &_text_wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        &_text {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            font-weight: 400;
+            text-align: center;
+
+            @media (max-width: bp.$breakpoint-desktop-fhd) {
+                font-size: var(--font-size-sm);
+            }
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: var(--font-size-xs);
+            }
+
+        }
+
+        &_stat {
+            font-family: var(--font-primary);
+            font-size: 64px;
+            font-weight: 600;
+
+            @media (max-width: bp.$breakpoint-desktop-fhd) {
+                font-size: 60px;
+            }
+
+            @media(max-width: bp.$breakpoint-desktop-s) {
+                font-size: 54px;
+            }
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                font-size: 44px;
+            }
+        }
+    }
+
+    &_small {
+        min-width: 168px;
+        max-width: 191px;
+        width: 13%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            min-width: 150px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-l) {
+            min-width: 120px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-m) {
+            min-width: 86px;
+        }
+    }
+
+
+}
+
+.greeting {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        display: none;
+    }
+
+    &_paragraph {
+        color: rgba(42, 54, 71, 1);
+        font-family: var(--font-primary);
+        font-size: var(--font-size-2xl);
+        font-weight: 500;
+
+        @media (max-width: bp.$breakpoint-desktop-fhd) {
+            font-size: 43px;
+        }
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            font-size: 37px;
+        }
+    }
+
+    &_name {
+        color: rgba(18, 70, 88, 1);
+        font-family: var(--font-primary);
+        font-size: 64px;
+        font-weight: 700;
+
+        @media (max-width: bp.$breakpoint-desktop-fhd) {
+            font-size: 60px;
+        }
+
+        @media(max-width: bp.$breakpoint-desktop-s) {
+            font-size: 54px;
+        }
+    }
+}

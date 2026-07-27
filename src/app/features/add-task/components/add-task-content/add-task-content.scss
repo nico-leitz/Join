@@ -9,6 +9,13 @@
   min-height: 0;
 }
 
+textarea::-webkit-resizer {
+  display: none;
+}
+textarea::-moz-resizer {
+  display: none;
+}
+
 .add-task {
   display: flex;
   width: 100%;
@@ -99,6 +106,7 @@
   }
 
   &__input {
+    position: relative;
     width: 100%;
     min-width: 0;
     height: 48px;
@@ -162,11 +170,24 @@
     resize: vertical;
   }
 
+  &__description_icon {
+    position: absolute;
+    bottom: 32px;
+    right: 6px;
+    height: 16px;
+    width: 16px;
+    background-image: url('/assets/add-task/description_icon.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
+    pointer-events: none;
+  }
+
   &__field-error {
     min-height: 18px;
     margin: 4px 0 0;
     color: var(--color-error);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     line-height: 1.2;
   }
 
@@ -306,6 +327,9 @@
   &__contact-menu,
   &__category-menu {
     position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: calc(100% + 4px);
     right: 0;
     left: 0;
     z-index: 100;
@@ -313,6 +337,7 @@
     border-radius: var(--radius-md);
     background-color: var(--color-bg-light);
     box-shadow: 0 4px 10px 0 #00000026;
+    gap: 1px;
   }
 
   &__contact-menu {
@@ -342,26 +367,23 @@
 
     &:hover {
       background-color: #eeeeee;
-
-      .add-task__contact-check {
-        background-image: url('/assets/icons/icons_dropdown/check_button_default_hover.svg');
-      }
     }
 
-    &--selected {
-      background-color: #2a3647;
-      color: #ffffff;
+    &:has(input:checked){
+      background-color: var(--color-primary);
+      color: var(--color-text-light);
+      border-radius: 10px;
 
-      .add-task__contact-check {
-        background-image: url('/assets/icons/icons_dropdown/check_button_checked.svg');
+      .add-task__contact-name {
+        color: var(--color-text-light);
       }
 
-      &:hover {
-        background-color: #091931;
+      .add-task__checkbox {
+        accent-color: var(--color-text-light);
+      }
 
-        .add-task__contact-check {
-          background-image: url('/assets/icons/icons_dropdown/check_button_checked_hover.svg');
-        }
+      &:hover{
+        background-color: var(--color-primary-dark);
       }
     }
   }
@@ -661,7 +683,7 @@
   &__required-legend {
     margin: 0 0 12px;
     color: var(--color-primary);
-    font-size: 1rem;
+    font-size: var(--font-size-sm);
 
     span {
       color: var(--color-error);

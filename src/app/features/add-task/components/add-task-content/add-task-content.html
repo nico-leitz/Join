@@ -45,6 +45,8 @@
           placeholder="Enter a Description"
         ></textarea>
 
+        <span class="add-task__description_icon" aria-hidden="true"></span>
+
         <p class="add-task__field-error"></p>
       </div>
 
@@ -61,6 +63,8 @@
           [min]="minimumDueDate"
           formControlName="dueDate"
         />
+
+        <span class="add-task__calendar_icon"></span>
 
         <p class="add-task__field-error">
           {{ getDueDateErrorMessage() }}
