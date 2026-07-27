@@ -1,5 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { Session, User } from '@supabase/supabase-js';
+import {
+  AuthApiError,
+  Session,
+  User,
+} from '@supabase/supabase-js';
 import {
   beforeEach,
   describe,
@@ -85,7 +89,11 @@ describe('AuthService', () => {
   it('returns email confirmation state after sign-up', async () => {
     const credentials = createSignUpCredentials();
     const user = createUser();
-    signUpMock.mockResolvedValue({ user, session: null });
+
+    signUpMock.mockResolvedValue({
+      user,
+      session: null,
+    });
 
     const result = await authService.signUp(credentials);
 
@@ -163,6 +171,112 @@ describe('AuthService', () => {
     expect(authService.currentUser()).toBeNull();
     expect(authService.isAuthenticated()).toBe(false);
   });
+
+  it('maps a sign-up error to a safe message', async () => {
+    signUpMock.mockRejectedValue(
+      createAuthApiError('email_exists')
+    );
+
+    const result = await authService.signUp(
+      createSignUpCredentials()
+    );
+
+    expect(result).toBeNull();
+    expect(authService.errorMessage()).toBe(
+      'An account with this email already exists.'
+    );
+    expect(authService.isAuthenticated()).toBe(false);
+    expect(authService.isLoading()).toBe(false);
+  });
+
+  it('maps invalid credentials during sign-in', async () => {
+    signInMock.mockRejectedValue(
+      createAuthApiError('invalid_credentials')
+    );
+
+    const result = await authService.signIn(
+      createLoginCredentials()
+    );
+
+    expect(result).toBe(false);
+    expect(authService.errorMessage()).toBe(
+      'Invalid email or password.'
+    );
+    expect(authService.isAuthenticated()).toBe(false);
+    expect(authService.isLoading()).toBe(false);
+  });
+
+  it('maps an unavailable anonymous provider', async () => {
+    guestSignInMock.mockRejectedValue(
+      createAuthApiError('anonymous_provider_disabled')
+    );
+
+    const result = await authService.signInAsGuest();
+
+    expect(result).toBe(false);
+    expect(authService.errorMessage()).toBe(
+      'Guest login is currently unavailable.'
+    );
+    expect(authService.isAuthenticated()).toBe(false);
+    expect(authService.isLoading()).toBe(false);
+  });
+
+  it('rejects a sign-in response without a session', async () => {
+    const user = createUser();
+
+    signInMock.mockResolvedValue({
+      user,
+      session: null,
+    });
+
+    const result = await authService.signIn(
+      createLoginCredentials()
+    );
+
+    expect(result).toBe(false);
+    expect(authService.errorMessage()).toBe(
+      'Authentication failed. Please try again.'
+    );
+    expect(authService.isAuthenticated()).toBe(false);
+    expect(authService.isLoading()).toBe(false);
+  });
+
+  it('keeps the authenticated user when sign-out fails', async () => {
+    const user = createUser();
+
+    signInMock.mockResolvedValue({
+      user,
+      session: createSession(user),
+    });
+    signOutMock.mockRejectedValue(new Error('Sign-out failed'));
+
+    await authService.signIn(createLoginCredentials());
+    const result = await authService.signOut();
+
+    expect(result).toBe(false);
+    expect(authService.currentUser()?.id).toBe('user-1');
+    expect(authService.isAuthenticated()).toBe(true);
+    expect(authService.errorMessage()).toBe(
+      'Authentication failed. Please try again.'
+    );
+    expect(authService.isLoading()).toBe(false);
+  });
+
+  it('completes initialization after session restoration fails', async () => {
+    getSessionMock.mockRejectedValue(
+      createAuthApiError('session_expired')
+    );
+
+    await authService.initialize();
+
+    expect(getSessionMock).toHaveBeenCalledOnce();
+    expect(authStateChangeMock).toHaveBeenCalledOnce();
+    expect(authService.isInitialized()).toBe(true);
+    expect(authService.isAuthenticated()).toBe(false);
+    expect(authService.errorMessage()).toBe(
+      'Your session has expired. Please log in again.'
+    );
+  });
 });
 
 /**
@@ -187,6 +301,17 @@ function createLoginCredentials(): LoginCredentials {
     email: 'bastian@example.com',
     password: 'Secure123!',
   };
+}
+
+/**
+ * Creates a Supabase authentication error fixture.
+ */
+function createAuthApiError(code: string): AuthApiError {
+  return new AuthApiError(
+    'Test authentication error',
+    400,
+    code
+  );
 }
 
 /**
