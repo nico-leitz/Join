@@ -5,29 +5,44 @@
 
     @media(max-width: bp.$breakpoint-tablet-xl) {
         flex-direction: column-reverse;
+        --mobile-bottom-nav-height: var(--layout-mobile-bottom-nav-height);
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-xs) {
+        --mobile-bottom-nav-height: 72px;
     }
 }
 
-.sidebar {
+app-sidebar {
     @media(max-width: bp.$breakpoint-tablet-xl) {
-        position: absolute;
-        bottom: 0;
+        position: fixed;
         right: 0;
+        bottom: 0;
         left: 0;
+        z-index: 1000;
+        display: block;
+        width: 100%;
+        height: var(--mobile-bottom-nav-height);
+        flex-shrink: 0;
     }
 }
 
 .summary_page_content {
     width: 100%;
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        padding-bottom: var(--mobile-bottom-nav-height);
+    }
 }
 
 .summary_element {
     display: flex;
     flex-direction: column;
-    height: 40vh;
+    min-height: 50dvh;
     max-width: 1440px;
-    margin-block: 10%;
+    margin-top: 10%;
     margin-inline: 8rem;
+    padding-bottom: 10%;
 
     @media(max-width:1500px) {
         margin-inline: 4rem;
@@ -124,11 +139,12 @@
     &_mid {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         margin-block: 2rem;
-        min-height: 168px;
+        height: 168px;
         width: 100%;
-        transition: min-height 200ms ease;
-        will-change: min-height;
+        transition: height 200ms ease;
+        will-change: height;
 
         @media(max-width: bp.$breakpoint-tablet-xl) {
             justify-content: center;
@@ -136,7 +152,7 @@
     }
 
     &_mid:has(.card_large:hover) {
-        min-height: 188px;
+        height: 198px;
     }
 
     &_lower {
@@ -199,8 +215,7 @@
 
     &_left {
         &:hover {
-            transform: matrix3d(
-                    1, 0, 0, 0,
+            transform: matrix3d(1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
                     15, 0, 1, 0.95);
@@ -209,8 +224,7 @@
 
     &_right {
         &:hover {
-            transform: matrix3d(
-                    1, 0, 0, 0,
+            transform: matrix3d(1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
                     -15, 0, 1, 0.95);
@@ -219,8 +233,7 @@
 
     &_mid {
         &:hover {
-            transform: matrix3d(
-                    1, 0, 0, 0,
+            transform: matrix3d(1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
                     0, 0, 1, 0.9);
@@ -244,11 +257,11 @@
     box-shadow: 0 0 4px 1px #0000001a;
 
     @media(max-width: bp.$breakpoint-mobile-l) {
-        height: 138px;
+        height: 128px;
     }
 
     @media(max-width: bp.$breakpoint-mobile-m) {
-        height: 108px;
+        height: 98px;
     }
 
     &_large {
