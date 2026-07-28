@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LoginCredentials } from '../../../../core/models/auth.model';
@@ -13,13 +13,22 @@ type LoginMode = 'user' | 'guest' | null;
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login {
+export class Login implements OnDestroy {
+  private static hasShownSplash = false;
+
   private readonly formBuilder = inject(FormBuilder).nonNullable;
   private readonly router = inject(Router);
 
   readonly authService = inject(AuthService);
   readonly submitted = signal(false);
   readonly activeLogin = signal<LoginMode>(null);
+  readonly showSplash = signal(true);
+  readonly isMobile = signal(false);
+
+  private splashTimer?: ReturnType<typeof window.setTimeout>;
+  private readonly onResize = (): void => {
+    this.isMobile.set(window.innerWidth <= 768);
+  };
 
   readonly loginForm = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
@@ -28,6 +37,26 @@ export class Login {
 
   constructor() {
     this.authService.clearError();
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+
+    if (Login.hasShownSplash) {
+      this.showSplash.set(false);
+      return;
+    }
+
+    Login.hasShownSplash = true;
+    this.splashTimer = window.setTimeout(() => {
+      this.showSplash.set(false);
+    }, 2400);
+  }
+
+  ngOnDestroy(): void {
+    if (this.splashTimer) {
+      window.clearTimeout(this.splashTimer);
+    }
+
+    window.removeEventListener('resize', this.onResize);
   }
 
   /**
@@ -53,7 +82,7 @@ export class Login {
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary();
+      await this.navigateToSummary('guest');
     }
   }
 
@@ -84,7 +113,7 @@ export class Login {
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary();
+      await this.navigateToSummary('user');
     }
   }
 
@@ -103,7 +132,8 @@ export class Login {
   /**
    * Navigates to the protected summary page.
    */
-  private navigateToSummary(): Promise<boolean> {
+  private navigateToSummary(mode: Exclude<LoginMode, null>): Promise<boolean> {
+    this.authService.queueSummaryGreeting(mode);
     return this.router.navigate(['/summary']);
   }
 }

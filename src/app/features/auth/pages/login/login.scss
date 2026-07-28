@@ -16,13 +16,19 @@
 }
 
 .login-page {
+  position: relative;
   max-width: 90rem;
   margin: 0 auto;
   width: 100%;
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
   font-family: inherit;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+  }
 
   &__header {
     display: flex;
@@ -94,6 +100,33 @@
     &:hover {
       color: var(--color-text-dark);
     }
+  }
+}
+
+.login-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  overflow: hidden;
+
+  &--mobile {
+    background-color: #2a3647;
+  }
+
+  &__logo {
+    position: absolute;
+    width: clamp(8rem, 18vw, 11rem);
+    height: auto;
+    opacity: 1;
+    animation: splash-logo-desktop 2.4s ease forwards;
+  }
+
+  &__logo--mobile {
+    animation-name: splash-logo-mobile;
   }
 }
 
@@ -270,6 +303,52 @@
   }
 }
 
+@keyframes splash-logo-desktop {
+  0% {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  70% {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    top: 3rem;
+    left: 5rem;
+    transform: translate(0, 0) scale(0.7);
+    opacity: 0;
+  }
+}
+
+@keyframes splash-logo-mobile {
+  0% {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  70% {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    top: 1rem;
+    left: 0.75rem;
+    transform: translate(0, 0) scale(0.7);
+    opacity: 0;
+  }
+}
+
 @media (max-width: bp.$breakpoint-tablet-l) {
   .login-page {
     &__header {
@@ -314,6 +393,12 @@
 }
 
 @media (max-width: bp.$breakpoint-mobile-xs) {
+  .login-splash {
+    &__logo {
+      width: clamp(6rem, 28vw, 8rem);
+    }
+  }
+
   .login-page {
     &__header {
       padding: 1rem 0.75rem;

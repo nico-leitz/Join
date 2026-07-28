@@ -2,6 +2,14 @@
     <app-sidebar></app-sidebar>
     <section class="summary_page_content">
         <app-header></app-header>
+        @if (showMobileGreeting()) {
+            <section class="mobile-greeting" [class.mobile-greeting--leaving]="isMobileGreetingLeaving()" aria-live="polite">
+                <p class="mobile-greeting__text">Good morning,</p>
+                @if (showGreetingName()) {
+                    <p class="mobile-greeting__name">Sandra Müller</p>
+                }
+            </section>
+        } @else {
         <section class="summary_element">
             <div class="title_wrapper">
                 <p class="title_title">Join 360</p>
@@ -50,10 +58,6 @@
                         </div>
 
                     </div>
-                    <aside class="greeting">
-                        <p class="greeting_paragraph">Good morning,</p>
-                        <p class="greeting_name">Sofia Müller</p>
-                    </aside>
                 </div>
                 <div class="summary_content_lower">
                     <div class="card card_small hover hover_left">
@@ -71,5 +75,6 @@
                 </div>
             </section>
         </section>
+        }
     </section>
 </section>

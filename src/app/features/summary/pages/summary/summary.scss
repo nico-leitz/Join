@@ -36,6 +36,49 @@ app-sidebar {
     }
 }
 
+.mobile-greeting {
+    display: none;
+
+    @media(max-width: bp.$breakpoint-tablet-xl) {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: calc(100vh - var(--mobile-bottom-nav-height) - 96px);
+        text-align: center;
+        padding-inline: 1rem;
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 380ms ease, transform 380ms ease;
+    }
+
+    &--leaving {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    &__text {
+        margin: 0;
+        color: rgba(42, 54, 71, 1);
+        font-family: var(--font-primary);
+        font-size: clamp(2rem, 7vw, 3.5rem);
+        font-weight: 500;
+        line-height: 1.15;
+        transition: opacity 380ms ease;
+    }
+
+    &__name {
+        margin: 0;
+        color: rgba(18, 70, 88, 1);
+        font-family: var(--font-primary);
+        font-size: clamp(2.25rem, 8vw, 4rem);
+        font-weight: 700;
+        line-height: 1.1;
+        transition: opacity 380ms ease;
+    }
+}
+
 .summary_element {
     display: flex;
     flex-direction: column;

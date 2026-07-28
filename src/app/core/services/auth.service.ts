@@ -19,6 +19,8 @@ import {
   AuthSubscription,
 } from '../repositories/auth.repository';
 
+type SummaryGreetingMode = 'user' | 'guest';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -31,6 +33,9 @@ export class AuthService implements OnDestroy {
   private readonly loadingState = signal(false);
   private readonly initializedState = signal(false);
   private readonly errorState = signal<string | null>(null);
+  private readonly summaryGreetingModeState = signal<SummaryGreetingMode | null>(
+    null
+  );
 
   private authSubscription: AuthSubscription | null = null;
   private initializationPromise: Promise<void> | null = null;
@@ -109,6 +114,23 @@ export class AuthService implements OnDestroy {
    */
   clearError(): void {
     this.errorState.set(null);
+  }
+
+  /**
+   * Queues a one-time mobile greeting for the next summary navigation.
+   */
+  queueSummaryGreeting(mode: SummaryGreetingMode): void {
+    this.summaryGreetingModeState.set(mode);
+  }
+
+  /**
+   * Consumes and clears the queued summary greeting mode.
+   */
+  consumeSummaryGreeting(): SummaryGreetingMode | null {
+    const mode = this.summaryGreetingModeState();
+    this.summaryGreetingModeState.set(null);
+
+    return mode;
   }
 
   /**
