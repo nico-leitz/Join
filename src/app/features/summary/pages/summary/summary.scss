@@ -29,6 +29,7 @@ app-sidebar {
 }
 
 .summary_page_content {
+    height: 100%;
     width: 100%;
     min-height: calc(100vh - var(--layout-mobile-bottom-nav-height));
 
@@ -41,6 +42,7 @@ app-sidebar {
     display: flex;
     justify-items: center;
     flex-direction: column;
+    max-height: 100%;
     max-width: 1440px;
     margin-inline: 8rem;
     padding-top: 3rem;
@@ -125,23 +127,24 @@ app-sidebar {
 .summary_content {
     display: flex;
     justify-content: flex-start;
-    align-items: stretch;
-    flex-direction: column;
+    gap: 4rem;
     width: 100%;
     padding-top: 1rem;
 
+    &_cards_wrapper{
+        display: flex;
+        flex-direction: column;
+        max-width: 600px;
+    }
+
     &_upper {
         display: flex;
-        justify-content: flex-start;
-        gap: 2.8rem;
+        justify-content: space-between;
         width: 100%;
     }
 
     &_mid {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-block: 1rem;
+        margin-block: 2rem;
         height: 168px;
         width: 100%;
         transition: height 200ms ease;
@@ -154,8 +157,12 @@ app-sidebar {
 
     &_lower {
         display: flex;
-        gap: 2rem;
+        justify-content: space-between;
         width: 100%;
+    }
+
+    &_right{
+        display: flex;
     }
 }
 
