@@ -5,6 +5,7 @@ export interface ContactRow {
   email: string;
   phone: string | null;
   badge_color: string;
+  auth_user_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -16,6 +17,7 @@ export interface Contact {
   email: string;
   phone: string | null;
   badgeColor: string;
+  authUserId: string | null;
   createdAt: string;
   updatedAt: string;
 }

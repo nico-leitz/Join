@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { Login } from '../pages/login/login';
-import { Signup } from '../pages/signup/signup';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-auth-page',
-  imports: [Login, Signup],
+  imports: [RouterOutlet],
   templateUrl: './auth-page.html',
   styleUrl: './auth-page.scss',
 })

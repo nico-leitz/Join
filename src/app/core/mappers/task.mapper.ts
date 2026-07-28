@@ -58,6 +58,7 @@ function mapContactRow(contactRow: ContactRow): Contact {
     email: contactRow.email,
     phone: contactRow.phone,
     badgeColor: contactRow.badge_color,
+    authUserId: contactRow.auth_user_id,
     createdAt: contactRow.created_at,
     updatedAt: contactRow.updated_at,
   };
