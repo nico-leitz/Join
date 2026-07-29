@@ -61,7 +61,9 @@
               class="board__search_input"
               placeholder="Find Task"
               [value]="searchTerm()"
-              (input)="updateSearchTerm($event)"
+              (input)="
+                updateSearchTerm($event)
+              "
             />
 
             <div
@@ -131,7 +133,9 @@
             class="board__column"
             aria-labelledby="col_todo"
           >
-            <header class="board__column_header">
+            <header
+              class="board__column_header"
+            >
               <h2
                 id="col_todo"
                 class="board__column_title"
@@ -143,7 +147,9 @@
                 type="button"
                 class="board__column_add_btn"
                 aria-label="Add new task to To do"
-                [disabled]="isBoardUpdating()"
+                [disabled]="
+                  isBoardUpdating()
+                "
                 (click)="
                   openAddTaskDialog('todo')
                 "
@@ -161,14 +167,21 @@
               id="todo"
               class="board__column_content"
               cdkDropList
+              [cdkDropListOrientation]="
+                dropListOrientation()
+              "
               [cdkDropListData]="todo()"
               [cdkDropListDisabled]="
                 isDragDisabled()
               "
-              (cdkDropListDropped)="drop($event)"
+              (cdkDropListDropped)="
+                drop($event)
+              "
             >
               @if (todo().length === 0) {
-                <div class="board__no_tasks">
+                <div
+                  class="board__no_tasks"
+                >
                   No tasks To do
                 </div>
               } @else {
@@ -185,10 +198,14 @@
                     "
                     [task]="task"
                     [subtasks]="
-                      getSubtasksForTask(task.id)
+                      getSubtasksForTask(
+                        task.id
+                      )
                     "
                     [assignedContacts]="
-                      getContactsForTask(task.id)
+                      getContactsForTask(
+                        task.id
+                      )
                     "
                     (cdkDragStarted)="
                       startDragging()
@@ -196,7 +213,9 @@
                     (cdkDragEnded)="
                       stopDragging()
                     "
-                    (cardClick)="openDialog(task)"
+                    (cardClick)="
+                      openDialog(task)
+                    "
                     (moveRequested)="
                       moveTaskToStatus(
                         task,
@@ -204,13 +223,6 @@
                       )
                     "
                   ></app-task-card>
-                }
-
-                @if (isDragging()) {
-                  <div
-                    class="board__drag_drop_zone"
-                    aria-hidden="true"
-                  ></div>
                 }
               }
             </div>
@@ -220,7 +232,9 @@
             class="board__column"
             aria-labelledby="col_inprogress"
           >
-            <header class="board__column_header">
+            <header
+              class="board__column_header"
+            >
               <h2
                 id="col_inprogress"
                 class="board__column_title"
@@ -232,7 +246,9 @@
                 type="button"
                 class="board__column_add_btn"
                 aria-label="Add new task to In progress"
-                [disabled]="isBoardUpdating()"
+                [disabled]="
+                  isBoardUpdating()
+                "
                 (click)="
                   openAddTaskDialog(
                     'in_progress'
@@ -252,14 +268,25 @@
               id="in_progress"
               class="board__column_content"
               cdkDropList
-              [cdkDropListData]="inProgress()"
+              [cdkDropListOrientation]="
+                dropListOrientation()
+              "
+              [cdkDropListData]="
+                inProgress()
+              "
               [cdkDropListDisabled]="
                 isDragDisabled()
               "
-              (cdkDropListDropped)="drop($event)"
+              (cdkDropListDropped)="
+                drop($event)
+              "
             >
-              @if (inProgress().length === 0) {
-                <div class="board__no_tasks">
+              @if (
+                inProgress().length === 0
+              ) {
+                <div
+                  class="board__no_tasks"
+                >
                   No tasks In progress
                 </div>
               } @else {
@@ -276,10 +303,14 @@
                     "
                     [task]="task"
                     [subtasks]="
-                      getSubtasksForTask(task.id)
+                      getSubtasksForTask(
+                        task.id
+                      )
                     "
                     [assignedContacts]="
-                      getContactsForTask(task.id)
+                      getContactsForTask(
+                        task.id
+                      )
                     "
                     (cdkDragStarted)="
                       startDragging()
@@ -287,7 +318,9 @@
                     (cdkDragEnded)="
                       stopDragging()
                     "
-                    (cardClick)="openDialog(task)"
+                    (cardClick)="
+                      openDialog(task)
+                    "
                     (moveRequested)="
                       moveTaskToStatus(
                         task,
@@ -295,13 +328,6 @@
                       )
                     "
                   ></app-task-card>
-                }
-
-                @if (isDragging()) {
-                  <div
-                    class="board__drag_drop_zone"
-                    aria-hidden="true"
-                  ></div>
                 }
               }
             </div>
@@ -311,7 +337,9 @@
             class="board__column"
             aria-labelledby="col_await"
           >
-            <header class="board__column_header">
+            <header
+              class="board__column_header"
+            >
               <h2
                 id="col_await"
                 class="board__column_title"
@@ -323,7 +351,9 @@
                 type="button"
                 class="board__column_add_btn"
                 aria-label="Add new task to Await feedback"
-                [disabled]="isBoardUpdating()"
+                [disabled]="
+                  isBoardUpdating()
+                "
                 (click)="
                   openAddTaskDialog(
                     'awaiting_feedback'
@@ -343,18 +373,25 @@
               id="awaiting_feedback"
               class="board__column_content"
               cdkDropList
+              [cdkDropListOrientation]="
+                dropListOrientation()
+              "
               [cdkDropListData]="
                 awaitFeedback()
               "
               [cdkDropListDisabled]="
                 isDragDisabled()
               "
-              (cdkDropListDropped)="drop($event)"
+              (cdkDropListDropped)="
+                drop($event)
+              "
             >
               @if (
                 awaitFeedback().length === 0
               ) {
-                <div class="board__no_tasks">
+                <div
+                  class="board__no_tasks"
+                >
                   No tasks Await feedback
                 </div>
               } @else {
@@ -371,10 +408,14 @@
                     "
                     [task]="task"
                     [subtasks]="
-                      getSubtasksForTask(task.id)
+                      getSubtasksForTask(
+                        task.id
+                      )
                     "
                     [assignedContacts]="
-                      getContactsForTask(task.id)
+                      getContactsForTask(
+                        task.id
+                      )
                     "
                     (cdkDragStarted)="
                       startDragging()
@@ -382,7 +423,9 @@
                     (cdkDragEnded)="
                       stopDragging()
                     "
-                    (cardClick)="openDialog(task)"
+                    (cardClick)="
+                      openDialog(task)
+                    "
                     (moveRequested)="
                       moveTaskToStatus(
                         task,
@@ -390,13 +433,6 @@
                       )
                     "
                   ></app-task-card>
-                }
-
-                @if (isDragging()) {
-                  <div
-                    class="board__drag_drop_zone"
-                    aria-hidden="true"
-                  ></div>
                 }
               }
             </div>
@@ -406,7 +442,9 @@
             class="board__column"
             aria-labelledby="col_done"
           >
-            <header class="board__column_header">
+            <header
+              class="board__column_header"
+            >
               <h2
                 id="col_done"
                 class="board__column_title"
@@ -419,14 +457,21 @@
               id="done"
               class="board__column_content"
               cdkDropList
+              [cdkDropListOrientation]="
+                dropListOrientation()
+              "
               [cdkDropListData]="done()"
               [cdkDropListDisabled]="
                 isDragDisabled()
               "
-              (cdkDropListDropped)="drop($event)"
+              (cdkDropListDropped)="
+                drop($event)
+              "
             >
               @if (done().length === 0) {
-                <div class="board__no_tasks">
+                <div
+                  class="board__no_tasks"
+                >
                   No tasks Done
                 </div>
               } @else {
@@ -443,10 +488,14 @@
                     "
                     [task]="task"
                     [subtasks]="
-                      getSubtasksForTask(task.id)
+                      getSubtasksForTask(
+                        task.id
+                      )
                     "
                     [assignedContacts]="
-                      getContactsForTask(task.id)
+                      getContactsForTask(
+                        task.id
+                      )
                     "
                     (cdkDragStarted)="
                       startDragging()
@@ -454,7 +503,9 @@
                     (cdkDragEnded)="
                       stopDragging()
                     "
-                    (cardClick)="openDialog(task)"
+                    (cardClick)="
+                      openDialog(task)
+                    "
                     (moveRequested)="
                       moveTaskToStatus(
                         task,
@@ -462,13 +513,6 @@
                       )
                     "
                   ></app-task-card>
-                }
-
-                @if (isDragging()) {
-                  <div
-                    class="board__drag_drop_zone"
-                    aria-hidden="true"
-                  ></div>
                 }
               }
             </div>

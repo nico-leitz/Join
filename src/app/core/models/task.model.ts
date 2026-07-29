@@ -2,11 +2,7 @@ export type TaskPriority = 'urgent' | 'medium' | 'low';
 
 export type TaskCategory = 'technical_task' | 'user_story';
 
-export type TaskStatus =
-  | 'todo'
-  | 'in_progress'
-  | 'awaiting_feedback'
-  | 'done';
+export type TaskStatus = 'todo' | 'in_progress' | 'awaiting_feedback' | 'done';
 
 export interface TaskRow {
   id: string;
@@ -32,6 +28,12 @@ export interface Task {
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TaskPositionUpdate {
+  id: string;
+  status: TaskStatus;
+  sortOrder: number;
 }
 
 export interface CreateTask {

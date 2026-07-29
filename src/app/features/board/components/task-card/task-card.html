@@ -12,8 +12,12 @@
   <div class="task_card__topbar">
     <div
       class="task_card__type"
-      [class.task_card__type--technical]="task().category === 'technical_task'"
-      [class.task_card__type--user-story]="task().category === 'user_story'"
+      [class.task_card__type--technical]="
+        task().category === 'technical_task'
+      "
+      [class.task_card__type--user-story]="
+        task().category === 'user_story'
+      "
     >
       {{ categoryLabel() }}
     </div>
@@ -36,88 +40,66 @@
       </button>
 
       @if (moveMenuOpen()) {
-        <div
-          class="task_card__move_menu"
-          role="menu"
-          aria-label="Move task menu"
-          (click)="$event.stopPropagation()"
+      <div
+        class="task_card__move_menu"
+        role="menu"
+        aria-label="Move task menu"
+        (click)="$event.stopPropagation()"
+      >
+        <p class="task_card__move_menu_title">Move to</p>
+
+        @for (option of taskStatusOptions; track option.status) {
+        <button
+          type="button"
+          class="task_card__move_menu_item"
+          role="menuitem"
+          [disabled]="option.status === task().status"
+          [attr.aria-current]="
+                option.status === task().status ? 'true' : null
+              "
+          (click)="requestMove($event, option.status)"
         >
-          <p class="task_card__move_menu_title">
-            Move to
-          </p>
-
-          <button
-            type="button"
-            class="task_card__move_menu_item"
-            role="menuitem"
-            (click)="requestMove($event, 'todo')"
-          >
-            <span aria-hidden="true">↑</span>
-            <span>To-do</span>
-          </button>
-
-          <button
-            type="button"
-            class="task_card__move_menu_item"
-            role="menuitem"
-            (click)="requestMove($event, 'awaiting_feedback')"
-          >
-            <span aria-hidden="true">↓</span>
-            <span>Review</span>
-          </button>
-        </div>
+          {{ option.label }}
+        </button>
+        }
+      </div>
       }
     </div>
   </div>
 
-  <h2 class="task_card__title">
-    {{ task().title }}
-  </h2>
+  <h2 class="task_card__title">{{ task().title }}</h2>
 
-  <p class="task_card__desc">
-    {{ task().description }}
-  </p>
+  <p class="task_card__desc">{{ task().description }}</p>
 
   @if (progress().total > 0) {
-    <div class="task_card__subtasks_wrapper">
+  <div class="task_card__subtasks_wrapper">
+    <div class="task_card__progress" aria-hidden="true">
       <div
-        class="task_card__progress"
-        aria-hidden="true"
-      >
-        <div
-          class="task_card__progress_fill"
-          [style.width.%]="progress().percentage"
-        ></div>
-      </div>
-
-      <span class="task_card__subtasks_text">
-        {{ progress().completed }}/{{ progress().total }} Subtasks
-      </span>
+        class="task_card__progress_fill"
+        [style.width.%]="progress().percentage"
+      ></div>
     </div>
+
+    <span class="task_card__subtasks_text">
+      {{ progress().completed }}/{{ progress().total }} Subtasks
+    </span>
+  </div>
   }
 
   <div class="task_card__footer">
-    <div
-      class="task_card__badges"
-      aria-label="Assigned contacts"
-    >
-      @for (
-        contact of assignedContacts() | slice:0:3;
-        track contact.id
-      ) {
-        <div
-          class="task_card__badge"
-          [style.background-color]="contact.badgeColor"
-          [attr.title]="contact.firstName + ' ' + contact.lastName"
-        >
-          {{ getInitials(contact) }}
-        </div>
-      }
-      
-      @if (assignedContacts().length > 3) {
-        <div class="task_card__badge task_card__badge--more">
-          +{{ assignedContacts().length - 3 }}
-        </div>
+    <div class="task_card__badges" aria-label="Assigned contacts">
+      @for ( contact of assignedContacts() | slice: 0 : 3; track contact.id ) {
+      <div
+        class="task_card__badge"
+        [style.background-color]="contact.badgeColor"
+        [attr.title]="contact.firstName + ' ' + contact.lastName"
+      >
+        {{ getInitials(contact) }}
+      </div>
+      } @if (assignedContacts().length > 3) {
+      <div class="task_card__badge task_card__badge--more">
+        +{{ assignedContacts().length - 3 }}
+      </div>
       }
     </div>
 

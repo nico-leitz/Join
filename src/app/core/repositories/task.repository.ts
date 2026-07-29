@@ -20,6 +20,7 @@ import {
 import { TaskAssignmentRow } from '../models/task-assignment.model';
 import {
   CreateTask,
+  TaskPositionUpdate,
   TaskRow,
   UpdateTask,
 } from '../models/task.model';
@@ -32,9 +33,7 @@ export class TaskRepository {
   private readonly taskTableName = 'tasks';
   private readonly subtaskTableName = 'subtasks';
   private readonly assignmentTableName = 'task_assignments';
-
-  private readonly supabase =
-    inject(SupabaseService).client;
+  private readonly supabase = inject(SupabaseService).client;
 
   async getTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
@@ -50,9 +49,7 @@ export class TaskRepository {
     return (data ?? []) as TaskRow[];
   }
 
-  async getTaskRowById(
-    id: string,
-  ): Promise<TaskRow | null> {
+  async getTaskRowById(id: string): Promise<TaskRow | null> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
       .select('*')
@@ -66,9 +63,7 @@ export class TaskRepository {
     return data as TaskRow | null;
   }
 
-  async createTask(
-    task: CreateTask,
-  ): Promise<TaskRow> {
+  async createTask(task: CreateTask): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
       .insert(createTaskInsertPayload(task))
@@ -82,10 +77,7 @@ export class TaskRepository {
     return data as TaskRow;
   }
 
-  async updateTask(
-    id: string,
-    task: UpdateTask,
-  ): Promise<TaskRow> {
+  async updateTask(id: string, task: UpdateTask): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
       .update(createTaskUpdatePayload(task))
@@ -100,6 +92,17 @@ export class TaskRepository {
     return data as TaskRow;
   }
 
+  async updateTaskPositions(updates: TaskPositionUpdate[]): Promise<TaskRow[]> {
+    return Promise.all(
+      updates.map((update) => {
+        return this.updateTask(update.id, {
+          status: update.status,
+          sortOrder: update.sortOrder,
+        });
+      }),
+    );
+  }
+
   async deleteTask(id: string): Promise<void> {
     const { error } = await this.supabase
       .from(this.taskTableName)
@@ -111,9 +114,7 @@ export class TaskRepository {
     }
   }
 
-  async getSubtaskRows(
-    taskId: string,
-  ): Promise<SubtaskRow[]> {
+  async getSubtaskRows(taskId: string): Promise<SubtaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
       .select('*')
@@ -143,9 +144,7 @@ export class TaskRepository {
     return (data ?? []) as SubtaskRow[];
   }
 
-  async createSubtask(
-    subtask: CreateSubtask,
-  ): Promise<SubtaskRow> {
+  async createSubtask(subtask: CreateSubtask): Promise<SubtaskRow> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
       .insert(createSubtaskInsertPayload(subtask))
@@ -159,10 +158,7 @@ export class TaskRepository {
     return data as SubtaskRow;
   }
 
-  async updateSubtask(
-    id: string,
-    subtask: UpdateSubtask,
-  ): Promise<SubtaskRow> {
+  async updateSubtask(id: string, subtask: UpdateSubtask): Promise<SubtaskRow> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
       .update(createSubtaskUpdatePayload(subtask))
@@ -223,9 +219,7 @@ export class TaskRepository {
     }
   }
 
-  async getAssignedContacts(
-    taskId: string,
-  ): Promise<Contact[]> {
+  async getAssignedContacts(taskId: string): Promise<Contact[]> {
     const { data, error } = await this.supabase
       .from(this.assignmentTableName)
       .select('contacts(*)')
@@ -240,9 +234,7 @@ export class TaskRepository {
     );
   }
 
-  async getAssignedContactIds(
-    taskId: string,
-  ): Promise<string[]> {
+  async getAssignedContactIds(taskId: string): Promise<string[]> {
     const { data, error } = await this.supabase
       .from(this.assignmentTableName)
       .select('contact_id')
@@ -252,19 +244,12 @@ export class TaskRepository {
       throw error;
     }
 
-    const assignments = (data ?? []) as Pick<
-      TaskAssignmentRow,
-      'contact_id'
-    >[];
+    const assignments = (data ?? []) as Pick<TaskAssignmentRow, 'contact_id'>[];
 
-    return assignments.map((assignment) => {
-      return assignment.contact_id;
-    });
+    return assignments.map((assignment) => assignment.contact_id);
   }
 
-  async getAllAssignmentRows(): Promise<
-    TaskAssignmentRow[]
-  > {
+  async getAllAssignmentRows(): Promise<TaskAssignmentRow[]> {
     const { data, error } = await this.supabase
       .from(this.assignmentTableName)
       .select('*')
@@ -278,15 +263,8 @@ export class TaskRepository {
     return (data ?? []) as TaskAssignmentRow[];
   }
 
-  async createTaskAssignment(
-    taskId: string,
-    contactId: string,
-  ): Promise<void> {
-    const assignmentRow = createTaskAssignmentRow(
-      taskId,
-      contactId,
-    );
-
+  async createTaskAssignment(taskId: string, contactId: string): Promise<void> {
+    const assignmentRow = createTaskAssignmentRow(taskId, contactId);
     const { error } = await this.supabase
       .from(this.assignmentTableName)
       .insert(assignmentRow);
@@ -304,11 +282,7 @@ export class TaskRepository {
       return;
     }
 
-    const assignmentRows = createTaskAssignmentRows(
-      taskId,
-      contactIds,
-    );
-
+    const assignmentRows = createTaskAssignmentRows(taskId, contactIds);
     const { error } = await this.supabase
       .from(this.assignmentTableName)
       .insert(assignmentRows);
@@ -318,10 +292,7 @@ export class TaskRepository {
     }
   }
 
-  async deleteTaskAssignment(
-    taskId: string,
-    contactId: string,
-  ): Promise<void> {
+  async deleteTaskAssignment(taskId: string, contactId: string): Promise<void> {
     const { error } = await this.supabase
       .from(this.assignmentTableName)
       .delete()
