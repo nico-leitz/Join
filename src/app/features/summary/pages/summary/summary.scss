@@ -1,5 +1,6 @@
 @use 'abstracts/breakpoints' as bp;
 @use 'abstracts/mixins' as mx;
+@use 'abstracts/variables' as var;
 
 .summary_page {
     display: flex;
@@ -15,21 +16,22 @@
 }
 
 app-sidebar {
+    position: sticky;
+    left: 0;
+
     @media(max-width: bp.$breakpoint-tablet-xl) {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 1000;
-        display: block;
-        width: 100%;
-        height: var(--mobile-bottom-nav-height);
-        flex-shrink: 0;
+    position: static;
+    display: block;
+    width: var(--contact-sidebar-width-current);
+    height: 100%;
+    flex: 0 0 var(--contact-sidebar-width-current);
     }
 }
 
 .summary_page_content {
+    height: 100%;
     width: 100%;
+    min-height: calc(100vh - var(--layout-mobile-bottom-nav-height));
 
     @media(max-width: bp.$breakpoint-tablet-xl) {
         padding-bottom: var(--mobile-bottom-nav-height);
@@ -38,10 +40,12 @@ app-sidebar {
 
 .summary_element {
     display: flex;
+    justify-items: center;
     flex-direction: column;
+    max-height: 100%;
     max-width: 1440px;
     margin-inline: 8rem;
-    padding-bottom: 10%;
+    padding-top: 3rem;
 
     @media(max-width:1500px) {
         margin-inline: 4rem;
@@ -57,6 +61,10 @@ app-sidebar {
 
     @media(max-width: bp.$breakpoint-mobile-l) {
         margin-inline: 3rem;
+    }
+
+    @media(max-width: bp.$breakpoint-mobile-xs) {
+        margin-inline: 1rem;
     }
 
 }
@@ -86,7 +94,7 @@ app-sidebar {
 
     &_divider {
         background-color: rgba(41, 171, 226, 1);
-        height: 80%;
+        height: 4rem;
         width: 3px;
         border-radius: 6px;
 
@@ -118,36 +126,29 @@ app-sidebar {
 
 .summary_content {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4rem;
     width: 100%;
-    margin-top: 4rem;
+    padding-top: 1rem;
+
+    &_cards_wrapper{
+        display: flex;
+        flex-direction: column;
+        max-width: 600px;
+    }
 
     &_upper {
         display: flex;
-        justify-content: flex-start;
-        gap: 2.8rem;
+        justify-content: space-between;
         width: 100%;
-
-        @media(max-width: bp.$breakpoint-tablet-xl) {
-            justify-content: center;
-        }
     }
 
     &_mid {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         margin-block: 2rem;
         height: 168px;
         width: 100%;
         transition: height 200ms ease;
         will-change: height;
-
-        @media(max-width: bp.$breakpoint-tablet-xl) {
-            justify-content: center;
-        }
     }
 
     &_mid:has(.card_large:hover) {
@@ -156,12 +157,12 @@ app-sidebar {
 
     &_lower {
         display: flex;
-        gap: 2rem;
+        justify-content: space-between;
         width: 100%;
+    }
 
-        @media(max-width: bp.$breakpoint-tablet-xl) {
-            justify-content: center;
-        }
+    &_right{
+        display: flex;
     }
 }
 
@@ -257,6 +258,11 @@ app-sidebar {
         height: 98px;
     }
 
+    @media(max-width: bp.$breakpoint-mobile-m) {
+        height: 78px;
+        border-radius: 16px;
+    }
+
     &_large {
         display: flex;
         justify-content: space-evenly;
@@ -275,7 +281,12 @@ app-sidebar {
         }
 
         @media(max-width: bp.$breakpoint-mobile-m) {
-            min-width: 320px;
+            min-width: 310px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-xs) {
+            min-width: 290px;
+            padding: 4px;
         }
 
         &_icon_wrapper {
@@ -291,12 +302,25 @@ app-sidebar {
                 height: 48px;
                 width: 48px;
             }
+
+            @media(max-width: bp.$breakpoint-mobile-xs) {
+                height: 40px;
+                width: 40px;
+            }
         }
 
         &_icon_doubleArrow {
             background-image: url('/assets/summary/doubleArrow.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             height: 1.6rem;
             width: 2.2rem;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                height: 1.4rem;
+                width: 1.6rem;
+            }
         }
 
         &_text {
@@ -334,6 +358,10 @@ app-sidebar {
                 justify-content: center;
                 align-items: center;
                 gap: 2rem;
+
+                @media(max-width: bp.$breakpoint-mobile-m) {
+                    gap: 1.2rem;
+                }
             }
 
             &_divider {
@@ -388,33 +416,60 @@ app-sidebar {
 
         @media(max-width: bp.$breakpoint-mobile-m) {
             min-width: 132px;
+            gap: 1.2rem;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-xs) {
+            min-width: 122px;
+            padding: 16px;
         }
 
         &_icon_wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 64px;
-            width: 64px;
+            min-height: 64px;
+            min-width: 64px;
             background-color: var(--color-primary);
             border-radius: 64px;
 
             @media(max-width: bp.$breakpoint-mobile-m) {
-                height: 48px;
-                width: 48px;
+                min-height: 48px;
+                min-width: 48px;
+            }
+
+            @media(max-width: bp.$breakpoint-mobile-xs) {
+                min-height: 40px;
+                min-width: 40px;
             }
         }
 
         &_icon_pencil {
             background-image: url('/assets/summary/pencil.svg');
+            background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
             height: 1.5rem;
             width: 1.5rem;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                height: 1.2rem;
+                width: 1.2rem;
+            }
         }
 
         &_icon_check {
             background-image: url('/assets/summary/check.svg');
+            background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
             height: 1.8rem;
             width: 2.3rem;
+
+            @media(max-width: bp.$breakpoint-mobile-m) {
+                height: 1.2rem;
+                width: 2.0rem;
+            }
         }
 
         &_text_wrapper {
@@ -477,7 +532,12 @@ app-sidebar {
         }
 
         @media(max-width: bp.$breakpoint-mobile-m) {
-            min-width: 86px;
+            min-width: 81px;
+        }
+
+        @media(max-width: bp.$breakpoint-mobile-xs) {
+            min-width: 76px;
+            padding: 16px;
         }
     }
 
