@@ -86,7 +86,7 @@ app-task-card {
 
 .board {
   display: flex;
-  width: 100%;            
+  width: 100%;
   max-width: 1440px;
   min-width: 0;
   min-height: 0;
@@ -372,6 +372,10 @@ app-task-card {
             1
           );
       }
+
+      .board__no_tasks {
+        display: none;
+      }
     }
 
     &.cdk-drop-list-receiving {
@@ -379,21 +383,6 @@ app-task-card {
       background-color:
         rgba(41, 171, 226, 0.04);
     }
-  }
-
-  &__drag_drop_zone {
-    width: 100%;
-    max-width: 252px;
-    min-height: 160px;
-    flex: 0 0 160px;
-    border: 1px dashed #a8a8a8;
-    border-radius: 24px;
-    box-sizing: border-box;
-    background-color: transparent;
-    pointer-events: none;
-    animation:
-      board-drop-zone-fade-in
-      160ms ease-out both;
   }
 
   &__no_tasks {
@@ -590,19 +579,6 @@ app-task-card {
       margin: 0;
       align-self: stretch;
     }
-
-    &__drag_drop_zone {
-      width: 100%;
-      min-width: 100%;
-      max-width: none;
-      min-height: 4.5rem;
-      flex: 0 0 100%;
-      align-self: stretch;
-      border-radius: var(
-        --radius-md,
-        0.625rem
-      );
-    }
   }
 }
 
@@ -682,10 +658,6 @@ app-task-card {
   }
 }
 
-.cdk-drag-placeholder {
-  opacity: 0;
-}
-
 .cdk-drag-animating {
   transition:
     transform
@@ -696,16 +668,4 @@ app-task-card {
       0.2,
       1
     );
-}
-
-@keyframes board-drop-zone-fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
