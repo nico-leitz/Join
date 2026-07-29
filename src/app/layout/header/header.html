@@ -1,6 +1,8 @@
 <section class="header">
   <div class="header__wrapper">
-    <p class="header__title">Kanban Project Management Tool</p>
+    <p class="header__title">
+      Kanban Project Management Tool
+    </p>
 
     <img
       class="header__mobile-logo"
@@ -10,67 +12,84 @@
       alt="Join logo"
     />
 
-    <div class="header__actions">
-      <a class="header__help-link" routerLink="/help" aria-label="Open help">
-        <img
-          ngSrc="assets/sidebar/icons/help_dark.svg"
-          width="32"
-          height="32"
-          alt=""
-          aria-hidden="true"
-        />
-      </a>
-
-      <div class="header__profile-menu">
-        <button
-          type="button"
-          class="header__profile-link"
-          aria-label="Open user menu"
-          [attr.aria-expanded]="menuOpen()"
-          aria-haspopup="menu"
-          (click)="toggleMenu()"
+    @if (isAuthenticated()) {
+      <div class="header__actions">
+        <a
+          class="header__help-link"
+          routerLink="/help"
+          aria-label="Open help"
         >
           <img
-            ngSrc="assets/sidebar/icons/userprofile.svg"
-            width="56"
-            height="56"
+            ngSrc="assets/sidebar/icons/help_dark.svg"
+            width="32"
+            height="32"
             alt=""
             aria-hidden="true"
           />
-        </button>
+        </a>
 
-        @if (menuOpen()) {
-          <div class="header__menu" role="menu" aria-label="User menu">
-            <a
-              class="header__menu-link header__menu-link--mobile-only"
-              routerLink="/help"
-              role="menuitem"
-              (click)="closeMenu()"
+        <div class="header__profile-menu">
+          <button
+            type="button"
+            class="header__profile-link"
+            aria-label="Open user menu"
+            [attr.aria-expanded]="menuOpen()"
+            aria-haspopup="menu"
+            (click)="toggleMenu()"
+          >
+            <span
+              class="header__profile-badge"
+              aria-hidden="true"
             >
-              Help
-            </a>
-            <a
-              class="header__menu-link"
-              routerLink="/legal-notice"
-              role="menuitem"
-              (click)="closeMenu()"
+              {{ profileInitials() }}
+            </span>
+          </button>
+
+          @if (menuOpen()) {
+            <div
+              class="header__menu"
+              role="menu"
+              aria-label="User menu"
             >
-              Legal Notice
-            </a>
-            <a
-              class="header__menu-link"
-              routerLink="/privacy-policy"
-              role="menuitem"
-              (click)="closeMenu()"
-            >
-              Privacy Policy
-            </a>
-            <a class="header__menu-link" routerLink="/login" role="menuitem" (click)="closeMenu()">
-              Log out
-            </a>
-          </div>
-        }
+              <a
+                class="header__menu-link header__menu-link--mobile-only"
+                routerLink="/help"
+                role="menuitem"
+                (click)="closeMenu()"
+              >
+                Help
+              </a>
+
+              <a
+                class="header__menu-link"
+                routerLink="/legal-notice"
+                role="menuitem"
+                (click)="closeMenu()"
+              >
+                Legal Notice
+              </a>
+
+              <a
+                class="header__menu-link"
+                routerLink="/privacy-policy"
+                role="menuitem"
+                (click)="closeMenu()"
+              >
+                Privacy Policy
+              </a>
+
+              <button
+                type="button"
+                class="header__menu-link"
+                role="menuitem"
+                (click)="onLogout()"
+              >
+                Log out
+              </button>
+            </div>
+          }
+        </div>
       </div>
-    </div>
+    }
   </div>
 </section>

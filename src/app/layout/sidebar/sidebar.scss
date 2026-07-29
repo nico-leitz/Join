@@ -145,10 +145,7 @@
   }
 }
 
-@media (
-  max-width:
-    bp.$breakpoint-tablet-xl
-) {
+@media (max-width: bp.$breakpoint-tablet-xl) {
   :host {
     height: var(--layout-mobile-bottom-nav-height);
   }
@@ -175,6 +172,10 @@
       margin-top: 0;
       padding-inline: 16px;
       box-sizing: border-box;
+    }
+
+    &__nav--public {
+      justify-content: center;
     }
 
     &__link,
@@ -222,10 +223,7 @@
   }
 }
 
-@media (
-  max-width:
-    bp.$breakpoint-mobile-xs
-) {
+@media (max-width: bp.$breakpoint-mobile-xs) {
   :host {
     height: 72px;
   }
@@ -254,15 +252,7 @@
   }
 }
 
-@media (
-  orientation: landscape
-) and (
-  max-height:
-    bp.$breakpoint-landscape-height-md
-) and (
-  max-width:
-    bp.$breakpoint-landscape-width-lg
-) {
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
   :host {
     height: var(--layout-mobile-landscape-bottom-nav-height);
   }

@@ -62,12 +62,22 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+  }
 
-    img {
-      width: 56px;
-      height: 56px;
-      object-fit: contain;
-    }
+  &__profile-badge {
+    display: flex;
+    width: 56px;
+    height: 56px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #2a3647;
+    border-radius: 50%;
+    background-color: #ffffff;
+    color: #124658;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
   }
 
   &__profile-menu {
@@ -93,15 +103,21 @@
 
   &__menu-link {
     display: flex;
+    width: 100%;
     min-height: 36px;
     align-items: center;
     padding: 8px 16px;
+    border: 0;
     border-radius: 8px;
+    background-color: transparent;
     color: #cdcdcd;
+    font-family: inherit;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.2;
+    text-align: left;
     text-decoration: none;
+    cursor: pointer;
 
     &:hover,
     &:focus-visible {
@@ -144,14 +160,15 @@
       display: none;
     }
 
-    &__profile-link {
+    &__profile-link,
+    &__profile-badge {
       width: 40px;
       height: 40px;
+    }
 
-      img {
-        width: 40px;
-        height: 40px;
-      }
+    &__profile-badge {
+      border-width: 2px;
+      font-size: 16px;
     }
 
     &__menu {
