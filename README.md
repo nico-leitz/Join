@@ -2,7 +2,7 @@
 - Basti: Struktur, Logik und Datenbanken, API's
 - Kevin: Design, Logik
 - Oliver:
-- Nico: Struktur, Logik, Datenbanken, API's, SCSS
+- Nico: Struktur, Logik, Datenbanken, API's, SCSS, Testing (Unit-Tests/Component-Test)
 
 # GitHub Manifest
 - repo clonen
