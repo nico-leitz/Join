@@ -2,6 +2,14 @@
     <app-sidebar></app-sidebar>
     <section class="summary_page_content">
         <app-header></app-header>
+        @if (showMobileGreeting()) {
+            <section class="mobile-greeting" [class.mobile-greeting--leaving]="isMobileGreetingLeaving()" aria-live="polite">
+                <p class="mobile-greeting__text">Good morning,</p>
+                @if (showGreetingName()) {
+                    <p class="mobile-greeting__name">Sandra Müller</p>
+                }
+            </section>
+        } @else {
         <section class="summary_element">
 
             <div class="title_wrapper">
@@ -78,6 +86,7 @@
                 </div>
             </aside>
         </section>
+        }
     </section>
 </section>
 </section>

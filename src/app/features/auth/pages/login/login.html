@@ -1,162 +1,183 @@
 <div class="login-page">
-  <header class="login-page__header">
-    <div class="login-page__logo">
-      <img src="assets/log-in/join-logo-blue.svg" alt="Join Logo" />
+  @if (showSplash()) {
+    <div
+      class="login-splash"
+      [class.login-splash--mobile]="isMobile()"
+      aria-hidden="true"
+    >
+      <img
+        class="login-splash__logo"
+        [class.login-splash__logo--mobile]="isMobile()"
+        [src]="
+          isMobile()
+            ? 'assets/sidebar/icons/join-logo.svg'
+            : 'assets/log-in/join-logo-blue.svg'
+        "
+        alt=""
+      />
     </div>
+  }
 
-    <div class="login-page__signup">
-      <span class="login-page__signup-text">Not a Join user?</span>
+  <div class="login-page__content">
+    <header class="login-page__header">
+      <div class="login-page__logo">
+        <img src="assets/log-in/join-logo-blue.svg" alt="Join Logo" />
+      </div>
 
-      <button
-        type="button"
-        class="login-page__btn login-page__btn--primary"
-        routerLink="/signup"
-      >
-        Sign up
-      </button>
-    </div>
-  </header>
+      <div class="login-page__signup">
+        <span class="login-page__signup-text">Not a Join user?</span>
 
-  <main class="login-page__main">
-    <div class="login-card">
-      <header class="login-card__header">
-        <h1 class="login-card__title">Log in</h1>
-        <div class="login-card__underline" aria-hidden="true"></div>
-      </header>
+        <button
+          type="button"
+          class="login-page__btn login-page__btn--primary"
+          routerLink="/signup"
+        >
+          Sign up
+        </button>
+      </div>
+    </header>
 
-      <form
-        class="login-card__form"
-        [formGroup]="loginForm"
-        (ngSubmit)="onSubmit()"
-        (input)="onFormChange()"
-        novalidate
-      >
-        <div class="login-card__field">
-          <div class="login-card__input-group">
-            <label class="login-card__visually-hidden" for="login-email">
-              Email
-            </label>
+    <main class="login-page__main">
+      <div class="login-card">
+        <header class="login-card__header">
+          <h1 class="login-card__title">Log in</h1>
+          <div class="login-card__underline" aria-hidden="true"></div>
+        </header>
 
-            <input
-              id="login-email"
-              type="email"
-              class="login-card__input"
-              formControlName="email"
-              placeholder="Email"
-              autocomplete="email"
-              aria-describedby="login-email-error"
-              [class.login-card__input--error]="
+        <form
+          class="login-card__form"
+          [formGroup]="loginForm"
+          (ngSubmit)="onSubmit()"
+          (input)="onFormChange()"
+          novalidate
+        >
+          <div class="login-card__field">
+            <div class="login-card__input-group">
+              <label class="login-card__visually-hidden" for="login-email">
+                Email
+              </label>
+
+              <input
+                id="login-email"
+                type="email"
+                class="login-card__input"
+                formControlName="email"
+                placeholder="Email"
+                autocomplete="email"
+                aria-describedby="login-email-error"
+                [class.login-card__input--error]="
+                  isControlInvalid('email')
+                "
+                [attr.aria-invalid]="isControlInvalid('email')"
+              />
+
+              <span class="login-card__icon" aria-hidden="true">
+                <img src="assets/log-in/mail.svg" alt="" />
+              </span>
+            </div>
+
+            <p
+              id="login-email-error"
+              class="login-card__error"
+              [class.login-card__error--visible]="
                 isControlInvalid('email')
               "
-              [attr.aria-invalid]="isControlInvalid('email')"
-            />
-
-            <span class="login-card__icon" aria-hidden="true">
-              <img src="assets/log-in/mail.svg" alt="" />
-            </span>
+            >
+              @if (loginForm.controls.email.hasError('required')) {
+                Please enter your email address.
+              } @else if (loginForm.controls.email.hasError('email')) {
+                Please enter a valid email address.
+              }
+            </p>
           </div>
 
-          <p
-            id="login-email-error"
-            class="login-card__error"
-            [class.login-card__error--visible]="
-              isControlInvalid('email')
-            "
-          >
-            @if (loginForm.controls.email.hasError('required')) {
-              Please enter your email address.
-            } @else if (loginForm.controls.email.hasError('email')) {
-              Please enter a valid email address.
-            }
-          </p>
-        </div>
+          <div class="login-card__field">
+            <div class="login-card__input-group">
+              <label class="login-card__visually-hidden" for="login-password">
+                Password
+              </label>
 
-        <div class="login-card__field">
-          <div class="login-card__input-group">
-            <label class="login-card__visually-hidden" for="login-password">
-              Password
-            </label>
+              <input
+                id="login-password"
+                type="password"
+                class="login-card__input"
+                formControlName="password"
+                placeholder="Password"
+                autocomplete="current-password"
+                aria-describedby="login-password-error"
+                [class.login-card__input--error]="
+                  isControlInvalid('password')
+                "
+                [attr.aria-invalid]="isControlInvalid('password')"
+              />
 
-            <input
-              id="login-password"
-              type="password"
-              class="login-card__input"
-              formControlName="password"
-              placeholder="Password"
-              autocomplete="current-password"
-              aria-describedby="login-password-error"
-              [class.login-card__input--error]="
+              <span class="login-card__icon" aria-hidden="true">
+                <img src="assets/log-in/lock.svg" alt="" />
+              </span>
+            </div>
+
+            <p
+              id="login-password-error"
+              class="login-card__error"
+              [class.login-card__error--visible]="
                 isControlInvalid('password')
               "
-              [attr.aria-invalid]="isControlInvalid('password')"
-            />
-
-            <span class="login-card__icon" aria-hidden="true">
-              <img src="assets/log-in/lock.svg" alt="" />
-            </span>
+            >
+              @if (isControlInvalid('password')) {
+                Please enter your password.
+              }
+            </p>
           </div>
 
           <p
-            id="login-password-error"
-            class="login-card__error"
-            [class.login-card__error--visible]="
-              isControlInvalid('password')
+            class="login-card__form-message"
+            role="alert"
+            aria-live="polite"
+            [class.login-card__form-message--visible]="
+              authService.errorMessage()
             "
           >
-            @if (isControlInvalid('password')) {
-              Please enter your password.
-            }
+            {{ authService.errorMessage() || '' }}
           </p>
-        </div>
 
-        <p
-          class="login-card__form-message"
-          role="alert"
-          aria-live="polite"
-          [class.login-card__form-message--visible]="
-            authService.errorMessage()
-          "
-        >
-          {{ authService.errorMessage() || '' }}
-        </p>
+          <div class="login-card__actions">
+            <button
+              type="submit"
+              class="login-card__btn login-card__btn--primary"
+              [disabled]="authService.isLoading()"
+            >
+              @if (activeLogin() === 'user') {
+                Logging in...
+              } @else {
+                Log in
+              }
+            </button>
 
-        <div class="login-card__actions">
-          <button
-            type="submit"
-            class="login-card__btn login-card__btn--primary"
-            [disabled]="authService.isLoading()"
-          >
-            @if (activeLogin() === 'user') {
-              Logging in...
-            } @else {
-              Log in
-            }
-          </button>
+            <button
+              type="button"
+              class="login-card__btn login-card__btn--secondary"
+              [disabled]="authService.isLoading()"
+              (click)="onGuestLogin()"
+            >
+              @if (activeLogin() === 'guest') {
+                Logging in...
+              } @else {
+                Guest Log in
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
 
-          <button
-            type="button"
-            class="login-card__btn login-card__btn--secondary"
-            [disabled]="authService.isLoading()"
-            (click)="onGuestLogin()"
-          >
-            @if (activeLogin() === 'guest') {
-              Logging in...
-            } @else {
-              Guest Log in
-            }
-          </button>
-        </div>
-      </form>
-    </div>
-  </main>
+    <footer class="login-page__footer">
+      <a routerLink="/privacy-policy" class="login-page__footer-link">
+        Privacy Policy
+      </a>
 
-  <footer class="login-page__footer">
-    <a routerLink="/privacy-policy" class="login-page__footer-link">
-      Privacy Policy
-    </a>
-
-    <a routerLink="/legal-notice" class="login-page__footer-link">
-      Legal notice
-    </a>
-  </footer>
+      <a routerLink="/legal-notice" class="login-page__footer-link">
+        Legal notice
+      </a>
+    </footer>
+  </div>
 </div>
