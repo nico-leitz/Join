@@ -1,11 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { SupabaseService } from '../supabase/supabase';
 import {
   Contact,
   ContactRow,
   CreateContact,
   UpdateContact,
 } from '../models/contact.model';
+import { SupabaseService } from '../supabase/supabase';
 
 @Injectable({
   providedIn: 'root',
@@ -28,10 +28,14 @@ export class ContactService {
       throw error;
     }
 
-    return this.sortContacts(this.mapContactRows((data ?? []) as ContactRow[]));
+    return this.sortContacts(
+      this.mapContactRows((data ?? []) as ContactRow[]),
+    );
   }
 
-  async getContactById(id: string): Promise<Contact | null> {
+  async getContactById(
+    id: string,
+  ): Promise<Contact | null> {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select('*')
@@ -42,73 +46,102 @@ export class ContactService {
       throw error;
     }
 
-    return data ? this.mapContactRow(data as ContactRow) : null;
+    return data
+      ? this.mapContactRow(data as ContactRow)
+      : null;
   }
 
-  async createContact(contact: CreateContact): Promise<Contact> {
-    const badgeColor = await this.createUniqueBadgeColor();
-    const { data, error } = await this.insertContact(contact, badgeColor);
+  async createContact(
+    contact: CreateContact,
+  ): Promise<Contact> {
+    const badgeColor =
+      await this.createUniqueBadgeColor();
+    const { data, error } =
+      await this.insertContact(contact, badgeColor);
 
     if (error) {
       throw error;
     }
 
-    const createdContact = this.mapContactRow(data as ContactRow);
+    const createdContact = this.mapContactRow(
+      data as ContactRow,
+    );
     this.addContactToState(createdContact);
     this.selectedContact.set(createdContact);
 
     return createdContact;
   }
 
-  async updateContact(id: string, contact: UpdateContact): Promise<Contact> {
+  async updateContact(
+    id: string,
+    contact: UpdateContact,
+  ): Promise<Contact> {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .update(this.createUpdatePayload(contact))
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (error) {
-      throw error;
-    }
-
-    const updatedContact = this.mapContactRow(data as ContactRow);
+    const updatedRow = this.requireMutationRow(
+      data as ContactRow | null,
+      error,
+      'updated',
+    );
+    const updatedContact =
+      this.mapContactRow(updatedRow);
     this.updateContactInState(updatedContact);
 
     return updatedContact;
   }
 
   async deleteContact(id: string): Promise<void> {
-    const { error } = await this.supabase
+    const { data, error } = await this.supabase
       .from(this.tableName)
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('id')
+      .maybeSingle();
 
-    if (error) {
-      throw error;
-    }
-
+    this.requireMutationRow(
+      data,
+      error,
+      'deleted',
+    );
     this.removeContactFromState(id);
   }
 
-  getInitials(firstName: string, lastName: string): string {
-    const firstInitial = firstName.trim().charAt(0);
-    const lastInitial = lastName.trim().charAt(0);
+  getInitials(
+    firstName: string,
+    lastName: string,
+  ): string {
+    const firstInitial =
+      firstName.trim().charAt(0);
+    const lastInitial =
+      lastName.trim().charAt(0);
 
     return `${firstInitial}${lastInitial}`.toUpperCase();
   }
 
-  private async insertContact(contact: CreateContact, badgeColor: string) {
+  private async insertContact(
+    contact: CreateContact,
+    badgeColor: string,
+  ) {
     return this.supabase
       .from(this.tableName)
-      .insert(this.createInsertPayload(contact, badgeColor))
+      .insert(
+        this.createInsertPayload(
+          contact,
+          badgeColor,
+        ),
+      )
       .select()
       .single();
   }
 
   private createInsertPayload(
     contact: CreateContact,
-    badgeColor: string
+    badgeColor: string,
   ): Partial<ContactRow> {
     return {
       first_name: contact.firstName.trim(),
@@ -119,7 +152,9 @@ export class ContactService {
     };
   }
 
-  private createUpdatePayload(contact: UpdateContact): Partial<ContactRow> {
+  private createUpdatePayload(
+    contact: UpdateContact,
+  ): Partial<ContactRow> {
     return {
       ...(contact.firstName !== undefined && {
         first_name: contact.firstName.trim(),
@@ -137,33 +172,51 @@ export class ContactService {
     };
   }
 
-  private addContactToState(contact: Contact): void {
+  private addContactToState(
+    contact: Contact,
+  ): void {
     this.allContacts.update((contacts) => {
-      return this.sortContacts([...contacts, contact]);
+      return this.sortContacts([
+        ...contacts,
+        contact,
+      ]);
     });
   }
 
-  private updateContactInState(updatedContact: Contact): void {
+  private updateContactInState(
+    updatedContact: Contact,
+  ): void {
     this.selectedContact.set(updatedContact);
     this.allContacts.update((contacts) => {
-      return this.replaceContact(contacts, updatedContact);
+      return this.replaceContact(
+        contacts,
+        updatedContact,
+      );
     });
   }
 
   private replaceContact(
     contacts: Contact[],
-    updatedContact: Contact
+    updatedContact: Contact,
   ): Contact[] {
-    const updatedContacts = contacts.map((contact) => {
-      return contact.id === updatedContact.id ? updatedContact : contact;
-    });
+    const updatedContacts = contacts.map(
+      (contact) => {
+        return contact.id === updatedContact.id
+          ? updatedContact
+          : contact;
+      },
+    );
 
     return this.sortContacts(updatedContacts);
   }
 
-  private removeContactFromState(contactId: string): void {
+  private removeContactFromState(
+    contactId: string,
+  ): void {
     this.allContacts.update((contacts) => {
-      return contacts.filter((contact) => contact.id !== contactId);
+      return contacts.filter(
+        (contact) => contact.id !== contactId,
+      );
     });
 
     if (this.selectedContact()?.id === contactId) {
@@ -171,11 +224,36 @@ export class ContactService {
     }
   }
 
-  private async createUniqueBadgeColor(): Promise<string> {
-    const usedColors = await this.getUsedBadgeColors();
+  private requireMutationRow<T>(
+    data: T | null,
+    error: unknown,
+    action: 'updated' | 'deleted',
+  ): T {
+    if (error) {
+      throw error;
+    }
 
-    for (let attempt = 0; attempt < 20; attempt++) {
-      const badgeColor = this.createRandomBadgeColor();
+    if (!data) {
+      throw new Error(
+        `Contact could not be ${action}.`,
+      );
+    }
+
+    return data;
+  }
+
+  private async createUniqueBadgeColor():
+    Promise<string> {
+    const usedColors =
+      await this.getUsedBadgeColors();
+
+    for (
+      let attempt = 0;
+      attempt < 20;
+      attempt++
+    ) {
+      const badgeColor =
+        this.createRandomBadgeColor();
 
       if (!usedColors.has(badgeColor)) {
         return badgeColor;
@@ -185,7 +263,8 @@ export class ContactService {
     return this.createRandomBadgeColor();
   }
 
-  private async getUsedBadgeColors(): Promise<Set<string>> {
+  private async getUsedBadgeColors():
+    Promise<Set<string>> {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select('badge_color');
@@ -194,52 +273,83 @@ export class ContactService {
       throw error;
     }
 
-    return new Set((data ?? []).map((contact) => contact.badge_color));
+    return new Set(
+      (data ?? []).map(
+        (contact) => contact.badge_color,
+      ),
+    );
   }
 
   private createRandomBadgeColor(): string {
     const hue = this.getRandomNumber(0, 359);
-    const saturation = this.getRandomNumber(65, 80);
-    const lightness = this.getRandomNumber(38, 46);
+    const saturation =
+      this.getRandomNumber(65, 80);
+    const lightness =
+      this.getRandomNumber(38, 46);
 
     return `hsl(${hue} ${saturation}% ${lightness}%)`;
   }
 
-  private getRandomNumber(minimum: number, maximum: number): number {
-    return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+  private getRandomNumber(
+    minimum: number,
+    maximum: number,
+  ): number {
+    return (
+      Math.floor(
+        Math.random() *
+          (maximum - minimum + 1),
+      ) + minimum
+    );
   }
 
-  private mapContactRows(contactRows: ContactRow[]): Contact[] {
-    return contactRows.map((contactRow) => this.mapContactRow(contactRow));
+  private mapContactRows(
+    contactRows: ContactRow[],
+  ): Contact[] {
+    return contactRows.map((contactRow) => {
+      return this.mapContactRow(contactRow);
+    });
   }
 
-  private mapContactRow(contactRow: ContactRow): Contact {
+  private mapContactRow(
+    contactRow: ContactRow,
+  ): Contact {
     return {
       id: contactRow.id,
+      authUserId: contactRow.auth_user_id,
       firstName: contactRow.first_name,
       lastName: contactRow.last_name,
       email: contactRow.email,
       phone: contactRow.phone,
       badgeColor: contactRow.badge_color,
-      authUserId: contactRow.auth_user_id,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
     };
   }
 
-  private sortContacts(contacts: Contact[]): Contact[] {
-    return [...contacts].sort((firstContact, secondContact) => {
-      return this.compareContacts(firstContact, secondContact);
-    });
+  private sortContacts(
+    contacts: Contact[],
+  ): Contact[] {
+    return [...contacts].sort(
+      (firstContact, secondContact) => {
+        return this.compareContacts(
+          firstContact,
+          secondContact,
+        );
+      },
+    );
   }
 
   private compareContacts(
     firstContact: Contact,
-    secondContact: Contact
+    secondContact: Contact,
   ): number {
     return (
-      firstContact.firstName.localeCompare(secondContact.firstName) ||
-      firstContact.lastName.localeCompare(secondContact.lastName)
+      firstContact.firstName.localeCompare(
+        secondContact.firstName,
+      ) ||
+      firstContact.lastName.localeCompare(
+        secondContact.lastName,
+      )
     );
   }
 }
