@@ -1,14 +1,8 @@
 import { Subtask } from '../models/subtask.model';
 import { Task } from '../models/task.model';
+import { sortTasks } from './task-order.utils';
 
-export function sortTasks(tasks: Task[]): Task[] {
-  return [...tasks].sort((firstTask, secondTask) => {
-    return (
-      firstTask.sortOrder - secondTask.sortOrder ||
-      firstTask.createdAt.localeCompare(secondTask.createdAt)
-    );
-  });
-}
+export { sortTasks } from './task-order.utils';
 
 export function sortSubtasks(subtasks: Subtask[]): Subtask[] {
   return [...subtasks].sort((firstSubtask, secondSubtask) => {
@@ -19,10 +13,7 @@ export function sortSubtasks(subtasks: Subtask[]): Subtask[] {
   });
 }
 
-export function replaceTask(
-  tasks: Task[],
-  updatedTask: Task,
-): Task[] {
+export function replaceTask(tasks: Task[], updatedTask: Task): Task[] {
   const updatedTasks = tasks.map((task) => {
     return task.id === updatedTask.id ? updatedTask : task;
   });
@@ -35,9 +26,7 @@ export function replaceSubtask(
   updatedSubtask: Subtask,
 ): Subtask[] {
   const updatedSubtasks = subtasks.map((subtask) => {
-    return subtask.id === updatedSubtask.id
-      ? updatedSubtask
-      : subtask;
+    return subtask.id === updatedSubtask.id ? updatedSubtask : subtask;
   });
 
   return sortSubtasks(updatedSubtasks);
