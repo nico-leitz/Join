@@ -90,13 +90,13 @@
 
   &__description_icon {
     position: absolute;
-    right: 6px;
     bottom: 32px;
-    width: 16px;
+    right: 6px;
     height: 16px;
+    width: 16px;
     background-image: url('/assets/add-task/description_icon.svg');
-    background-position: center;
     background-repeat: no-repeat;
+    background-position: center;
     background-size: 16px 16px;
     pointer-events: none;
   }
@@ -152,7 +152,7 @@
     &:focus-visible {
       outline: none;
       transform: translateY(-1px);
-      box-shadow: 0 5px 4px 0 rgba(0, 0, 0, 0.212);
+      box-shadow: 0px 5px 4px 0 rgba(0, 0, 0, 0.212);
     }
 
     &--active {
@@ -193,7 +193,7 @@
     min-width: 0;
     height: 100%;
     padding: 11px 44px 11px 16px;
-    border: 0.5px solid rgba(0, 0, 0, 0);
+    border: 0.5px rgba(0, 0, 0, 0) solid;
     border-radius: inherit;
     background: transparent;
     color: var(--color-text-main);
@@ -245,17 +245,17 @@
   &__contact-menu,
   &__category-menu {
     position: absolute;
+    display: flex;
+    flex-direction: column;
     top: calc(100% + 4px);
     right: 0;
     left: 0;
     z-index: 100;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
     overflow-y: auto;
     border-radius: var(--radius-md);
     background-color: var(--color-bg-light);
     box-shadow: 0 4px 10px 0 #00000026;
+    gap: 1px;
   }
 
   &__contact-menu {
@@ -284,23 +284,31 @@
 
     &:hover {
       background-color: #eeeeee;
+
+      .add-task__contact-check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_default_hover.svg');
+      }
     }
 
     &:has(input:checked) {
-      border-radius: 10px;
       background-color: var(--color-primary);
       color: var(--color-text-light);
+      border-radius: 10px;
 
       .add-task__contact-name {
         color: var(--color-text-light);
       }
 
-      .add-task__checkbox {
-        accent-color: var(--color-text-light);
+      .add-task__contact-check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_checked.svg');
       }
 
       &:hover {
         background-color: var(--color-primary-dark);
+
+        .add-task__contact-check {
+          background-image: url('/assets/icons/icons_dropdown/check_button_checked_hover.svg');
+        }
       }
     }
   }
