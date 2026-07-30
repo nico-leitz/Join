@@ -3,13 +3,10 @@ import { Contact } from '../../../../core/models/contact.model';
 import { ContactService } from '../../../../core/services/contact.service';
 
 /**
- * Component for displaying a list of contacts.
- * 
- * @remarks
- * This component manages the retrieval and display of the contact list,
- * handles selection states, and provides alphabetical grouping functionality.
- * 
- * @public
+ * Loads and displays the alphabetically grouped contact list.
+ *
+ * Coordinates contact selection and forwards requests to open the contact
+ * creation dialog.
  */
 @Component({
   selector: 'app-contact-list',
@@ -18,55 +15,37 @@ import { ContactService } from '../../../../core/services/contact.service';
   styleUrl: './contact-list.scss',
 })
 export class ContactList implements OnInit {
-  /** 
-   * Event emitted when the user requests to create a new contact.
-   * @public 
-   */
+  /** Emits when the contact creation dialog should be opened. */
   createContactRequested = output<void>();
 
-  /** 
-   * Service handling business logic and state for contacts.
-   * @private 
-   */
+  /** Service exposing contact state and loading operations. */
   private readonly contactService = inject(ContactService);
 
-  /** 
-   * The currently selected contact.
-   * @public 
-   */
+  /** Contact currently selected in shared contact state. */
   selectedContact = this.contactService.selectedContact;
 
-  /** 
-   * The complete list of contacts.
-   * @public 
-   */
+  /** Complete contact collection exposed by shared contact state. */
   contacts = this.contactService.allContacts;
 
-  /** 
-   * Loading state signal.
-   * @public 
-   */
+  /** Indicates whether the contact list is currently loading. */
   isLoading = signal(true);
 
-  /** 
-   * Error message signal for request failures.
-   * @public 
-   */
+  /** User-facing message describing the latest loading failure. */
   errorMessage = signal('');
 
   /**
-   * Lifecycle hook to initialize the contact list loading.
-   * @public
+   * Loads contacts when the component initializes.
+   *
+   * @returns A promise that resolves after the initial loading attempt.
    */
   async ngOnInit(): Promise<void> {
     await this.loadContacts();
   }
 
   /**
-   * Fetches the contact list from the service and handles the loading state.
-   * 
-   * @returns A promise that resolves when the contact fetch operation completes.
-   * @public
+   * Loads the contact collection and exposes loading or error state.
+   *
+   * @returns A promise that resolves after the loading attempt.
    */
   async loadContacts(): Promise<void> {
     this.isLoading.set(true);
@@ -82,41 +61,37 @@ export class ContactList implements OnInit {
   }
 
   /**
-   * Emits the create contact request output.
-   * @public
+   * Requests opening the contact creation dialog.
    */
   openCreateDialog(): void {
     this.createContactRequested.emit();
   }
 
   /**
-   * Updates the selected contact in the service.
-   * 
-   * @param contact - The contact to select.
-   * @public
+   * Stores a contact as the current shared selection.
+   *
+   * @param contact - Contact selected by the user.
    */
   getContact(contact: Contact): void {
     this.contactService.selectedContact.set(contact);
   }
 
   /**
-   * Retrieves the initials for a given contact by delegating to the service.
-   * 
+   * Creates the initials displayed in a contact badge.
+   *
    * @param firstName - The first name of the contact.
    * @param lastName - The last name of the contact.
    * @returns The contact's initials.
-   * @public
    */
   getInitials(firstName: string, lastName: string): string {
     return this.contactService.getInitials(firstName, lastName);
   }
 
   /**
-   * Determines if a letter-based header should be shown for a contact index.
-   * 
-   * @param index - The index of the current contact in the list.
-   * @returns True if the header should be rendered, false otherwise.
-   * @public
+   * Checks whether a new alphabetical group begins at an index.
+   *
+   * @param index - Index of the contact to inspect.
+   * @returns True when a letter header should be rendered.
    */
   shouldShowLetterHeader(index: number): boolean {
     if (index === 0) {
@@ -127,11 +102,10 @@ export class ContactList implements OnInit {
   }
 
   /**
-   * Helper to retrieve the first letter of a contact's first name for grouping.
-   * 
-   * @param index - The index of the contact.
-   * @returns The first letter of the first name, uppercase.
-   * @private
+   * Resolves the uppercase first-name initial used for grouping.
+   *
+   * @param index - Index of the requested contact.
+   * @returns Uppercase first letter of the contact's first name.
    */
   private getContactLetter(index: number): string {
     return this.contacts()[index].firstName.charAt(0).toUpperCase();
