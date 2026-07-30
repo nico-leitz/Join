@@ -20,63 +20,94 @@ import {
   replaceBoardSubtask,
 } from '../utils/board-data.utils';
 
+/**
+ * Owns the board-specific search and relation state.
+ *
+ * Loads tasks, subtasks, assignments and contacts and derives the task
+ * collections rendered by each board column.
+ */
 @Injectable()
 export class BoardDataStateService {
+  /** Service used to load task and relation data. */
   private readonly taskService =
     inject(TaskService);
 
+  /** Service used to load and expose contact data. */
   private readonly contactService =
     inject(ContactService);
 
-  readonly allSubtasks = signal<Subtask[]>([]);
+  /** Complete subtask collection required by the board. */
+  readonly allSubtasks =
+    signal<Subtask[]>([]);
 
+  /** Complete persisted assignment row collection. */
   readonly allAssignments =
     signal<TaskAssignmentRow[]>([]);
 
+  /** Complete contact collection shared by the contact service. */
   readonly allContacts =
     this.contactService.allContacts;
 
-  readonly searchTerm = signal('');
+  /** Current task search term entered on the board. */
+  readonly searchTerm =
+    signal('');
 
-  readonly filteredTasks = computed(() => {
-    return filterTasksBySearchTerm(
-      this.taskService.allTasks(),
-      this.searchTerm(),
-    );
-  });
+  /** Tasks matching the current search term. */
+  readonly filteredTasks =
+    computed(() => {
+      return filterTasksBySearchTerm(
+        this.taskService.allTasks(),
+        this.searchTerm(),
+      );
+    });
 
-  readonly todo = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'todo',
-    );
-  });
+  /** Filtered tasks belonging to the to-do column. */
+  readonly todo =
+    computed(() => {
+      return filterTasksByStatus(
+        this.filteredTasks(),
+        'todo',
+      );
+    });
 
-  readonly inProgress = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'in_progress',
-    );
-  });
+  /** Filtered tasks belonging to the in-progress column. */
+  readonly inProgress =
+    computed(() => {
+      return filterTasksByStatus(
+        this.filteredTasks(),
+        'in_progress',
+      );
+    });
 
-  readonly awaitFeedback = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'awaiting_feedback',
-    );
-  });
+  /** Filtered tasks belonging to the awaiting-feedback column. */
+  readonly awaitFeedback =
+    computed(() => {
+      return filterTasksByStatus(
+        this.filteredTasks(),
+        'awaiting_feedback',
+      );
+    });
 
-  readonly done = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'done',
-    );
-  });
+  /** Filtered tasks belonging to the done column. */
+  readonly done =
+    computed(() => {
+      return filterTasksByStatus(
+        this.filteredTasks(),
+        'done',
+      );
+    });
 
-  readonly isSearchActive = computed(() => {
-    return this.searchTerm().trim().length > 0;
-  });
+  /** Indicates whether a non-empty board search is active. */
+  readonly isSearchActive =
+    computed(() => {
+      return (
+        this.searchTerm()
+          .trim()
+          .length > 0
+      );
+    });
 
+  /** Subtasks grouped by their parent task identifier. */
   private readonly subtasksByTaskId =
     computed(() => {
       return groupSubtasksByTaskId(
@@ -84,6 +115,7 @@ export class BoardDataStateService {
       );
     });
 
+  /** Assigned contact identifiers grouped by task identifier. */
   private readonly contactIdsByTaskId =
     computed(() => {
       return groupContactIdsByTaskId(
@@ -91,6 +123,7 @@ export class BoardDataStateService {
       );
     });
 
+  /** Contacts indexed by their identifier. */
   private readonly contactsById =
     computed(() => {
       return createContactMap(
@@ -99,30 +132,46 @@ export class BoardDataStateService {
     });
 
   /**
-   * Loads tasks and every relation required by the board.
+   * Loads tasks, relations and contacts required by the board.
+   *
+   * @returns A promise that resolves after all board state is applied.
+   * @throws The loading error returned by a required service.
    */
   async load(): Promise<void> {
-    const [, boardData, contacts] =
-      await Promise.all([
-        this.taskService.getTasks(),
-        this.taskService.loadAllBoardData(),
-        this.contactService.getContacts(),
-      ]);
+    const [
+      ,
+      boardData,
+      contacts,
+    ] = await Promise.all([
+      this.taskService.getTasks(),
+      this.taskService
+        .loadAllBoardData(),
+      this.contactService
+        .getContacts(),
+    ]);
 
     this.setRelations(
       boardData.subtasks,
       boardData.assignments,
     );
 
-    this.allContacts.set(contacts);
+    this.allContacts.set(
+      contacts,
+    );
   }
 
   /**
-   * Reloads relations after a task was created or updated.
+   * Reloads subtasks and assignments after a task mutation.
+   *
+   * @returns A promise that resolves after relation state is applied.
+   * @throws The relation loading error returned by the task service.
    */
-  async refreshRelations(): Promise<void> {
+  async refreshRelations():
+    Promise<void>
+  {
     const boardData =
-      await this.taskService.loadAllBoardData();
+      await this.taskService
+        .loadAllBoardData();
 
     this.setRelations(
       boardData.subtasks,
@@ -131,61 +180,94 @@ export class BoardDataStateService {
   }
 
   /**
-   * Returns the subtasks assigned to one task.
+   * Returns the subtasks belonging to a task.
+   *
+   * @param taskId - Identifier of the requested task.
+   * @returns Subtasks belonging to the task or an empty collection.
    */
-  getSubtasks(taskId: string): Subtask[] {
+  getSubtasks(
+    taskId: string,
+  ): Subtask[] {
     return (
-      this.subtasksByTaskId().get(taskId) ?? []
+      this.subtasksByTaskId()
+        .get(taskId) ?? []
     );
   }
 
   /**
-   * Returns the contacts assigned to one task.
+   * Resolves the contacts assigned to a task.
+   *
+   * @param taskId - Identifier of the requested task.
+   * @returns Existing contacts assigned to the task.
    */
-  getContacts(taskId: string): Contact[] {
+  getContacts(
+    taskId: string,
+  ): Contact[] {
     const contactIds =
-      this.contactIdsByTaskId().get(taskId) ??
-      [];
+      this.contactIdsByTaskId()
+        .get(taskId) ?? [];
 
-    const contactsById = this.contactsById();
+    const contactsById =
+      this.contactsById();
 
-    return contactIds.flatMap((id) => {
-      const contact = contactsById.get(id);
+    return contactIds.flatMap(
+      (id) => {
+        const contact =
+          contactsById.get(id);
 
-      return contact ? [contact] : [];
-    });
+        return contact
+          ? [contact]
+          : [];
+      },
+    );
   }
 
   /**
-   * Replaces one changed subtask in the board state.
+   * Replaces a changed subtask in the complete board state.
+   *
+   * @param updatedSubtask - Persisted subtask containing the new state.
    */
   updateSubtask(
     updatedSubtask: Subtask,
   ): void {
-    this.allSubtasks.update((subtasks) => {
-      return replaceBoardSubtask(
-        subtasks,
-        updatedSubtask,
-      );
-    });
+    this.allSubtasks.update(
+      (subtasks) => {
+        return replaceBoardSubtask(
+          subtasks,
+          updatedSubtask,
+        );
+      },
+    );
   }
 
   /**
-   * Removes the relations belonging to a deleted task.
+   * Removes local relation data belonging to a deleted task.
+   *
+   * @param taskId - Identifier of the deleted task.
    */
-  removeTaskRelations(taskId: string): void {
-    this.allSubtasks.update((subtasks) => {
-      return subtasks.filter((subtask) => {
-        return subtask.taskId !== taskId;
-      });
-    });
+  removeTaskRelations(
+    taskId: string,
+  ): void {
+    this.allSubtasks.update(
+      (subtasks) => {
+        return subtasks.filter(
+          (subtask) => {
+            return (
+              subtask.taskId !==
+              taskId
+            );
+          },
+        );
+      },
+    );
 
     this.allAssignments.update(
       (assignments) => {
         return assignments.filter(
           (assignment) => {
             return (
-              assignment.task_id !== taskId
+              assignment.task_id !==
+              taskId
             );
           },
         );
@@ -194,13 +276,21 @@ export class BoardDataStateService {
   }
 
   /**
-   * Replaces all board relation rows.
+   * Replaces all board relation state.
+   *
+   * @param subtasks - Complete loaded subtask collection.
+   * @param assignments - Complete loaded assignment row collection.
    */
   private setRelations(
     subtasks: Subtask[],
     assignments: TaskAssignmentRow[],
   ): void {
-    this.allSubtasks.set(subtasks);
-    this.allAssignments.set(assignments);
+    this.allSubtasks.set(
+      subtasks,
+    );
+
+    this.allAssignments.set(
+      assignments,
+    );
   }
 }

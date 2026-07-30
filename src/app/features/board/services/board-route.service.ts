@@ -9,75 +9,102 @@ import {
 import { isTaskStatus } from '../../../core/constants/task-status.constants';
 import { TaskStatus } from '../../../core/models/task.model';
 
+/**
+ * Handles board behavior controlled through route query parameters.
+ */
 @Injectable()
 export class BoardRouteService {
+  /** Current route used to read board query parameters. */
   private readonly route =
     inject(ActivatedRoute);
 
-  private readonly router = inject(Router);
+  /** Router used to remove handled query parameters. */
+  private readonly router =
+    inject(Router);
 
   /**
-   * Returns the task ID requested through the current query parameters.
+   * Returns the task requested through the current URL.
+   *
+   * @returns Requested task identifier or null when none was supplied.
    */
-  getRequestedTaskId(): string | null {
-    return this.route.snapshot.queryParamMap.get(
-      'taskId',
-    );
+  getRequestedTaskId():
+    string | null
+  {
+    return this.route.snapshot
+      .queryParamMap
+      .get('taskId');
   }
 
   /**
-   * Removes the selected task from the current board URL.
+   * Removes the selected task identifier from the current URL.
    */
   clearRequestedTask(): void {
     if (
-      !this.route.snapshot.queryParamMap.has(
-        'taskId',
-      )
+      !this.route.snapshot
+        .queryParamMap
+        .has('taskId')
     ) {
       return;
     }
 
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        taskId: null,
+    void this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: {
+          taskId: null,
+        },
+        queryParamsHandling:
+          'merge',
+        replaceUrl: true,
       },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
+    );
   }
 
   /**
-   * Scrolls to the board status requested through the URL.
+   * Schedules scrolling to a valid board status requested through the URL.
    */
   scheduleRequestedStatusScroll(): void {
     const status =
-      this.route.snapshot.queryParamMap.get(
-        'status',
-      );
+      this.route.snapshot
+        .queryParamMap
+        .get('status');
 
-    if (!status || !isTaskStatus(status)) {
+    if (
+      !status ||
+      !isTaskStatus(status)
+    ) {
       return;
     }
 
-    window.requestAnimationFrame(() => {
-      this.scrollToStatus(status);
-    });
+    window.requestAnimationFrame(
+      () => {
+        this.scrollToStatus(
+          status,
+        );
+      },
+    );
   }
 
   /**
-   * Scrolls only when the board columns use the stacked layout.
+   * Scrolls to a status when the board columns use the stacked layout.
+   *
+   * @param status - Status of the requested board column.
    */
   private scrollToStatus(
     status: TaskStatus,
   ): void {
-    const target = document
-      .getElementById(status)
-      ?.closest<HTMLElement>(
-        '.board__column',
-      );
+    const target =
+      document
+        .getElementById(status)
+        ?.closest<HTMLElement>(
+          '.board__column',
+        );
 
-    if (target && this.hasStackedColumns()) {
+    if (
+      target &&
+      this.hasStackedColumns()
+    ) {
       target.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
@@ -86,24 +113,31 @@ export class BoardRouteService {
   }
 
   /**
-   * Checks whether the board columns are displayed below each other.
+   * Checks whether the board columns are positioned below each other.
+   *
+   * @returns True when the first two columns have different vertical offsets.
    */
-  private hasStackedColumns(): boolean {
+  private hasStackedColumns():
+    boolean
+  {
     const columns =
       document.querySelectorAll<HTMLElement>(
         '.board__column',
       );
 
-    const firstColumn = columns.item(0);
-    const secondColumn = columns.item(1);
+    const firstColumn =
+      columns.item(0);
+
+    const secondColumn =
+      columns.item(1);
 
     return Boolean(
       firstColumn &&
-        secondColumn &&
-        Math.abs(
-          firstColumn.offsetTop -
-            secondColumn.offsetTop,
-        ) > 1,
+      secondColumn &&
+      Math.abs(
+        firstColumn.offsetTop -
+          secondColumn.offsetTop,
+      ) > 1,
     );
   }
 }

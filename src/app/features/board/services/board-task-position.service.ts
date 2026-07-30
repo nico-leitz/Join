@@ -1,6 +1,4 @@
-import {
-  CdkDragDrop,
-} from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
   Injectable,
   inject,
@@ -17,15 +15,28 @@ import {
   createStatusMoveTaskUpdates,
 } from '../../../core/utils/task-order.utils';
 
+/**
+ * Coordinates board task position changes and their persistence.
+ *
+ * Converts CDK or mobile move input into position updates and restores
+ * persisted task state when an update fails.
+ */
 @Injectable()
 export class BoardTaskPositionService {
+  /** Service used to read and persist task state. */
   private readonly taskService =
     inject(TaskService);
 
-  readonly isUpdating = signal(false);
+  /** Indicates whether task positions are currently being persisted. */
+  readonly isUpdating =
+    signal(false);
 
   /**
-   * Moves one task into another board status.
+   * Moves a task to the end of another board status.
+   *
+   * @param task - Task to move.
+   * @param targetStatus - Status of the target board column.
+   * @returns Empty text after success or a user-facing error message.
    */
   async moveToStatus(
     task: Task,
@@ -37,16 +48,22 @@ export class BoardTaskPositionService {
 
     const updates =
       createStatusMoveTaskUpdates(
-        this.taskService.allTasks(),
+        this.taskService
+          .allTasks(),
         task.id,
         targetStatus,
       );
 
-    return this.persist(updates);
+    return this.persist(
+      updates,
+    );
   }
 
   /**
-   * Reorders a task from one CDK drop event.
+   * Reorders a task according to a CDK drop event.
+   *
+   * @param event - Drop event containing source and target positions.
+   * @returns Empty text after success or a user-facing error message.
    */
   async moveFromDrop(
     event: CdkDragDrop<Task[]>,
@@ -55,26 +72,34 @@ export class BoardTaskPositionService {
       return '';
     }
 
-    const updates = createDropTaskUpdates(
-      this.taskService.allTasks(),
-      {
-        sourceStatus:
-          event.previousContainer
-            .id as TaskStatus,
+    const updates =
+      createDropTaskUpdates(
+        this.taskService
+          .allTasks(),
+        {
+          sourceStatus:
+            event.previousContainer
+              .id as TaskStatus,
+          targetStatus:
+            event.container
+              .id as TaskStatus,
+          sourceIndex:
+            event.previousIndex,
+          targetIndex:
+            event.currentIndex,
+        },
+      );
 
-        targetStatus:
-          event.container.id as TaskStatus,
-
-        sourceIndex: event.previousIndex,
-        targetIndex: event.currentIndex,
-      },
+    return this.persist(
+      updates,
     );
-
-    return this.persist(updates);
   }
 
   /**
-   * Persists task positions and restores server state on failure.
+   * Persists position changes and restores server state after failure.
+   *
+   * @param updates - Complete changed task position collection.
+   * @returns Empty text after success or a user-facing error message.
    */
   private async persist(
     updates: TaskPositionUpdate[],
@@ -87,20 +112,29 @@ export class BoardTaskPositionService {
 
     try {
       await this.taskService
-        .updateTaskPositions(updates);
+        .updateTaskPositions(
+          updates,
+        );
 
       return '';
     } catch (error) {
-      await this.restoreTasksAfterError(error);
+      await this.restoreTasksAfterError(
+        error,
+      );
 
       return 'Task positions could not be saved.';
     } finally {
-      this.isUpdating.set(false);
+      this.isUpdating.set(
+        false,
+      );
     }
   }
 
   /**
-   * Reloads task state after a failed position update.
+   * Logs the position failure and attempts to reload persisted tasks.
+   *
+   * @param error - Original task position persistence error.
+   * @returns A promise that resolves after the reload attempt.
    */
   private async restoreTasksAfterError(
     error: unknown,
@@ -111,7 +145,8 @@ export class BoardTaskPositionService {
     );
 
     try {
-      await this.taskService.getTasks();
+      await this.taskService
+        .getTasks();
     } catch (reloadError) {
       console.error(
         'Tasks could not be reloaded.',
