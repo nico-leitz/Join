@@ -11,7 +11,11 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  Router,
+} from '@angular/router';
+import { isTaskStatus } from '../../../../core/constants/task-status.constants';
 import { Contact } from '../../../../core/models/contact.model';
 import { Subtask } from '../../../../core/models/subtask.model';
 import { TaskAssignmentRow } from '../../../../core/models/task-assignment.model';
@@ -77,39 +81,51 @@ import {
 export class Board implements OnInit {
   private readonly taskService =
     inject(TaskService);
+
   private readonly contactService =
     inject(ContactService);
+
   private readonly horizontalScroll = inject(
     BoardHorizontalScrollService,
   );
+
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly isDialogOpen = signal(false);
   readonly isAddTaskDialogOpen = signal(false);
+
   readonly addTaskStatus =
     signal<TaskStatus>('todo');
+
   readonly isBoardLoading = signal(false);
   readonly isBoardUpdating = signal(false);
   readonly isDragging = signal(false);
   readonly boardError = signal('');
   readonly searchTerm = signal('');
   readonly allSubtasks = signal<Subtask[]>([]);
+
   readonly allAssignments =
     signal<TaskAssignmentRow[]>([]);
+
   readonly allContacts =
     this.contactService.allContacts;
+
   readonly dialogTask = signal<Task | null>(
     null,
   );
+
   readonly dialogSubtasks = signal<Subtask[]>(
     [],
   );
+
   readonly dialogContacts = signal<Contact[]>(
     [],
   );
 
   protected readonly isMobileViewport =
     this.horizontalScroll.isMobileViewport;
+
   protected readonly dropListOrientation =
     this.horizontalScroll.dropListOrientation;
 
@@ -149,9 +165,7 @@ export class Board implements OnInit {
   });
 
   readonly isSearchActive = computed(() => {
-    return (
-      this.searchTerm().trim().length > 0
-    );
+    return this.searchTerm().trim().length > 0;
   });
 
   readonly isDragDisabled = computed(() => {
@@ -192,16 +206,19 @@ export class Board implements OnInit {
 
     try {
       await this.loadBoardContent();
+      this.openRequestedTaskDialog();
     } catch (error) {
       console.error(
         'Board data could not be loaded.',
         error,
       );
+
       this.boardError.set(
         'Board data could not be loaded.',
       );
     } finally {
       this.isBoardLoading.set(false);
+      this.scheduleRequestedStatusScroll();
     }
   }
 
@@ -221,10 +238,12 @@ export class Board implements OnInit {
     const contactIds =
       this.contactIdsByTaskId().get(taskId) ??
       [];
+
     const contactsById = this.contactsById();
 
     return contactIds.flatMap((id) => {
       const contact = contactsById.get(id);
+
       return contact ? [contact] : [];
     });
   }
@@ -240,6 +259,7 @@ export class Board implements OnInit {
       void this.router.navigate(['/add-task'], {
         queryParams: { status },
       });
+
       return;
     }
 
@@ -277,6 +297,7 @@ export class Board implements OnInit {
     const subtasks = this.getSubtasksForTask(
       task.id,
     );
+
     const contacts = this.getContactsForTask(
       task.id,
     );
@@ -285,12 +306,15 @@ export class Board implements OnInit {
     this.dialogSubtasks.set(subtasks);
     this.dialogContacts.set(contacts);
     this.taskService.selectedTask.set(task);
+
     this.taskService.selectedSubtasks.set(
       subtasks,
     );
+
     this.taskService.assignedContacts.set(
       contacts,
     );
+
     this.isDialogOpen.set(true);
   }
 
@@ -300,6 +324,7 @@ export class Board implements OnInit {
     this.dialogSubtasks.set([]);
     this.dialogContacts.set([]);
     this.clearTaskSelectionState();
+    this.clearRequestedTaskQuery();
   }
 
   handleSubtaskUpdated(
@@ -343,9 +368,11 @@ export class Board implements OnInit {
   ): Promise<void> {
     this.dialogTask.set(update.task);
     this.dialogSubtasks.set(update.subtasks);
+
     this.dialogContacts.set(
       update.assignedContacts,
     );
+
     this.boardError.set('');
 
     try {
@@ -355,6 +382,7 @@ export class Board implements OnInit {
         'Task was saved, but board relations could not be refreshed.',
         error,
       );
+
       this.boardError.set(
         'Task was saved, but the board could not be refreshed completely.',
       );
@@ -445,9 +473,11 @@ export class Board implements OnInit {
       ]);
 
     this.allSubtasks.set(boardData.subtasks);
+
     this.allAssignments.set(
       boardData.assignments,
     );
+
     this.allContacts.set(contacts);
   }
 
@@ -457,16 +487,122 @@ export class Board implements OnInit {
       await this.taskService.loadAllBoardData();
 
     this.allSubtasks.set(boardData.subtasks);
+
     this.allAssignments.set(
       boardData.assignments,
     );
   }
 
+  private scheduleRequestedStatusScroll(): void {
+    const status =
+      this.route.snapshot.queryParamMap.get(
+        'status',
+      );
+
+    if (!status || !isTaskStatus(status)) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      this.scrollToRequestedStatus(status);
+    });
+  }
+
+  private scrollToRequestedStatus(
+    status: TaskStatus,
+  ): void {
+    const target = document
+      .getElementById(status)
+      ?.closest<HTMLElement>(
+        '.board__column',
+      );
+
+    if (target && this.hasStackedColumns()) {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }
+
+  private hasStackedColumns(): boolean {
+    const columns =
+      document.querySelectorAll<HTMLElement>(
+        '.board__column',
+      );
+
+    const firstColumn = columns.item(0);
+    const secondColumn = columns.item(1);
+
+    return Boolean(
+      firstColumn &&
+      secondColumn &&
+      Math.abs(
+        firstColumn.offsetTop -
+          secondColumn.offsetTop,
+      ) > 1,
+    );
+  }
+
+  private openRequestedTaskDialog(): void {
+    const taskId =
+      this.route.snapshot.queryParamMap.get(
+        'taskId',
+      );
+
+    if (!taskId) {
+      return;
+    }
+
+    const task = this.findTaskById(taskId);
+
+    if (task) {
+      this.openDialog(task);
+    }
+  }
+
+  private findTaskById(
+    taskId: string,
+  ): Task | undefined {
+    const task = this.taskService
+      .allTasks()
+      .find((item) => item.id === taskId);
+
+    if (!task) {
+      this.boardError.set(
+        'Requested task could not be found.',
+      );
+    }
+
+    return task;
+  }
+
+  private clearRequestedTaskQuery(): void {
+    if (
+      !this.route.snapshot.queryParamMap.has(
+        'taskId',
+      )
+    ) {
+      return;
+    }
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        taskId: null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
   private clearTaskSelectionState(): void {
     this.taskService.selectedTask.set(null);
+
     this.taskService.selectedSubtasks.set(
       [],
     );
+
     this.taskService.assignedContacts.set(
       [],
     );
@@ -500,6 +636,7 @@ export class Board implements OnInit {
       'Task positions could not be saved.',
       error,
     );
+
     this.boardError.set(
       'Task positions could not be saved.',
     );

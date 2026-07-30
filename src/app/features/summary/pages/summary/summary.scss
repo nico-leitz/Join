@@ -2,20 +2,45 @@
 
 :host {
   display: block;
-  min-height: 100vh;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
   background-color: var(--color-bg-main, #f6f7f8);
 }
 
 .summary-page {
+  --summary-header-height:
+    var(--layout-mobile-header-height, 80px);
+  --summary-bottom-nav-height:
+    var(--layout-mobile-bottom-nav-height, 80px);
+
+  position: relative;
   display: flex;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   background-color: var(--color-bg-main, #f6f7f8);
 
   &__content {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
-    min-height: 100vh;
+    height: 100%;
+    min-height: 0;
     flex: 1;
+    overflow: hidden;
+    box-sizing: border-box;
   }
+}
+
+app-header {
+  z-index: 20;
+  display: block;
+  width: 100%;
+  flex: 0 0 auto;
 }
 
 app-sidebar {
@@ -23,8 +48,13 @@ app-sidebar {
 }
 
 .summary {
+  min-height: 0;
+  flex: 1 1 auto;
   width: min(100%, 1440px);
   padding: 3rem clamp(2rem, 6.7vw, 8rem) 4rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
   box-sizing: border-box;
 
   &__header {
@@ -96,7 +126,7 @@ app-sidebar {
 
   &__greeting-name {
     overflow-wrap: anywhere;
-    color: var(--color-accent, #29abe2);
+    color: #124658;
     font-size: clamp(3rem, 4vw, 4rem);
     font-weight: 700;
     line-height: 1.08;
@@ -192,7 +222,8 @@ app-sidebar {
 
     &--done {
       width: 2.3rem;
-      background-image: url('/assets/summary/check.svg');
+      background-image: url('/assets/summary/check_dark.svg');
+      filter: brightness(0) invert(1);
     }
   }
 
@@ -230,6 +261,7 @@ app-sidebar {
 
   .metric-card__icon--done {
     background-image: url('/assets/summary/check_dark.svg');
+    filter: none;
   }
 }
 
@@ -309,7 +341,7 @@ app-sidebar {
 
   &__name {
     overflow-wrap: anywhere;
-    color: var(--color-accent, #29abe2);
+    color: #124658;
     font-size: clamp(2.25rem, 8vw, 4rem);
     font-weight: 700;
   }
@@ -370,8 +402,23 @@ app-sidebar {
 
     &__content {
       padding-bottom:
-        var(--layout-mobile-bottom-nav-height, 80px);
+        var(--summary-bottom-nav-height);
     }
+  }
+
+  app-header {
+    height: var(--summary-header-height);
+    flex-basis: var(--summary-header-height);
+  }
+
+  app-sidebar {
+    position: fixed;
+    z-index: 1000;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--summary-bottom-nav-height);
   }
 
   .summary {
@@ -399,12 +446,12 @@ app-sidebar {
     justify-content: center;
     flex-direction: column;
     gap: 0.5rem;
-    min-height: calc(
-      100vh -
-      var(--layout-mobile-bottom-nav-height, 80px) -
-      96px
-    );
+    min-height: 0;
+    flex: 1 1 auto;
     padding-inline: 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
     opacity: 1;
     text-align: center;
     transition:
@@ -577,6 +624,29 @@ app-sidebar {
 
   .deadline__date {
     font-size: var(--font-size-xs, 0.8125rem);
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-xs) {
+  .summary-page {
+    --summary-bottom-nav-height: 72px;
+  }
+}
+
+@media (orientation: landscape) and
+  (max-height: bp.$breakpoint-landscape-height-md) and
+  (max-width: bp.$breakpoint-landscape-width-lg) {
+  .summary-page {
+    --summary-header-height:
+      var(
+        --layout-mobile-landscape-header-height,
+        64px
+      );
+    --summary-bottom-nav-height:
+      var(
+        --layout-mobile-landscape-bottom-nav-height,
+        72px
+      );
   }
 }
 

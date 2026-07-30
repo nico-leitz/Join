@@ -22,6 +22,16 @@ import { Sidebar } from '../../../../layout/sidebar/sidebar';
 export class Summary implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly taskService = inject(TaskService);
+
+  private readonly priorityRank: Record<
+    Task['priority'],
+    number
+  > = {
+    urgent: 0,
+    medium: 1,
+    low: 2,
+  };
+
   private readonly deadlineFormatter =
     new Intl.DateTimeFormat('en-US', {
       month: 'long',
@@ -30,21 +40,27 @@ export class Summary implements OnInit, OnDestroy {
     });
 
   private readonly currentDate = signal(new Date());
+
   private clockTimer?: ReturnType<
     typeof window.setInterval
   >;
+
   private greetingFadeTimer?: ReturnType<
     typeof window.setTimeout
   >;
+
   private greetingHideTimer?: ReturnType<
     typeof window.setTimeout
   >;
 
   readonly showMobileGreeting = signal(false);
+
   readonly isMobileGreetingLeaving =
     signal(false);
+
   readonly tasks = this.taskService.allTasks;
   readonly isLoading = this.taskService.isLoading;
+
   readonly errorMessage =
     this.taskService.errorMessage;
 
@@ -68,6 +84,18 @@ export class Summary implements OnInit, OnDestroy {
 
   readonly urgentCount = computed(() => {
     return this.activeUrgentTasks().length;
+  });
+
+  readonly upcomingTask = computed(() => {
+    return this.getNextDueTask();
+  });
+
+  readonly upcomingTaskQueryParams = computed(() => {
+    const task = this.upcomingTask();
+
+    return task
+      ? { taskId: task.id }
+      : {};
   });
 
   readonly upcomingDeadline = computed(() => {
@@ -112,10 +140,12 @@ export class Summary implements OnInit, OnDestroy {
    */
   ngOnDestroy(): void {
     this.clearTimer(this.clockTimer, 'interval');
+
     this.clearTimer(
       this.greetingFadeTimer,
       'timeout',
     );
+
     this.clearTimer(
       this.greetingHideTimer,
       'timeout',
@@ -163,7 +193,7 @@ export class Summary implements OnInit, OnDestroy {
    * Resolves the earliest upcoming task deadline.
    */
   private resolveUpcomingDeadline(): string {
-    const task = this.getNextDueTask();
+    const task = this.upcomingTask();
 
     if (!task) {
       return 'No upcoming deadline';
@@ -186,10 +216,29 @@ export class Summary implements OnInit, OnDestroy {
         );
       })
       .sort((firstTask, secondTask) => {
-        return firstTask.dueDate.localeCompare(
-          secondTask.dueDate,
+        return this.compareByDueDateAndPriority(
+          firstTask,
+          secondTask,
         );
       })[0];
+  }
+
+  /**
+   * Sorts by due date and uses priority as tie-breaker.
+   */
+  private compareByDueDateAndPriority(
+    firstTask: Task,
+    secondTask: Task,
+  ): number {
+    const dateComparison =
+      firstTask.dueDate.localeCompare(
+        secondTask.dueDate,
+      );
+
+    return dateComparison !== 0
+      ? dateComparison
+      : this.priorityRank[firstTask.priority] -
+          this.priorityRank[secondTask.priority];
   }
 
   /**
@@ -199,6 +248,7 @@ export class Summary implements OnInit, OnDestroy {
     const [year, month, day] = dateValue
       .split('-')
       .map(Number);
+
     const date = new Date(year, month - 1, day);
 
     return Number.isNaN(date.getTime())
@@ -211,10 +261,12 @@ export class Summary implements OnInit, OnDestroy {
    */
   private toDateKey(date: Date): string {
     const year = date.getFullYear();
+
     const month = `${date.getMonth() + 1}`.padStart(
       2,
       '0',
     );
+
     const day = `${date.getDate()}`.padStart(2, '0');
 
     return `${year}-${month}-${day}`;

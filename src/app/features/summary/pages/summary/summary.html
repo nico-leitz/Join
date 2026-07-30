@@ -69,6 +69,7 @@
             <a
               class="metric-card metric-card--medium metric-card--todo"
               routerLink="/board"
+              [queryParams]="{ status: 'todo' }"
               [attr.aria-label]="
                 'Open board. ' +
                 todoCount() +
@@ -88,6 +89,7 @@
                 <span class="metric-card__number">
                   {{ isLoading() ? '–' : todoCount() }}
                 </span>
+
                 <span class="metric-card__label">
                   To-do
                 </span>
@@ -97,6 +99,7 @@
             <a
               class="metric-card metric-card--medium metric-card--done"
               routerLink="/board"
+              [queryParams]="{ status: 'done' }"
               [attr.aria-label]="
                 'Open board. ' +
                 doneCount() +
@@ -116,6 +119,7 @@
                 <span class="metric-card__number">
                   {{ isLoading() ? '–' : doneCount() }}
                 </span>
+
                 <span class="metric-card__label">
                   Done
                 </span>
@@ -125,6 +129,9 @@
             <a
               class="metric-card metric-card--urgent"
               routerLink="/board"
+              [queryParams]="
+                upcomingTaskQueryParams()
+              "
               [attr.aria-label]="
                 'Open board. ' +
                 urgentCount() +
@@ -146,6 +153,7 @@
                         : urgentCount()
                     }}
                   </span>
+
                   <span class="metric-card__label">
                     Urgent
                   </span>
@@ -165,6 +173,7 @@
                       : upcomingDeadline()
                   }}
                 </span>
+
                 <span class="deadline__label">
                   Upcoming Deadline
                 </span>
@@ -183,6 +192,7 @@
               <span class="metric-card__number">
                 {{ isLoading() ? '–' : tasks().length }}
               </span>
+
               <span class="metric-card__label">
                 Tasks in<br />Board
               </span>
@@ -191,6 +201,9 @@
             <a
               class="metric-card metric-card--small"
               routerLink="/board"
+              [queryParams]="
+                { status: 'in_progress' }
+              "
               [attr.aria-label]="
                 'Open board. ' +
                 inProgressCount() +
@@ -204,6 +217,7 @@
                     : inProgressCount()
                 }}
               </span>
+
               <span class="metric-card__label">
                 Tasks in<br />Progress
               </span>
@@ -212,6 +226,9 @@
             <a
               class="metric-card metric-card--small"
               routerLink="/board"
+              [queryParams]="
+                { status: 'awaiting_feedback' }
+              "
               [attr.aria-label]="
                 'Open board. ' +
                 awaitingFeedbackCount() +
@@ -225,6 +242,7 @@
                     : awaitingFeedbackCount()
                 }}
               </span>
+
               <span class="metric-card__label">
                 Awaiting<br />Feedback
               </span>
