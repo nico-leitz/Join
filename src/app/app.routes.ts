@@ -13,7 +13,7 @@ import { Summary } from './features/summary/pages/summary/summary';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'contacts',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
   {
