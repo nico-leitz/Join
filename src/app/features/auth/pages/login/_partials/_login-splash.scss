@@ -1,0 +1,26 @@
+.login-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  overflow: hidden;
+
+  &--mobile {
+    background-color: #2a3647;
+  }
+
+  &__logo {
+    position: absolute;
+    width: clamp(8rem, 18vw, 11rem);
+    height: auto;
+    opacity: 1;
+    animation: splash-logo-desktop 2.4s ease forwards;
+  }
+
+  &__logo--mobile {
+    animation-name: splash-logo-mobile;
+  }
+}

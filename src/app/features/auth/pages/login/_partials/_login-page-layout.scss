@@ -1,0 +1,96 @@
+.login-page {
+  position: relative;
+  max-width: 90rem;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 100vh;
+  font-family: inherit;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 3rem 5rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  &__logo {
+    img {
+      height: 7rem;
+      width: auto;
+      transition: height 0.2s ease-in-out;
+    }
+  }
+
+  &__signup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    &--mobile {
+      display: none;
+    }
+  }
+
+  &__signup-text {
+    font-size: 1rem;
+    color: var(--color-text-dark);
+  }
+
+  &__btn {
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 0.125rem solid transparent;
+    transition: all 150ms ease-in-out;
+    white-space: nowrap;
+
+    &--primary {
+      background-color: var(--color-text-dark);
+      color: #ffffff;
+
+      &:hover {
+        background-color: var(--color-cyan);
+        border-color: var(--color-cyan);
+      }
+    }
+  }
+
+  &__main {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem 1rem;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  &__footer-link {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 150ms ease-in-out;
+
+    &:hover {
+      color: var(--color-text-dark);
+    }
+  }
+}
