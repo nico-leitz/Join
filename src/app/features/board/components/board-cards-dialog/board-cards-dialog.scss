@@ -250,7 +250,7 @@
     border: 2px solid #ffffff;
     border-radius: 50%;
     color: #ffffff;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
   }
 
@@ -308,7 +308,7 @@
     border-radius: 8px;
     background-color: #fff0f2;
     color: #b00020;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   &__field {
@@ -416,7 +416,7 @@
     min-height: 16px;
     margin: 0;
     color: #ff8190;
-    font-size: 12px;
+    font-size: 16px;
     line-height: 1.2;
   }
 
@@ -442,7 +442,7 @@
       rgba(0, 0, 0, 0.16);
     color: #2a3647;
     font-family: inherit;
-    font-size: 15px;
+    font-size: 16px;
     cursor: pointer;
     transition:
       background-color 0.15s ease,
@@ -586,7 +586,7 @@
     border-radius: 10px;
     box-sizing: border-box;
     color: #2a3647;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     transition:
       background-color 0.15s ease,
@@ -649,7 +649,7 @@
     margin: 0;
     padding: 10px;
     color: #7a869a;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   &__selected_contacts {
@@ -909,7 +909,7 @@
     &__priority_button {
       gap: 5px;
       padding-inline: 6px;
-      font-size: 13px;
+      font-size: 16px;
 
       img {
         width: 16px;

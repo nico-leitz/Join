@@ -94,7 +94,7 @@
   &__footer-link {
     color: var(--color-text-muted);
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 1rem;
     transition: color 150ms ease-in-out;
 
     &:hover {
@@ -220,7 +220,7 @@
     min-height: 1rem;
     margin: 0.25rem 0.25rem 0;
     color: var(--color-error);
-    font-size: 0.75rem;
+    font-size: 1rem;
     line-height: 1rem;
     opacity: 0;
     visibility: hidden;
@@ -235,7 +235,7 @@
     min-height: 1.125rem;
     margin: 0;
     color: var(--color-error);
-    font-size: 0.875rem;
+    font-size: 1rem;
     line-height: 1.125rem;
     text-align: center;
     opacity: 0;
@@ -363,6 +363,38 @@
 
 @media (max-width: bp.$breakpoint-tablet-sm-max) {
   .login-page {
+    min-height: 100svh;
+    height: 100svh;
+
+    &__content {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: 100svh;
+      height: 100svh;
+      overflow: hidden;
+    }
+
+    &__main {
+      min-height: 0;
+      display: block;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-padding-top: 0.75rem;
+      justify-content: flex-start;
+      padding: 1.25rem 1rem 1.25rem;
+    }
+
+    &__footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      flex: 0 0 auto;
+      background-color: var(--color-bg-page);
+      padding: 1rem;
+    }
+  }
+
+  .login-page {
     &__header {
       padding: 1.5rem 1rem;
     }
@@ -375,6 +407,7 @@
   .login-card {
     padding: 2.5rem 2rem;
     border-radius: 1.25rem;
+    margin: 0 auto;
 
     &__title {
       font-size: 2.75rem;
@@ -388,6 +421,56 @@
     &__btn {
       width: 100%;
       justify-content: center;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
+  .login-page {
+    &__header {
+      padding: 0.625rem 0.75rem;
+    }
+
+    &__logo img {
+      height: 2.25rem;
+    }
+
+    &__main {
+      padding: 0.875rem 0.75rem 0.75rem;
+    }
+
+    &__footer {
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
+    }
+  }
+
+  .login-card {
+    padding: 1.25rem 1rem;
+    border-radius: 1rem;
+
+    &__header {
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      font-size: 2rem;
+    }
+
+    &__form {
+      gap: 0.75rem;
+    }
+
+    &__actions {
+      flex-direction: row;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    &__btn {
+      flex: 1 1 0;
+      width: auto;
+      padding: 0.625rem 0.875rem;
     }
   }
 }
@@ -407,17 +490,23 @@
     &__logo img {
       height: 3rem;
     }
+
+    &__footer {
+      gap: 1rem;
+      padding: 0.875rem 0.75rem calc(0.875rem + env(safe-area-inset-bottom));
+    }
   }
 
   .login-card {
     padding: 2rem 1.25rem;
+    margin: 0 auto;
 
     &__title {
       font-size: 2.25rem;
     }
 
     &__input {
-      font-size: 0.875rem;
+      font-size: 1rem;
     }
   }
 }

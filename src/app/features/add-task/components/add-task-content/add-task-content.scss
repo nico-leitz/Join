@@ -398,7 +398,7 @@ textarea::-moz-resizer {
     border: 2px solid #ffffff;
     border-radius: 50%;
     color: #ffffff;
-    font-size: 11px;
+    font-size: 16px;
   }
 
   &__contact-checkbox {
@@ -767,7 +767,7 @@ textarea::-moz-resizer {
 
     &__priority {
       padding-inline: 6px;
-      font-size: 14px;
+      font-size: 16px;
 
       img {
         width: 2rem;
@@ -878,7 +878,7 @@ textarea::-moz-resizer {
     }
 
     &__priority {
-      font-size: 13px;
+      font-size: 16px;
     }
 
     &__footer {
@@ -889,7 +889,7 @@ textarea::-moz-resizer {
     &__secondary-button,
     &__create-button {
       padding-inline: 12px;
-      font-size: 15px;
+      font-size: 16px;
     }
   }
 }
