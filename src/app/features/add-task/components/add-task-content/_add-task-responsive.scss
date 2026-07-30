@@ -1,0 +1,258 @@
+@use 'abstracts/breakpoints' as bp;
+
+@media (max-width: bp.$breakpoint-tablet-l) {
+  .add-task {
+    padding-inline: 32px;
+
+    &__form-area {
+      gap: 1.8rem;
+    }
+
+    &__priority {
+      padding-inline: 6px;
+      font-size: 14px;
+
+      img {
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-tablet-sm-max) {
+  .add-task {
+    height: auto;
+    min-height: auto;
+    padding: 32px 16px 0;
+
+    &__header {
+      margin-bottom: 28px;
+    }
+
+    &__title {
+      font-size: var(--font-size-2xl);
+    }
+
+    &__form-area {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    &__divider {
+      display: none;
+    }
+
+    &__column {
+      gap: 4px;
+    }
+
+    &__field,
+    &__fieldset {
+      min-height: 84px;
+    }
+
+    &__textarea {
+      min-height: 104px;
+    }
+
+    &__footer {
+      position: sticky;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 40;
+      min-height: 76px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-inline: -16px;
+      padding: 10px 16px;
+      border-top: 1px solid #d1d1d1;
+      background-color: var(--color-bg-main);
+      box-shadow: 0 -2px 4px #0000000d;
+    }
+
+    &__required-legend {
+      display: none;
+    }
+
+    &__buttons {
+      width: 100%;
+      justify-content: flex-end;
+    }
+
+    &--dialog {
+      height: 100%;
+      min-height: 0;
+      padding-top: 32px;
+    }
+
+    &--dialog &__form-area {
+      flex: 1 1 auto;
+      overflow-y: auto;
+    }
+
+    &__success {
+      top: 50%;
+      right: auto;
+      bottom: auto;
+      left: 50%;
+      width: calc(100% - 32px);
+      min-width: 0;
+      max-width: 320px;
+      transform: translate(-50%, -50%);
+      animation: add-task-success-mobile-in 200ms ease-in-out both;
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-xs) {
+  .add-task {
+    padding-inline: 12px;
+
+    &__title {
+      font-size: 40px;
+    }
+
+    &__priorities {
+      gap: 6px;
+    }
+
+    &__priority {
+      font-size: 13px;
+    }
+
+    &__footer {
+      margin-inline: -12px;
+      padding-inline: 12px;
+    }
+
+    &__secondary-button,
+    &__create-button {
+      padding-inline: 12px;
+      font-size: 15px;
+    }
+  }
+}
+
+@media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
+  .add-task {
+    height: auto;
+    min-height: 100%;
+    padding: 20px 24px 0;
+
+    &__header {
+      margin-bottom: 18px;
+    }
+
+    &__title {
+      font-size: 38px;
+    }
+
+    &__form-area {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1fr)
+        1px
+        minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    &__divider {
+      display: block;
+    }
+
+    &__field,
+    &__fieldset {
+      min-height: 70px;
+    }
+
+    &__textarea {
+      min-height: 76px;
+    }
+
+    &__input,
+    &__priority {
+      height: 40px;
+    }
+
+    &__select-arrow-button,
+    &__subtask-add {
+      height: 40px;
+    }
+
+    &__footer {
+      position: sticky;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 40;
+      width: auto;
+      min-height: 58px;
+      align-items: center;
+      margin-top: auto;
+      margin-inline: -24px;
+      padding: 6px 24px;
+      border-top: 1px solid #d1d1d1;
+      background-color: var(--color-bg-main);
+      box-shadow: 0 -2px 4px #0000000d;
+    }
+
+    &__required-legend {
+      margin-bottom: 8px;
+    }
+
+    &__buttons {
+      flex-shrink: 0;
+    }
+
+    &__secondary-button,
+    &__create-button {
+      min-height: 42px;
+      padding-block: 8px;
+    }
+
+    &--dialog {
+      height: 100%;
+      min-height: 0;
+      padding: 20px 24px 0;
+      overflow: hidden;
+    }
+
+    &--dialog &__form-area {
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    &--dialog &__footer {
+      margin-top: 0;
+    }
+  }
+}
+
+@keyframes add-task-success-desktop-in {
+  from {
+    opacity: 0;
+    transform: translate(calc(-50% + 80px), -50%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes add-task-success-mobile-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(100vh - 50%));
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

@@ -10,6 +10,12 @@ import {
   UpdateTask,
 } from '../models/task.model';
 
+/**
+ * Creates a database payload for inserting a task.
+ *
+ * @param task - Task data to transform.
+ * @returns Normalized task insert payload.
+ */
 export function createTaskInsertPayload(
   task: CreateTask,
 ): Partial<TaskRow> {
@@ -24,6 +30,12 @@ export function createTaskInsertPayload(
   };
 }
 
+/**
+ * Creates a database payload containing the provided task updates.
+ *
+ * @param task - Task fields to update.
+ * @returns Normalized task update payload with a new update timestamp.
+ */
 export function createTaskUpdatePayload(
   task: UpdateTask,
 ): Partial<TaskRow> {
@@ -41,6 +53,12 @@ export function createTaskUpdatePayload(
   };
 }
 
+/**
+ * Creates a database payload for inserting a subtask.
+ *
+ * @param subtask - Subtask data to transform.
+ * @returns Normalized subtask insert payload.
+ */
 export function createSubtaskInsertPayload(
   subtask: CreateSubtask,
 ): Partial<SubtaskRow> {
@@ -53,6 +71,12 @@ export function createSubtaskInsertPayload(
   };
 }
 
+/**
+ * Creates a database payload containing the provided subtask updates.
+ *
+ * @param subtask - Subtask fields to update.
+ * @returns Normalized subtask update payload with a new update timestamp.
+ */
 export function createSubtaskUpdatePayload(
   subtask: UpdateSubtask,
 ): Partial<SubtaskRow> {
@@ -70,6 +94,13 @@ export function createSubtaskUpdatePayload(
   };
 }
 
+/**
+ * Creates a database row linking a task with a contact.
+ *
+ * @param taskId - Identifier of the task.
+ * @param contactId - Identifier of the assigned contact.
+ * @returns Task assignment insert payload.
+ */
 export function createTaskAssignmentRow(
   taskId: string,
   contactId: string,
@@ -80,6 +111,13 @@ export function createTaskAssignmentRow(
   };
 }
 
+/**
+ * Creates task assignment rows for multiple contacts.
+ *
+ * @param taskId - Identifier of the task.
+ * @param contactIds - Identifiers of the contacts to assign.
+ * @returns Task assignment insert payloads.
+ */
 export function createTaskAssignmentRows(
   taskId: string,
   contactIds: string[],

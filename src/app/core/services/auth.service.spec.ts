@@ -281,6 +281,9 @@ describe('AuthService', () => {
 
 /**
  * Creates valid registration test data.
+ *
+ * @param privacyAccepted - Privacy acceptance state assigned to the fixture.
+ * @returns Complete registration credentials for service tests.
  */
 function createSignUpCredentials(
   privacyAccepted = true
@@ -295,6 +298,8 @@ function createSignUpCredentials(
 
 /**
  * Creates valid login test data.
+ *
+ * @returns Complete login credentials for service tests.
  */
 function createLoginCredentials(): LoginCredentials {
   return {
@@ -305,6 +310,9 @@ function createLoginCredentials(): LoginCredentials {
 
 /**
  * Creates a Supabase authentication error fixture.
+ *
+ * @param code - Supabase authentication error code.
+ * @returns Authentication error containing the provided code.
  */
 function createAuthApiError(code: string): AuthApiError {
   return new AuthApiError(
@@ -316,6 +324,8 @@ function createAuthApiError(code: string): AuthApiError {
 
 /**
  * Creates a complete permanent Supabase user fixture.
+ *
+ * @returns Permanent Supabase user fixture.
  */
 function createUser(): User {
   return {
@@ -333,6 +343,8 @@ function createUser(): User {
 
 /**
  * Creates a complete anonymous Supabase user fixture.
+ *
+ * @returns Anonymous Supabase user fixture.
  */
 function createGuestUser(): User {
   return {
@@ -347,6 +359,9 @@ function createGuestUser(): User {
 
 /**
  * Creates a complete Supabase session fixture.
+ *
+ * @param user - User associated with the session.
+ * @returns Supabase session fixture for the provided user.
  */
 function createSession(user: User): Session {
   return {

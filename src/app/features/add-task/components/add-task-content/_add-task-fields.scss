@@ -1,0 +1,432 @@
+@use 'abstracts/mixins' as mx;
+
+.add-task {
+  &__field,
+  &__fieldset {
+    position: relative;
+    min-width: 0;
+    min-height: 88px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+
+  &__label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: var(--line-height-base);
+
+    span {
+      color: var(--color-error);
+    }
+  }
+
+  &__input {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+    padding: 11px 16px;
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-light);
+    color: var(--color-text-main);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-base);
+    outline: none;
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+
+    &::placeholder {
+      color: #a8a8a8;
+      opacity: 1;
+    }
+
+    &:focus,
+    .dropdown-wrapper.is-open & {
+      border-color: #124658;
+    }
+
+    &--invalid,
+    &--invalid:focus {
+      border-color: var(--color-error);
+    }
+  }
+
+  &__input[type='date'] {
+    padding-right: 16px;
+    cursor: pointer;
+    color-scheme: light;
+
+    &::-webkit-calendar-picker-indicator {
+      width: 24px;
+      height: 24px;
+      padding: 4px;
+      margin-right: -4px;
+      border-radius: 50%;
+      background-color: transparent;
+      background-image: url('/assets/icons/icon_calender/event.svg');
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 24px 24px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    &::-webkit-calendar-picker-indicator:hover {
+      background-color: #eeeeee;
+    }
+  }
+
+  &__textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  &__description_icon {
+    position: absolute;
+    bottom: 32px;
+    right: 6px;
+    height: 16px;
+    width: 16px;
+    background-image: url('/assets/add-task/description_icon.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
+    pointer-events: none;
+  }
+
+  &__field-error {
+    min-height: 18px;
+    margin: 4px 0 0;
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+    line-height: 1.2;
+  }
+
+  &__form-error {
+    margin: 12px 0 0;
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+  }
+
+  &__priorities {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  &__priority {
+    display: inline-flex;
+    min-width: 0;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid rgba(0, 0, 0, 0.137);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-light);
+    box-shadow: 0 0 4px 0 #0000001a;
+    color: var(--color-text-main);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast),
+      transform var(--transition-fast);
+
+    img {
+      width: 2rem;
+      height: 2rem;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    &:hover,
+    &:focus-visible {
+      outline: none;
+      transform: translateY(-1px);
+      box-shadow: 0px 5px 4px 0 rgba(0, 0, 0, 0.212);
+    }
+
+    &--active {
+      color: #ffffff;
+
+      img {
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    &--urgent.add-task__priority--active {
+      background-color: #ff3d00;
+    }
+
+    &--medium.add-task__priority--active {
+      background-color: #ffa800;
+    }
+
+    &--low.add-task__priority--active {
+      background-color: #7ae229;
+    }
+  }
+
+  &__contact-select,
+  &__category-select {
+    position: relative;
+    min-width: 0;
+  }
+
+  &__select-control {
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+
+  &__select-search {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 11px 44px 11px 16px;
+    border: 0.5px rgba(0, 0, 0, 0) solid;
+    border-radius: inherit;
+    background: transparent;
+    color: var(--color-text-main);
+    font: inherit;
+    outline: none;
+    cursor: pointer;
+
+    &:focus,
+    .dropdown-wrapper.is-open & {
+      border-color: #124658;
+    }
+
+    &::placeholder {
+      color: var(--color-text-main);
+      opacity: 1;
+    }
+  }
+
+  &__select-arrow-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    width: 44px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: unset;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  &__dropdown-arrow {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+    pointer-events: none;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform var(--transition-fast);
+
+    &--open {
+      transform: translateY(2px) rotate(225deg);
+    }
+  }
+
+  &__contact-menu,
+  &__category-menu {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    z-index: 100;
+    overflow-y: auto;
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-light);
+    box-shadow: 0 4px 10px 0 #00000026;
+    gap: 1px;
+  }
+
+  &__contact-menu {
+    top: calc(100% - 0.3rem);
+    max-height: 250px;
+    padding: 8px;
+  }
+
+  &__contact-option {
+    display: grid;
+    width: 100%;
+    min-height: 56px;
+    grid-template-columns:
+      32px
+      minmax(0, 1fr)
+      24px;
+    align-items: center;
+    gap: 16px;
+    padding: 7px 16px;
+    border-radius: 10px;
+    color: var(--color-text-main);
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast);
+
+    &:hover {
+      background-color: #eeeeee;
+
+      .add-task__contact-check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_default_hover.svg');
+      }
+    }
+
+    &:has(input:checked) {
+      background-color: var(--color-primary);
+      color: var(--color-text-light);
+      border-radius: 10px;
+
+      .add-task__contact-name {
+        color: var(--color-text-light);
+      }
+
+      .add-task__contact-check {
+        background-image: url('/assets/icons/icons_dropdown/check_button_checked.svg');
+      }
+
+      &:hover {
+        background-color: var(--color-primary-dark);
+
+        .add-task__contact-check {
+          background-image: url('/assets/icons/icons_dropdown/check_button_checked_hover.svg');
+        }
+      }
+    }
+  }
+
+  &__contact-badge {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 11px;
+  }
+
+  &__contact-checkbox {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__contact-check {
+    display: block;
+    width: 24px;
+    height: 24px;
+    justify-self: end;
+    background-image: url('/assets/icons/icons_dropdown/check_button_default.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+  }
+
+  &__badge {
+    @include mx.flexbox(row, center, center);
+
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border: 0.125rem solid var(--color-bg-light, #ffffff);
+    border-radius: 50%;
+    color: var(--color-text-light, #ffffff);
+    font-size: var(--font-size-sm, 0.75rem);
+
+    &:not(:first-child) {
+      margin-left: -0.5rem;
+    }
+  }
+
+  &__badge--more {
+    background-color: #dbdbdb;
+    color: #1f1e1e;
+  }
+
+  &__contact-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__selected-contacts {
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 0;
+    margin-top: 8px;
+
+    .add-task__contact-badge:not(:first-child) {
+      margin-left: -6px;
+    }
+  }
+
+  &__empty-option {
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--color-text-muted);
+  }
+
+  &__category-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__placeholder {
+    color: #a8a8a8;
+  }
+
+  &__category-menu {
+    top: 100%;
+    overflow: hidden;
+  }
+
+  &__category-option {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: unset;
+    background: transparent;
+    color: var(--color-text-main);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background-color: #eeeeee;
+      outline: none;
+    }
+  }
+}

@@ -1,11 +1,25 @@
 import { Subtask } from '../models/subtask.model';
 
+/**
+ * Describes the completion state of a subtask collection.
+ */
 export interface SubtaskProgress {
+  /** Number of completed subtasks. */
   completed: number;
+
+  /** Total number of subtasks. */
   total: number;
+
+  /** Rounded completion percentage between zero and one hundred. */
   percentage: number;
 }
 
+/**
+ * Calculates the completion progress of a subtask collection.
+ *
+ * @param subtasks - Subtasks to evaluate.
+ * @returns Completed count, total count and completion percentage.
+ */
 export function calculateSubtaskProgress(
   subtasks: Subtask[],
 ): SubtaskProgress {
@@ -19,6 +33,12 @@ export function calculateSubtaskProgress(
   };
 }
 
+/**
+ * Counts completed subtasks within a collection.
+ *
+ * @param subtasks - Subtasks to evaluate.
+ * @returns Number of completed subtasks.
+ */
 function countCompletedSubtasks(
   subtasks: Subtask[],
 ): number {
@@ -27,6 +47,13 @@ function countCompletedSubtasks(
   }).length;
 }
 
+/**
+ * Calculates a rounded percentage from completed and total values.
+ *
+ * @param completed - Number of completed entries.
+ * @param total - Total number of entries.
+ * @returns Rounded percentage or zero when the total is zero.
+ */
 function calculatePercentage(
   completed: number,
   total: number,

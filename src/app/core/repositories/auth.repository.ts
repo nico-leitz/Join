@@ -11,33 +11,63 @@ import {
 } from '../models/auth.model';
 import { SupabaseService } from '../supabase/supabase';
 
+/**
+ * Contains the registration fields accepted by the repository.
+ */
 type SignUpPayload = Pick<
   SignUpCredentials,
   'fullName' | 'email' | 'password'
 >;
 
+/**
+ * Contains the user and session returned by an authentication request.
+ */
 export interface AuthSessionData {
+  /** Authenticated Supabase user. */
   user: User;
+
+  /** Active session or null when email confirmation is still required. */
   session: Session | null;
 }
 
+/**
+ * Represents a subscription to authentication state changes.
+ */
 export interface AuthSubscription {
+  /**
+   * Stops receiving authentication state changes.
+   */
   unsubscribe(): void;
 }
 
+/**
+ * Handles a Supabase authentication state change.
+ *
+ * @param event - Authentication event emitted by Supabase.
+ * @param session - Current session or null when no session is active.
+ */
 export type AuthStateChangeCallback = (
   event: AuthChangeEvent,
   session: Session | null
 ) => void;
 
+/**
+ * Provides direct access to Supabase authentication operations.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AuthRepository {
+  /** Supabase client used for authentication requests. */
   private readonly supabase = inject(SupabaseService).client;
 
   /**
-   * Registers a permanent Supabase user.
+   * Registers a permanent Supabase user with normalized metadata.
+   *
+   * @param credentials - Registration credentials.
+   * @returns Registered user and the resulting session state.
+   * @throws The authentication error returned by Supabase.
+   * @throws An error when the response does not contain a user.
    */
   async signUp(credentials: SignUpPayload): Promise<AuthSessionData> {
     const metadata = createAuthUserMetadata(credentials.fullName);
@@ -53,7 +83,12 @@ export class AuthRepository {
   }
 
   /**
-   * Signs in a permanent user with email and password.
+   * Signs in a permanent user with an email address and password.
+   *
+   * @param credentials - User login credentials.
+   * @returns Authenticated user and active session.
+   * @throws The authentication error returned by Supabase.
+   * @throws An error when the response does not contain a user.
    */
   async signIn(
     credentials: LoginCredentials
@@ -71,6 +106,10 @@ export class AuthRepository {
 
   /**
    * Creates and signs in an anonymous guest user.
+   *
+   * @returns Anonymous user and active session.
+   * @throws The authentication error returned by Supabase.
+   * @throws An error when the response does not contain a user.
    */
   async signInAnonymously(): Promise<AuthSessionData> {
     const { data, error } =
@@ -82,7 +121,10 @@ export class AuthRepository {
   }
 
   /**
-   * Returns the locally persisted Supabase session.
+   * Retrieves the locally persisted Supabase session.
+   *
+   * @returns Persisted session or null when no session exists.
+   * @throws The authentication error returned by Supabase.
    */
   async getSession(): Promise<Session | null> {
     const { data, error } = await this.supabase.auth.getSession();
@@ -94,6 +136,9 @@ export class AuthRepository {
 
   /**
    * Subscribes to Supabase authentication state changes.
+   *
+   * @param callback - Function invoked for each authentication change.
+   * @returns Subscription used to stop receiving changes.
    */
   onAuthStateChange(
     callback: AuthStateChangeCallback
@@ -104,6 +149,9 @@ export class AuthRepository {
 
   /**
    * Signs out the active Supabase session.
+   *
+   * @returns A promise that resolves after the session is removed.
+   * @throws The authentication error returned by Supabase.
    */
   async signOut(): Promise<void> {
     const { error } = await this.supabase.auth.signOut();
@@ -112,7 +160,10 @@ export class AuthRepository {
   }
 
   /**
-   * Throws a Supabase authentication error when present.
+   * Throws a Supabase authentication error when one is present.
+   *
+   * @param error - Authentication error or null for a successful request.
+   * @throws The provided error when it is not null.
    */
   private throwIfError(error: Error | null): void {
     if (error) {
@@ -121,7 +172,12 @@ export class AuthRepository {
   }
 
   /**
-   * Ensures that a successful response contains a user.
+   * Ensures that a successful authentication response contains a user.
+   *
+   * @param user - User returned by Supabase.
+   * @param session - Session returned by Supabase.
+   * @returns Validated authentication response data.
+   * @throws An error when the response does not contain a user.
    */
   private requireUser(
     user: User | null,

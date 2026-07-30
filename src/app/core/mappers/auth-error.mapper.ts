@@ -1,8 +1,14 @@
 import { isAuthApiError } from '@supabase/supabase-js';
 
+/**
+ * Fallback message for unknown or unsupported authentication errors.
+ */
 const DEFAULT_AUTH_ERROR =
   'Authentication failed. Please try again.';
 
+/**
+ * Maps supported Supabase authentication error codes to safe UI messages.
+ */
 const AUTH_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   invalid_credentials: 'Invalid email or password.',
   email_not_confirmed:
@@ -41,6 +47,9 @@ const AUTH_ERROR_MESSAGES: Readonly<Record<string, string>> = {
 
 /**
  * Maps a Supabase authentication error to a safe UI message.
+ *
+ * @param error - Unknown error returned by an authentication request.
+ * @returns Matching user-facing message or the default error message.
  */
 export function mapAuthErrorMessage(error: unknown): string {
   if (!isAuthApiError(error) || !error.code) {

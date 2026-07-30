@@ -26,15 +26,31 @@ import {
 } from '../models/task.model';
 import { SupabaseService } from '../supabase/supabase';
 
+/**
+ * Provides persistence operations for tasks, subtasks and assignments.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class TaskRepository {
+  /** Name of the task database table. */
   private readonly taskTableName = 'tasks';
+
+  /** Name of the subtask database table. */
   private readonly subtaskTableName = 'subtasks';
+
+  /** Name of the task assignment database table. */
   private readonly assignmentTableName = 'task_assignments';
+
+  /** Supabase client used for persistence requests. */
   private readonly supabase = inject(SupabaseService).client;
 
+  /**
+   * Retrieves all task rows in their board order.
+   *
+   * @returns Task rows ordered by position and creation time.
+   * @throws The database error returned by Supabase.
+   */
   async getTaskRows(): Promise<TaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -49,6 +65,13 @@ export class TaskRepository {
     return (data ?? []) as TaskRow[];
   }
 
+  /**
+   * Retrieves a single task row by its identifier.
+   *
+   * @param id - Identifier of the requested task.
+   * @returns Matching task row or null when the task does not exist.
+   * @throws The database error returned by Supabase.
+   */
   async getTaskRowById(id: string): Promise<TaskRow | null> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -63,6 +86,13 @@ export class TaskRepository {
     return data as TaskRow | null;
   }
 
+  /**
+   * Creates a task in the database.
+   *
+   * @param task - Task data to persist.
+   * @returns Created task row.
+   * @throws The database error returned by Supabase.
+   */
   async createTask(task: CreateTask): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -77,6 +107,14 @@ export class TaskRepository {
     return data as TaskRow;
   }
 
+  /**
+   * Updates a task in the database.
+   *
+   * @param id - Identifier of the task to update.
+   * @param task - Task fields to persist.
+   * @returns Updated task row.
+   * @throws The database error returned by Supabase.
+   */
   async updateTask(id: string, task: UpdateTask): Promise<TaskRow> {
     const { data, error } = await this.supabase
       .from(this.taskTableName)
@@ -92,7 +130,16 @@ export class TaskRepository {
     return data as TaskRow;
   }
 
-  async updateTaskPositions(updates: TaskPositionUpdate[]): Promise<TaskRow[]> {
+  /**
+   * Persists multiple task status and position changes.
+   *
+   * @param updates - Task position updates to persist.
+   * @returns Updated task rows.
+   * @throws The database error returned by Supabase.
+   */
+  async updateTaskPositions(
+    updates: TaskPositionUpdate[]
+  ): Promise<TaskRow[]> {
     return Promise.all(
       updates.map((update) => {
         return this.updateTask(update.id, {
@@ -103,6 +150,13 @@ export class TaskRepository {
     );
   }
 
+  /**
+   * Deletes a task from the database.
+   *
+   * @param id - Identifier of the task to delete.
+   * @returns A promise that resolves after deletion.
+   * @throws The database error returned by Supabase.
+   */
   async deleteTask(id: string): Promise<void> {
     const { error } = await this.supabase
       .from(this.taskTableName)
@@ -114,6 +168,13 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * Retrieves all subtasks belonging to a task.
+   *
+   * @param taskId - Identifier of the parent task.
+   * @returns Subtask rows ordered by position and creation time.
+   * @throws The database error returned by Supabase.
+   */
   async getSubtaskRows(taskId: string): Promise<SubtaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
@@ -129,6 +190,12 @@ export class TaskRepository {
     return (data ?? []) as SubtaskRow[];
   }
 
+  /**
+   * Retrieves all subtask rows required by the board.
+   *
+   * @returns Subtask rows ordered by task, position and creation time.
+   * @throws The database error returned by Supabase.
+   */
   async getAllSubtaskRows(): Promise<SubtaskRow[]> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
@@ -144,6 +211,13 @@ export class TaskRepository {
     return (data ?? []) as SubtaskRow[];
   }
 
+  /**
+   * Creates a subtask in the database.
+   *
+   * @param subtask - Subtask data to persist.
+   * @returns Created subtask row.
+   * @throws The database error returned by Supabase.
+   */
   async createSubtask(subtask: CreateSubtask): Promise<SubtaskRow> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
@@ -158,7 +232,18 @@ export class TaskRepository {
     return data as SubtaskRow;
   }
 
-  async updateSubtask(id: string, subtask: UpdateSubtask): Promise<SubtaskRow> {
+  /**
+   * Updates a subtask in the database.
+   *
+   * @param id - Identifier of the subtask to update.
+   * @param subtask - Subtask fields to persist.
+   * @returns Updated subtask row.
+   * @throws The database error returned by Supabase.
+   */
+  async updateSubtask(
+    id: string,
+    subtask: UpdateSubtask
+  ): Promise<SubtaskRow> {
     const { data, error } = await this.supabase
       .from(this.subtaskTableName)
       .update(createSubtaskUpdatePayload(subtask))
@@ -173,6 +258,15 @@ export class TaskRepository {
     return data as SubtaskRow;
   }
 
+  /**
+   * Updates a subtask while restricting the request to its parent task.
+   *
+   * @param taskId - Identifier of the parent task.
+   * @param id - Identifier of the subtask to update.
+   * @param subtask - Subtask fields to persist.
+   * @returns A promise that resolves after the update.
+   * @throws The database error returned by Supabase.
+   */
   async updateTaskSubtask(
     taskId: string,
     id: string,
@@ -189,6 +283,13 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * Deletes a subtask from the database.
+   *
+   * @param id - Identifier of the subtask to delete.
+   * @returns A promise that resolves after deletion.
+   * @throws The database error returned by Supabase.
+   */
   async deleteSubtask(id: string): Promise<void> {
     const { error } = await this.supabase
       .from(this.subtaskTableName)
@@ -200,6 +301,14 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * Deletes selected subtasks belonging to a task.
+   *
+   * @param taskId - Identifier of the parent task.
+   * @param subtaskIds - Identifiers of the subtasks to delete.
+   * @returns A promise that resolves after deletion.
+   * @throws The database error returned by Supabase.
+   */
   async deleteTaskSubtasks(
     taskId: string,
     subtaskIds: string[],
@@ -219,6 +328,13 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * Retrieves the contacts assigned to a task.
+   *
+   * @param taskId - Identifier of the task.
+   * @returns Mapped contacts assigned to the task.
+   * @throws The database error returned by Supabase.
+   */
   async getAssignedContacts(taskId: string): Promise<Contact[]> {
     const { data, error } = await this.supabase
       .from(this.assignmentTableName)
@@ -234,6 +350,13 @@ export class TaskRepository {
     );
   }
 
+  /**
+   * Retrieves the identifiers of contacts assigned to a task.
+   *
+   * @param taskId - Identifier of the task.
+   * @returns Assigned contact identifiers.
+   * @throws The database error returned by Supabase.
+   */
   async getAssignedContactIds(taskId: string): Promise<string[]> {
     const { data, error } = await this.supabase
       .from(this.assignmentTableName)
@@ -244,11 +367,20 @@ export class TaskRepository {
       throw error;
     }
 
-    const assignments = (data ?? []) as Pick<TaskAssignmentRow, 'contact_id'>[];
+    const assignments = (data ?? []) as Pick<
+      TaskAssignmentRow,
+      'contact_id'
+    >[];
 
     return assignments.map((assignment) => assignment.contact_id);
   }
 
+  /**
+   * Retrieves all task assignment rows required by the board.
+   *
+   * @returns Assignment rows ordered by task and creation time.
+   * @throws The database error returned by Supabase.
+   */
   async getAllAssignmentRows(): Promise<TaskAssignmentRow[]> {
     const { data, error } = await this.supabase
       .from(this.assignmentTableName)
@@ -263,7 +395,18 @@ export class TaskRepository {
     return (data ?? []) as TaskAssignmentRow[];
   }
 
-  async createTaskAssignment(taskId: string, contactId: string): Promise<void> {
+  /**
+   * Assigns a contact to a task.
+   *
+   * @param taskId - Identifier of the task.
+   * @param contactId - Identifier of the contact to assign.
+   * @returns A promise that resolves after the assignment is created.
+   * @throws The database error returned by Supabase.
+   */
+  async createTaskAssignment(
+    taskId: string,
+    contactId: string
+  ): Promise<void> {
     const assignmentRow = createTaskAssignmentRow(taskId, contactId);
     const { error } = await this.supabase
       .from(this.assignmentTableName)
@@ -274,6 +417,14 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * Assigns multiple contacts to a task.
+   *
+   * @param taskId - Identifier of the task.
+   * @param contactIds - Identifiers of the contacts to assign.
+   * @returns A promise that resolves after the assignments are created.
+   * @throws The database error returned by Supabase.
+   */
   async createTaskAssignments(
     taskId: string,
     contactIds: string[],
@@ -282,7 +433,10 @@ export class TaskRepository {
       return;
     }
 
-    const assignmentRows = createTaskAssignmentRows(taskId, contactIds);
+    const assignmentRows = createTaskAssignmentRows(
+      taskId,
+      contactIds
+    );
     const { error } = await this.supabase
       .from(this.assignmentTableName)
       .insert(assignmentRows);
@@ -292,7 +446,18 @@ export class TaskRepository {
     }
   }
 
-  async deleteTaskAssignment(taskId: string, contactId: string): Promise<void> {
+  /**
+   * Removes a contact assignment from a task.
+   *
+   * @param taskId - Identifier of the task.
+   * @param contactId - Identifier of the contact to unassign.
+   * @returns A promise that resolves after the assignment is deleted.
+   * @throws The database error returned by Supabase.
+   */
+  async deleteTaskAssignment(
+    taskId: string,
+    contactId: string
+  ): Promise<void> {
     const { error } = await this.supabase
       .from(this.assignmentTableName)
       .delete()
@@ -304,6 +469,14 @@ export class TaskRepository {
     }
   }
 
+  /**
+   * Removes multiple contact assignments from a task.
+   *
+   * @param taskId - Identifier of the task.
+   * @param contactIds - Identifiers of the contacts to unassign.
+   * @returns A promise that resolves after the assignments are deleted.
+   * @throws The database error returned by Supabase.
+   */
   async deleteTaskAssignments(
     taskId: string,
     contactIds: string[],

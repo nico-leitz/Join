@@ -19,14 +19,10 @@ import {
 } from '../../../../core/models/contact.model';
 
 /**
- * Component for editing an existing contact via a modal dialog.
- * 
- * @remarks
- * This component handles the reactive form for updating contact details,
- * validates inputs, sanitizes phone numbers, and manages the lifecycle 
- * of update or delete requests.
- * 
- * @public
+ * Collects and validates changes to an existing contact.
+ *
+ * Initializes the form from the required contact input, sanitizes phone data
+ * and emits update, deletion or cancellation requests.
  */
 @Component({
   selector: 'app-contact-edit-dialog',
@@ -35,34 +31,34 @@ import {
   styleUrl: './contact-edit-dialog.scss',
 })
 export class ContactEditDialog implements OnInit {
-  /** @internal Duration of the closing animation in milliseconds. */
+  /** Duration of the dialog closing animation in milliseconds. */
   private readonly closeAnimationMs = 200;
 
-  /** @internal Fallback value if no last name is provided. */
+  /** Last name used when the user enters only one name. */
   private readonly fallbackLastName = 'Unknown';
 
-  /** @internal Regex pattern for validating names. */
+  /** Pattern allowing supported letters and name separators. */
   private readonly namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/;
 
-  /** @internal Regex pattern for validating phone numbers. */
+  /** Pattern allowing digits, spaces and one optional leading plus sign. */
   private readonly phonePattern = /^\+?[0-9 ]+$/;
 
-  /** The contact data to be edited. Required input. */
+  /** Contact whose values should be edited. */
   readonly contact = input.required<Contact>();
 
-  /** Event emitted when the edit process is cancelled. */
+  /** Emits after the user cancels and the closing animation finishes. */
   readonly cancelled = output<void>();
 
-  /** Event emitted when the update form is submitted. */
+  /** Emits a normalized update payload after successful validation. */
   readonly submitted = output<UpdateContact>();
 
-  /** Event emitted when a request to delete the contact is triggered. */
+  /** Emits the identifier of the contact requested for deletion. */
   readonly deleted = output<string>();
 
-  /** Signal tracking whether the dialog is in the closing state. */
+  /** Indicates whether the dialog is currently closing. */
   readonly isClosing = signal(false);
 
-  /** Reactive form group for contact fields. */
+  /** Reactive form containing the editable contact fields. */
   readonly contactForm = new FormGroup({
     fullName: new FormControl('', {
       nonNullable: true,
@@ -87,14 +83,15 @@ export class ContactEditDialog implements OnInit {
     }),
   });
 
-  /** @public Lifecycle hook to initialize the form values. */
+  /**
+   * Initializes the form with the current contact values.
+   */
   ngOnInit(): void {
     this.setInitialFormValues();
   }
 
   /**
-   * Cancels the edit process and triggers the closing animation.
-   * @public
+   * Starts the closing animation and emits the cancellation request once.
    */
   cancel(): void {
     if (this.isClosing()) {
@@ -109,8 +106,7 @@ export class ContactEditDialog implements OnInit {
   }
 
   /**
-   * Submits the form after sanitizing input and validating data.
-   * @public
+   * Sanitizes and validates the form before emitting an update payload.
    */
   submitForm(): void {
     this.sanitizePhoneInput();
@@ -125,16 +121,14 @@ export class ContactEditDialog implements OnInit {
   }
 
   /**
-   * Emits the delete event using the contact's ID.
-   * @public
+   * Requests deletion of the contact currently being edited.
    */
   deleteContact(): void {
     this.deleted.emit(this.contact().id);
   }
 
   /**
-   * Sanitizes the phone input based on predefined patterns.
-   * @public
+   * Removes unsupported characters and normalizes plus signs in the phone field.
    */
   sanitizePhoneInput(): void {
     const phoneControl = this.contactForm.controls.phone;
@@ -149,22 +143,38 @@ export class ContactEditDialog implements OnInit {
     });
   }
 
-  /** @public Returns true if the full name field has validation errors. */
+  /**
+   * Checks whether the touched full-name field is invalid.
+   *
+   * @returns True when the full-name field should display an error.
+   */
   hasNameError(): boolean {
     return this.hasTouchedError(this.contactForm.controls.fullName);
   }
 
-  /** @public Returns true if the email field has validation errors. */
+  /**
+   * Checks whether the touched email field is invalid.
+   *
+   * @returns True when the email field should display an error.
+   */
   hasEmailError(): boolean {
     return this.hasTouchedError(this.contactForm.controls.email);
   }
 
-  /** @public Returns true if the phone field has validation errors. */
+  /**
+   * Checks whether the touched phone field is invalid.
+   *
+   * @returns True when the phone field should display an error.
+   */
   hasPhoneError(): boolean {
     return this.hasTouchedError(this.contactForm.controls.phone);
   }
 
-  /** @public Returns the error message for the full name field. */
+  /**
+   * Resolves the current full-name validation message.
+   *
+   * @returns A user-facing validation message or an empty string.
+   */
   getNameErrorMessage(): string {
     const control = this.contactForm.controls.fullName;
 
@@ -187,7 +197,11 @@ export class ContactEditDialog implements OnInit {
     return '';
   }
 
-  /** @public Returns the error message for the email field. */
+  /**
+   * Resolves the current email validation message.
+   *
+   * @returns A user-facing validation message or an empty string.
+   */
   getEmailErrorMessage(): string {
     const control = this.contactForm.controls.email;
 
@@ -206,7 +220,11 @@ export class ContactEditDialog implements OnInit {
     return '';
   }
 
-  /** @public Returns the error message for the phone field. */
+  /**
+   * Resolves the current phone validation message.
+   *
+   * @returns A user-facing validation message or an empty string.
+   */
   getPhoneErrorMessage(): string {
     const control = this.contactForm.controls.phone;
 
@@ -225,10 +243,10 @@ export class ContactEditDialog implements OnInit {
     return '';
   }
 
-  /** 
-   * Calculates the initials for the contact currently being edited.
-   * @returns The capitalized initials.
-   * @public
+  /**
+   * Creates the initials displayed in the edited contact's badge.
+   *
+   * @returns Uppercase first-name and last-name initials.
    */
   getInitials(): string {
     const contact = this.contact();
@@ -239,7 +257,9 @@ export class ContactEditDialog implements OnInit {
     ).toUpperCase();
   }
 
-  /** @internal Populates the form with existing contact data. */
+  /**
+   * Populates the form with the current contact values.
+   */
   private setInitialFormValues(): void {
     const contact = this.contact();
 
@@ -250,7 +270,12 @@ export class ContactEditDialog implements OnInit {
     });
   }
 
-  /** @internal Custom validator for the name input. */
+  /**
+   * Validates the supported characters of a non-empty full name.
+   *
+   * @param control - Full-name form control to validate.
+   * @returns A matching validation error or null for a valid value.
+   */
   private validateName(control: AbstractControl<string>): ValidationErrors | null {
     const fullName = control.value.trim();
 
@@ -273,12 +298,21 @@ export class ContactEditDialog implements OnInit {
     return null;
   }
 
-  /** @internal Helper to check if a control is touched and invalid. */
+  /**
+   * Checks whether a form control was touched and remains invalid.
+   *
+   * @param control - Form control whose state should be inspected.
+   * @returns True when the control is touched and invalid.
+   */
   private hasTouchedError(control: AbstractControl): boolean {
     return control.touched && control.invalid;
   }
 
-  /** @internal Maps form data to the UpdateContact model payload. */
+  /**
+   * Maps the normalized form values to a contact update payload.
+   *
+   * @returns Contact changes ready for persistence.
+   */
   private createContactPayload(): UpdateContact {
     const fullNameParts = this.contactForm.controls.fullName.value
       .trim()
@@ -294,7 +328,12 @@ export class ContactEditDialog implements OnInit {
     };
   }
 
-  /** @internal Sanitizes the raw phone string. */
+  /**
+   * Removes unsupported phone characters and collapses repeated spaces.
+   *
+   * @param phone - Raw phone value entered by the user.
+   * @returns Sanitized phone value.
+   */
   private createSanitizedPhone(phone: string): string {
     const validCharactersOnly = phone
       .replace(/[^\d+\s]/g, '')
@@ -303,7 +342,12 @@ export class ContactEditDialog implements OnInit {
     return this.normalizePhonePlus(validCharactersOnly.trimStart());
   }
 
-  /** @internal Ensures the phone number starts with a single '+' if needed. */
+  /**
+   * Keeps one leading plus sign and removes every other plus sign.
+   *
+   * @param phone - Phone value whose plus signs should be normalized.
+   * @returns Phone value containing at most one leading plus sign.
+   */
   private normalizePhonePlus(phone: string): string {
     if (phone.startsWith('+')) {
       return '+' + phone.slice(1).replace(/\+/g, '');

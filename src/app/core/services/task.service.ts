@@ -24,21 +24,46 @@ import { TaskStateService } from './task-state.service';
 
 export type { BoardRelationsData } from '../models/task-relations.model';
 
+/**
+ * Coordinates task persistence, relation operations and application state.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
+  /** Repository used for task persistence requests. */
   private readonly repository = inject(TaskRepository);
+
+  /** Service used for subtask and assignment operations. */
   private readonly relations = inject(TaskRelationsService);
+
+  /** Service owning the in-memory task state. */
   private readonly state = inject(TaskStateService);
 
+  /** Complete task collection exposed from the task state service. */
   readonly allTasks = this.state.allTasks;
+
+  /** Currently selected task exposed from the task state service. */
   readonly selectedTask = this.state.selectedTask;
+
+  /** Subtasks of the selected task exposed from the task state service. */
   readonly selectedSubtasks = this.state.selectedSubtasks;
+
+  /** Assigned contacts exposed from the task state service. */
   readonly assignedContacts = this.state.assignedContacts;
+
+  /** Indicates whether a managed task request is running. */
   readonly isLoading = signal(false);
+
+  /** User-facing message describing the latest managed request failure. */
   readonly errorMessage = signal('');
 
+  /**
+   * Retrieves all tasks and replaces the local task collection.
+   *
+   * @returns Mapped tasks in board order.
+   * @throws The persistence error returned by the repository.
+   */
   getTasks(): Promise<Task[]> {
     return this.execute('Tasks could not be loaded.', async () => {
       const tasks = mapTaskRows(await this.repository.getTaskRows());
@@ -47,6 +72,13 @@ export class TaskService {
     });
   }
 
+  /**
+   * Retrieves and selects a task by its identifier.
+   *
+   * @param id - Identifier of the requested task.
+   * @returns Mapped task or null when the task does not exist.
+   * @throws The persistence error returned by the repository.
+   */
   getTaskById(id: string): Promise<Task | null> {
     return this.execute('Task could not be loaded.', async () => {
       const row = await this.repository.getTaskRowById(id);
@@ -56,6 +88,13 @@ export class TaskService {
     });
   }
 
+  /**
+   * Retrieves subtasks and applies them when their task is selected.
+   *
+   * @param taskId - Identifier of the parent task.
+   * @returns Mapped subtasks belonging to the task.
+   * @throws The persistence error returned by the relation service.
+   */
   getSubtasksByTaskId(taskId: string): Promise<Subtask[]> {
     return this.execute('Subtasks could not be loaded.', async () => {
       const subtasks = await this.relations.getSubtasks(taskId);
@@ -64,6 +103,13 @@ export class TaskService {
     });
   }
 
+  /**
+   * Retrieves assignments and applies them when their task is selected.
+   *
+   * @param taskId - Identifier of the task.
+   * @returns Contacts assigned to the task.
+   * @throws The persistence error returned by the relation service.
+   */
   getAssignedContacts(taskId: string): Promise<Contact[]> {
     return this.execute('Assigned contacts could not be loaded.', async () => {
       const contacts = await this.relations.getAssignedContacts(taskId);
@@ -72,10 +118,23 @@ export class TaskService {
     });
   }
 
+  /**
+   * Retrieves all relation data required to populate the board.
+   *
+   * @returns Mapped subtasks and persisted assignment rows.
+   * @throws The persistence error returned by the relation service.
+   */
   loadAllBoardData(): Promise<BoardRelationsData> {
     return this.relations.loadBoardRelations();
   }
 
+  /**
+   * Creates a task and synchronizes the local task state.
+   *
+   * @param task - Task data to persist.
+   * @returns Created application task.
+   * @throws The persistence error returned by the repository.
+   */
   createTask(task: CreateTask): Promise<Task> {
     return this.execute('Task could not be created.', async () => {
       const createdTask = mapTaskRow(await this.repository.createTask(task));
@@ -85,12 +144,27 @@ export class TaskService {
     });
   }
 
+  /**
+   * Creates a task together with its submitted subtasks and assignments.
+   *
+   * @param input - Task and relation data to persist.
+   * @returns Created application task.
+   * @throws The persistence error returned during task or relation creation.
+   */
   createTaskWithRelations(input: CreateTaskWithRelationsInput): Promise<Task> {
     return this.execute('Task and its relations could not be created.', () =>
       this.createTaskWithRelationsRequest(input),
     );
   }
 
+  /**
+   * Updates a task and synchronizes the local task state.
+   *
+   * @param id - Identifier of the task to update.
+   * @param task - Task fields to persist.
+   * @returns Updated application task.
+   * @throws The persistence error returned by the repository.
+   */
   updateTask(id: string, task: UpdateTask): Promise<Task> {
     return this.execute('Task could not be updated.', async () => {
       const updatedTask = mapTaskRow(
@@ -101,6 +175,13 @@ export class TaskService {
     });
   }
 
+  /**
+   * Persists task positions and applies the returned task updates.
+   *
+   * @param updates - Task status and position updates to persist.
+   * @returns A promise that resolves after state synchronization.
+   * @throws The persistence error returned by the repository.
+   */
   updateTaskPositions(updates: TaskPositionUpdate[]): Promise<void> {
     return this.execute('Task positions could not be saved.', async () => {
       const rows = await this.repository.updateTaskPositions(updates);
@@ -108,6 +189,14 @@ export class TaskService {
     });
   }
 
+  /**
+   * Updates a task together with any submitted relation state.
+   *
+   * @param id - Identifier of the task to update.
+   * @param input - Task fields and optional complete relation states.
+   * @returns Updated application task.
+   * @throws The persistence error returned during task or relation updates.
+   */
   updateTaskWithRelations(
     id: string,
     input: UpdateTaskWithRelationsInput,
@@ -117,6 +206,15 @@ export class TaskService {
     );
   }
 
+  /**
+   * Replaces all subtasks of a task and synchronizes selected state.
+   *
+   * @param taskId - Identifier of the parent task.
+   * @param subtasks - Complete submitted subtask state.
+   * @returns Persisted subtasks after replacement.
+   * @throws An error when submitted subtask identifiers are invalid.
+   * @throws The persistence error returned by the relation service.
+   */
   replaceTaskSubtasks(
     taskId: string,
     subtasks: UpdateTaskSubtaskInput[],
@@ -131,6 +229,13 @@ export class TaskService {
     });
   }
 
+  /**
+   * Deletes a task and removes it from local state.
+   *
+   * @param id - Identifier of the task to delete.
+   * @returns A promise that resolves after deletion.
+   * @throws The persistence error returned by the repository.
+   */
   deleteTask(id: string): Promise<void> {
     return this.execute('Task could not be deleted.', async () => {
       await this.repository.deleteTask(id);
@@ -138,6 +243,13 @@ export class TaskService {
     });
   }
 
+  /**
+   * Creates a subtask and adds it to selected task state when applicable.
+   *
+   * @param subtask - Subtask data to persist.
+   * @returns Created application subtask.
+   * @throws The persistence error returned by the relation service.
+   */
   createSubtask(subtask: CreateSubtask): Promise<Subtask> {
     return this.execute('Subtask could not be created.', async () => {
       const createdSubtask = await this.relations.createSubtask(subtask);
@@ -146,6 +258,14 @@ export class TaskService {
     });
   }
 
+  /**
+   * Updates a subtask and synchronizes selected subtask state.
+   *
+   * @param id - Identifier of the subtask to update.
+   * @param subtask - Subtask fields to persist.
+   * @returns Updated application subtask.
+   * @throws The persistence error returned by the relation service.
+   */
   updateSubtask(id: string, subtask: UpdateSubtask): Promise<Subtask> {
     return this.execute('Subtask could not be updated.', async () => {
       const updatedSubtask = await this.relations.updateSubtask(id, subtask);
@@ -154,10 +274,25 @@ export class TaskService {
     });
   }
 
+  /**
+   * Persists a subtask completion state.
+   *
+   * @param id - Identifier of the subtask to update.
+   * @param isCompleted - New completion state.
+   * @returns Updated application subtask.
+   * @throws The persistence error returned by the relation service.
+   */
   toggleSubtaskCompletion(id: string, isCompleted: boolean): Promise<Subtask> {
     return this.updateSubtask(id, { isCompleted });
   }
 
+  /**
+   * Deletes a subtask and removes it from selected subtask state.
+   *
+   * @param id - Identifier of the subtask to delete.
+   * @returns A promise that resolves after deletion.
+   * @throws The persistence error returned by the relation service.
+   */
   deleteSubtask(id: string): Promise<void> {
     return this.execute('Subtask could not be deleted.', async () => {
       await this.relations.deleteSubtask(id);
@@ -165,6 +300,14 @@ export class TaskService {
     });
   }
 
+  /**
+   * Assigns a contact and synchronizes selected assignment state.
+   *
+   * @param taskId - Identifier of the task.
+   * @param contactId - Identifier of the contact to assign.
+   * @returns Complete assigned contact collection after creation.
+   * @throws The persistence error returned by the relation service.
+   */
   assignContact(taskId: string, contactId: string): Promise<Contact[]> {
     return this.execute('Contact could not be assigned.', async () => {
       const contacts = await this.relations.assignContact(taskId, contactId);
@@ -173,6 +316,14 @@ export class TaskService {
     });
   }
 
+  /**
+   * Removes a contact assignment and synchronizes selected assignment state.
+   *
+   * @param taskId - Identifier of the task.
+   * @param contactId - Identifier of the contact to unassign.
+   * @returns Complete assigned contact collection after removal.
+   * @throws The persistence error returned by the relation service.
+   */
   removeContactAssignment(
     taskId: string,
     contactId: string,
@@ -187,6 +338,14 @@ export class TaskService {
     );
   }
 
+  /**
+   * Replaces all task assignments and synchronizes selected assignment state.
+   *
+   * @param taskId - Identifier of the task.
+   * @param contactIds - Complete submitted contact identifier state.
+   * @returns Complete assigned contact collection after replacement.
+   * @throws The persistence error returned by the relation service.
+   */
   replaceTaskAssignments(
     taskId: string,
     contactIds: string[],
@@ -204,6 +363,13 @@ export class TaskService {
     );
   }
 
+  /**
+   * Persists a task and its relations with best-effort rollback on failure.
+   *
+   * @param input - Task and relation data to persist.
+   * @returns Created application task.
+   * @throws The persistence error returned during task or relation creation.
+   */
   private async createTaskWithRelationsRequest(
     input: CreateTaskWithRelationsInput,
   ): Promise<Task> {
@@ -226,6 +392,14 @@ export class TaskService {
     }
   }
 
+  /**
+   * Persists task and relation updates and refreshes state after failure.
+   *
+   * @param id - Identifier of the task to update.
+   * @param input - Task fields and optional complete relation states.
+   * @returns Updated application task.
+   * @throws The persistence error returned during task or relation updates.
+   */
   private async updateTaskWithRelationsRequest(
     id: string,
     input: UpdateTaskWithRelationsInput,
@@ -248,6 +422,12 @@ export class TaskService {
     }
   }
 
+  /**
+   * Attempts to delete a partially created task without masking the root error.
+   *
+   * @param taskId - Identifier of the created task or null before creation.
+   * @returns A promise that resolves after the rollback attempt.
+   */
   private async rollbackCreatedTask(taskId: string | null): Promise<void> {
     if (!taskId) {
       return;
@@ -260,6 +440,12 @@ export class TaskService {
     }
   }
 
+  /**
+   * Attempts to restore persisted task state after an update failure.
+   *
+   * @param taskId - Identifier of the task to refresh.
+   * @returns A promise that resolves after the refresh attempt.
+   */
   private async refreshTaskStateAfterFailure(taskId: string): Promise<void> {
     try {
       const row = await this.repository.getTaskRowById(taskId);
@@ -280,6 +466,13 @@ export class TaskService {
     }
   }
 
+  /**
+   * Reloads and applies relations for the selected task.
+   *
+   * @param taskId - Identifier of the selected task.
+   * @returns A promise that resolves after relation state is refreshed.
+   * @throws The persistence error returned while loading relations.
+   */
   private async refreshSelectedRelations(taskId: string): Promise<void> {
     const [subtaskRows, contacts] = await Promise.all([
       this.repository.getSubtaskRows(taskId),
@@ -289,6 +482,14 @@ export class TaskService {
     this.state.setAssignedContacts(contacts);
   }
 
+  /**
+   * Executes a task request while maintaining loading and error state.
+   *
+   * @param message - User-facing message stored when the request fails.
+   * @param request - Task operation to execute.
+   * @returns Result returned by the request.
+   * @throws The original error returned by the request.
+   */
   private async execute<T>(
     message: string,
     request: () => Promise<T>,
