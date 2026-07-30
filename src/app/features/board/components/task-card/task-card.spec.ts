@@ -6,7 +6,6 @@ import { TaskCard } from './task-card';
 import { Task, TaskStatus } from '../../../../core/models/task.model';
 import { Contact } from '../../../../core/models/contact.model';
 import { Subtask } from '../../../../core/models/subtask.model';
-import * as subtaskUtils from '../../../../core/utils/subtask-progress.utils';
 
 /**
  * @description Unit tests for the TaskCard component.
@@ -50,12 +49,6 @@ describe('TaskCard Component', () => {
     await TestBed.configureTestingModule({
       imports: [TaskCard]
     }).compileComponents();
-
-    vi.spyOn(subtaskUtils, 'calculateSubtaskProgress').mockReturnValue({
-      total: 2,
-      completed: 1,
-      percentage: 50
-    });
 
     fixture = TestBed.createComponent(TaskCard);
     component = fixture.componentInstance;
@@ -134,12 +127,6 @@ describe('TaskCard Component', () => {
    * @test Verifies that the subtask progress section is completely hidden if there are no subtasks.
    */
   it('should hide the subtask progress wrapper if total is 0', () => {
-    vi.spyOn(subtaskUtils, 'calculateSubtaskProgress').mockReturnValueOnce({
-      total: 0,
-      completed: 0,
-      percentage: 0
-    });
-    
     fixture.componentRef.setInput('subtasks', []);
     fixture.detectChanges();
 
