@@ -210,6 +210,8 @@ describe('AuthRepository', () => {
 
 /**
  * Creates a complete permanent Supabase user fixture.
+ *
+ * @returns Permanent user fixture.
  */
 function createUser(): User {
   return {
@@ -227,6 +229,8 @@ function createUser(): User {
 
 /**
  * Creates a complete anonymous Supabase user fixture.
+ *
+ * @returns Anonymous user fixture.
  */
 function createGuestUser(): User {
   return {
@@ -241,6 +245,9 @@ function createGuestUser(): User {
 
 /**
  * Creates a complete Supabase session fixture.
+ *
+ * @param user - User associated with the session.
+ * @returns Session fixture for the provided user.
  */
 function createSession(user: User): Session {
   return {

@@ -101,7 +101,10 @@ describe('mapAuthUser', () => {
 });
 
 /**
- * Creates a complete Supabase user fixture.
+ * Creates a complete Supabase user fixture with optional property overrides.
+ *
+ * @param overrides - User properties that replace the fixture defaults.
+ * @returns Complete Supabase user fixture.
  */
 function createUser(overrides: Partial<User> = {}): User {
   return {
