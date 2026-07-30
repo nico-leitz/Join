@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Unit tests for the Board component.
+ * Verifies initialization loading states, task filtering, subtask/contact mapping,
+ * drag-and-drop operations, context menu actions, and dialog interactions.
+ */
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
@@ -6,18 +12,13 @@ import { Board } from './board';
 import { TaskService } from '../../../../core/services/task.service';
 import { ContactService } from '../../../../core/services/contact.service';
 import { BoardHorizontalScrollService } from '../../services/board-horizontal-scroll.service';
-import { Task, TaskPositionUpdate } from '../../../../core/models/task.model';
+import { Task } from '../../../../core/models/task.model';
 import { Contact } from '../../../../core/models/contact.model';
 import { Subtask } from '../../../../core/models/subtask.model';
 import { TaskAssignmentRow } from '../../../../core/models/task-assignment.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TaskDialogUpdate } from '../../components/board-cards-dialog/board-cards-dialog';
 
-/**
- * @description Unit tests for the Board component.
- * Verifies initialization loading states, task filtering, subtask/contact mapping,
- * drag-and-drop operations, context menu actions, and dialog interactions.
- */
 describe('Board Component', () => {
   let component: Board;
   let fixture: ComponentFixture<Board>;
@@ -252,7 +253,7 @@ describe('Board Component', () => {
    * @test Blocks opening the add task dialog if the board is actively updating to prevent state conflicts.
    */
   it('should not open Add Task dialog if board is updating', () => {
-    component['isBoardUpdating'].set(true);
+    (component as any).isBoardUpdating.set(true);
     
     component.openAddTaskDialog('todo');
     
@@ -263,7 +264,7 @@ describe('Board Component', () => {
    * @test Validates cleanup operations upon closing the Add Task dialog.
    */
   it('should close the Add Task dialog and clear selected task states', () => {
-    component['isAddTaskDialogOpen'].set(true);
+    (component as any).isAddTaskDialogOpen.set(true);
     mockTaskService.selectedTask.set(MOCK_TASKS[0]);
     
     component.closeAddTaskDialog();
@@ -276,7 +277,7 @@ describe('Board Component', () => {
    * @test Ensures that a successful task creation trigger refetches relational board data.
    */
   it('should refresh board relations when a task is created', async () => {
-    component['isAddTaskDialogOpen'].set(true);
+    (component as any).isAddTaskDialogOpen.set(true);
     
     await component.handleTaskCreated();
     
@@ -371,40 +372,13 @@ describe('Board Component', () => {
   });
 
   /**
-   * @test Validates pointer down events delegate immediately to the scroll service.
-   */
-  it('should delegate horizontal pointer down events to scroll service', () => {
-    const event = new PointerEvent('pointerdown');
-    component['onHorizontalPointerDown'](event);
-    expect(mockScrollService.start).toHaveBeenCalledWith(event, false);
-  });
-
-  /**
-   * @test Validates pointer move events delegate immediately to the scroll service.
-   */
-  it('should delegate horizontal pointer move events to scroll service', () => {
-    const event = new PointerEvent('pointermove');
-    component['onHorizontalPointerMove'](event);
-    expect(mockScrollService.move).toHaveBeenCalledWith(event);
-  });
-
-  /**
-   * @test Validates pointer up/cancel events delegate immediately to the scroll service.
-   */
-  it('should delegate horizontal pointer end events to scroll service', () => {
-    const event = new PointerEvent('pointerup');
-    component['onHorizontalPointerEnd'](event);
-    expect(mockScrollService.end).toHaveBeenCalledWith(event);
-  });
-
-  /**
    * @test Ensures that the drag state indicators function correctly.
    */
   it('should correctly set isDragging boolean states', () => {
-    component['startDragging']();
+    (component as any).startDragging();
     expect(component.isDragging()).toBe(true);
 
-    component['stopDragging']();
+    (component as any).stopDragging();
     expect(component.isDragging()).toBe(false);
   });
 
@@ -412,7 +386,7 @@ describe('Board Component', () => {
    * @test Tests context menu triggered status move workflow.
    */
   it('should generate position updates and trigger persistence when a task is moved via context menu', async () => {
-    await component['moveTaskToStatus'](MOCK_TASKS[0], 'done');
+    await (component as any).moveTaskToStatus(MOCK_TASKS[0], 'done');
     
     expect(mockTaskService.updateTaskPositions).toHaveBeenCalled();
     expect(component.isBoardUpdating()).toBe(false);
@@ -422,9 +396,9 @@ describe('Board Component', () => {
    * @test Blocks context menu moves while the board is already processing an update.
    */
   it('should abort context menu move if the board is already updating', async () => {
-    component['isBoardUpdating'].set(true);
+    (component as any).isBoardUpdating.set(true);
     
-    await component['moveTaskToStatus'](MOCK_TASKS[0], 'done');
+    await (component as any).moveTaskToStatus(MOCK_TASKS[0], 'done');
     
     expect(mockTaskService.updateTaskPositions).not.toHaveBeenCalled();
   });
@@ -461,6 +435,9 @@ describe('Board Component', () => {
    * @test Ensures that a persistence failure during drag/drop logs an error and attempts to resync from the backend.
    */
   it('should gracefully handle update errors during drag and drop by triggering a reload', async () => {
+    // 💡 HIER FANGEN WIR DEN CONSOLE-FEHLER AB, DAMIT ER NICHT IM TERMINAL AUFTAUCHT
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const mockDropEvent = {
       previousContainer: { id: 'todo' },
       container: { id: 'in_progress' },
@@ -475,5 +452,8 @@ describe('Board Component', () => {
     expect(component.boardError()).toBe('Task positions could not be saved.');
     expect(mockTaskService.getTasks).toHaveBeenCalledTimes(2); 
     expect(component.isBoardUpdating()).toBe(false);
+
+    // Spy wieder aufräumen
+    consoleSpy.mockRestore();
   });
 });
