@@ -1,0 +1,175 @@
+.board_dialog {
+  &__assignees,
+  &__subtasks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__assignee {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #000000;
+    font-size: 19px;
+  }
+
+  &__badge {
+    display: inline-flex;
+    width: 2.625rem;
+    height: 2.625rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  &__badge--more {
+    background-color: #dbdbdb;
+    color: #1f1e1e;
+  }
+
+  &__contact_name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__contact_empty {
+    margin: 0;
+    padding: 10px;
+    color: #7a869a;
+    font-size: 16px;
+  }
+
+  &__selected_contacts {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    padding-top: 4px;
+
+    .board_dialog__badge {
+      &:not(:first-child) {
+        margin-left: -6px;
+      }
+    }
+  }
+
+  &__subtask {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    color: #000000;
+    font-size: 18px;
+
+    &:hover {
+      background-color: #eeeeee;
+    }
+  }
+
+  &__checkbox {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    margin: 0;
+    border: none;
+    appearance: none;
+    background: url('/assets/board/task-details/uncheck_button.svg') center / 24px 24px no-repeat;
+    cursor: pointer;
+
+    &:checked {
+      background-image: url('/assets/board/task-details/check_button.svg');
+    }
+    &:disabled {
+      cursor: wait;
+      opacity: 0.55;
+    }
+  }
+
+  &__subtask_creator {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .board_dialog__input {
+      padding-right: 48px;
+    }
+  }
+
+  &__subtask_add {
+    position: absolute;
+    right: 8px;
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #2a3647;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      background-color: #eeeeee;
+      outline: none;
+    }
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+  }
+
+  &__editable_subtasks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__editable_subtask {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__subtask_input {
+    min-width: 0;
+  }
+
+  &__subtask_remove {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #2a3647;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background-color: #eeeeee;
+      color: #b00020;
+      outline: none;
+    }
+  }
+}

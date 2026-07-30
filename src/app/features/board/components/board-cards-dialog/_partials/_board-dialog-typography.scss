@@ -1,0 +1,85 @@
+.board_dialog {
+  &__edit_heading {
+    margin: 0;
+    color: #2a3647;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  &__type {
+    width: fit-content;
+    padding: 4px 16px;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 23px;
+    line-height: 1.2;
+
+    &--technical {
+      background: #1fd7c1;
+    }
+    &--user-story {
+      background: #0038ff;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    color: #000000;
+    font-size: clamp(2.25rem, 6vw, 3.8125rem);
+    font-weight: 700;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  &__desc {
+    margin: 0;
+    color: #000000;
+    font-size: 20px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #000000;
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  &__label {
+    width: 95px;
+    flex-shrink: 0;
+    color: #2a3647;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__section_title {
+    margin: 0;
+    color: #2a3647;
+    font-size: 20px;
+    font-weight: 400;
+  }
+
+  &__empty {
+    margin: 0;
+    color: #7a869a;
+    font-size: 16px;
+  }
+
+  &__error {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: #fff0f2;
+    color: #b00020;
+    font-size: 16px;
+  }
+}
