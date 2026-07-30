@@ -1,0 +1,249 @@
+.add-task {
+  &__subtask-creator {
+    position: relative;
+
+    & > .add-task__input {
+      padding-right: 3rem;
+    }
+  }
+
+  &__subtask-divider {
+    width: 1px;
+    height: 24px;
+    margin: 0 2px;
+    background-color: #a8a8a8;
+  }
+
+  &__subtask-add {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    width: 4.5rem;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0;
+    border: unset;
+    background: transparent;
+    color: var(--color-primary);
+    font-size: 25px;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
+    }
+
+    img {
+      width: 1.8rem;
+      height: 1.8rem;
+      padding: 4px;
+      border-radius: 50%;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #eeeeee;
+      }
+    }
+  }
+
+  &__subtask-list {
+    display: flex;
+    max-height: 126px;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 0;
+    overflow-y: auto;
+  }
+
+  &__subtask-item {
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 8px 2px 16px;
+    border-radius: var(--radius-sm);
+
+    &::before {
+      content: '•';
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background-color: #eeeeee;
+
+      .add-task__subtask-actions {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  }
+
+  &__subtask-title {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__subtask-actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-fast, 0.15s ease);
+  }
+
+  &__subtask-action {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: unset;
+    border-radius: 50%;
+    background-color: transparent;
+    cursor: pointer;
+
+    img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+    }
+
+    img[alt='Save'] {
+      filter: brightness(0) saturate(100%) invert(22%) sepia(10%)
+        saturate(2256%) hue-rotate(158deg) brightness(96%) contrast(92%);
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: #d1d1d1;
+      outline: none;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+  }
+
+  &__subtask-edit {
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 8px 2px 0;
+    border-bottom: 1px solid #124658;
+    background-color: white;
+
+    .add-task__subtask-actions {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  &__subtask-edit-input {
+    min-width: 0;
+    height: 36px;
+    flex: 1;
+    padding-block: 6px;
+    padding-left: 16px;
+    border: none;
+    background: transparent;
+    outline: none;
+  }
+
+  &__footer {
+    display: flex;
+    min-height: 72px;
+    flex-shrink: 0;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: auto;
+    padding-top: 24px;
+    background-color: var(--color-bg-main);
+  }
+
+  &__required-legend {
+    margin: 0 0 12px;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+
+    span {
+      color: var(--color-error);
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__button-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+  }
+
+  &__secondary-button,
+  &__create-button {
+    min-height: 48px;
+    padding: 10px 16px;
+    font-size: var(--font-size-sm);
+  }
+
+  &--dialog {
+    height: 100%;
+    min-height: 0;
+    padding: 40px clamp(24px, 5vw, 48px) 32px;
+    overflow: hidden;
+  }
+
+  &--dialog &__form-area {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
+  &--dialog &__footer {
+    margin-top: 0;
+  }
+
+  &__success {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 5000;
+    display: flex;
+    min-width: 260px;
+    min-height: 64px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 12px 24px;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-fab);
+    font-size: var(--font-size-sm);
+    transform: translate(-50%, -50%);
+    animation: add-task-success-desktop-in 200ms ease-in-out both;
+
+    img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+  }
+}
