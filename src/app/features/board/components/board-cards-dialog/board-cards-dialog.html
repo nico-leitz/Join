@@ -1,8 +1,4 @@
-<div
-  class="dialog_overlay"
-  [class.dialog_overlay--closing]="isClosing()"
-  (click)="closeDialog()"
->
+<div class="dialog_overlay" [class.dialog_overlay--closing]="isClosing()" (click)="closeDialog()">
   <dialog
     open
     class="board_dialog"
@@ -14,23 +10,12 @@
   >
     <header class="board_dialog__header">
       @if (isEditing()) {
-        <h2
-          id="board-dialog-title"
-          class="board_dialog__edit_heading"
-        >
-          Edit task
-        </h2>
+        <h2 id="board-dialog-title" class="board_dialog__edit_heading">Edit task</h2>
       } @else {
         <span
           class="board_dialog__type"
-          [class.board_dialog__type--technical]="
-            task().category ===
-            'technical_task'
-          "
-          [class.board_dialog__type--user-story]="
-            task().category ===
-            'user_story'
-          "
+          [class.board_dialog__type--technical]="task().category === 'technical_task'"
+          [class.board_dialog__type--user-story]="task().category === 'user_story'"
         >
           {{ categoryLabel() }}
         </span>
@@ -49,24 +34,16 @@
 
     @if (!isEditing()) {
       <div class="board_dialog__content">
-        <h2
-          id="board-dialog-title"
-          class="board_dialog__title"
-        >
+        <h2 id="board-dialog-title" class="board_dialog__title">
           {{ task().title }}
         </h2>
 
         <p class="board_dialog__desc">
-          {{
-            task().description ||
-              'No description available.'
-          }}
+          {{ task().description || 'No description available.' }}
         </p>
 
         <div class="board_dialog__meta">
-          <span class="board_dialog__label">
-            Due date:
-          </span>
+          <span class="board_dialog__label"> Due date: </span>
 
           <span>
             {{ formattedDueDate() }}
@@ -74,9 +51,7 @@
         </div>
 
         <div class="board_dialog__meta">
-          <span class="board_dialog__label">
-            Priority:
-          </span>
+          <span class="board_dialog__label"> Priority: </span>
 
           <div class="board_dialog__priority">
             <span>
@@ -84,96 +59,67 @@
             </span>
 
             <img
-              [src]="
-                'assets/board/board-card/' +
-                task().priority +
-                '.svg'
-              "
-              [alt]="
-                task().priority +
-                ' priority'
-              "
+              [src]="'assets/board/board-card/' + task().priority + '.svg'"
+              [alt]="task().priority + ' priority'"
             />
           </div>
         </div>
 
         <section class="board_dialog__section">
-          <h3 class="board_dialog__section_title">
-            Assigned To:
-          </h3>
+          <h3 class="board_dialog__section_title">Assigned To:</h3>
 
           @if (assignedContacts().length === 0) {
-            <p class="board_dialog__empty">
-              No contacts assigned.
-            </p>
+            <p class="board_dialog__empty">No contacts assigned.</p>
           } @else {
-            <div class="board_dialog__assignees">
-              @for (
-                contact of assignedContacts();
-                track contact.id
-              ) {
-                <div class="board_dialog__assignee">
-                  <span
-                    class="board_dialog__badge"
-                    [style.background-color]="
-                      contact.badgeColor
-                    "
-                  >
-                    {{ getInitials(contact) }}
-                  </span>
+            <div class="board_dialog__scroll_wrapper board_dialog__scroll_wrapper--assignees">
+              <div class="board_dialog__assignees">
+                @for (contact of assignedContacts(); track contact.id) {
+                  <div class="board_dialog__assignee">
+                    <span class="board_dialog__badge" [style.background-color]="contact.badgeColor">
+                      {{ getInitials(contact) }}
+                    </span>
 
-                  <span>
-                    {{ contact.firstName }}
-                    {{ contact.lastName }}
-                  </span>
-                </div>
-              }
+                    <span>
+                      {{ contact.firstName }}
+                      {{ contact.lastName }}
+                    </span>
+                  </div>
+                }
+              </div>
             </div>
           }
         </section>
 
         <section class="board_dialog__section">
-          <h3 class="board_dialog__section_title">
-            Subtasks
-          </h3>
+          <h3 class="board_dialog__section_title">Subtasks</h3>
 
           @if (subtasks().length === 0) {
-            <p class="board_dialog__empty">
-              No subtasks available.
-            </p>
+            <p class="board_dialog__empty">No subtasks available.</p>
           } @else {
-            <div class="board_dialog__subtasks">
-              @for (
-                subtask of subtasks();
-                track subtask.id
-              ) {
-                <label class="board_dialog__subtask">
-                  <input
-                    class="board_dialog__checkbox"
-                    type="checkbox"
-                    [checked]="subtask.isCompleted"
-                    [disabled]="
-                      updatingSubtaskId() === subtask.id
-                    "
-                    (change)="
-                      toggleSubtask(subtask, $event)
-                    "
-                  />
+            <div class="board_dialog__scroll_wrapper board_dialog__scroll_wrapper--subtasks">
+              <div class="board_dialog__subtasks">
+                @for (subtask of subtasks(); track subtask.id) {
+                  <label class="board_dialog__subtask">
+                    <input
+                      class="board_dialog__checkbox"
+                      type="checkbox"
+                      [checked]="subtask.isCompleted"
+                      [disabled]="updatingSubtaskId() === subtask.id"
+                      (change)="toggleSubtask(subtask, $event)"
+                    />
 
-                  <span>
-                    {{ subtask.title }}
-                  </span>
-                </label>
-              }
+                    <span>
+                      {{ subtask.title }}
+                    </span>
+                  </label>
+                }
+              </div>
             </div>
           }
         </section>
 
         @if (errorMessage()) {
-          <p
-            class="board_dialog__error"
-            role="alert"
-          >
+          <p class="board_dialog__error" role="alert">
             {{ errorMessage() }}
           </p>
         }
@@ -221,22 +167,10 @@
         </button>
       </footer>
     } @else {
-      <form
-        class="board_dialog__edit_form"
-        [formGroup]="editForm"
-        (ngSubmit)="saveTask()"
-      >
-        <div
-          class="
-            board_dialog__content
-            board_dialog__content--edit
-          "
-        >
+      <form class="board_dialog__edit_form" [formGroup]="editForm" (ngSubmit)="saveTask()">
+        <div class="board_dialog__content board_dialog__content--edit">
           <div class="board_dialog__field">
-            <label
-              class="board_dialog__field_label"
-              for="edit_task_title"
-            >
+            <label class="board_dialog__field_label" for="edit_task_title">
               Title
               <span aria-hidden="true">*</span>
             </label>
@@ -245,8 +179,7 @@
               id="edit_task_title"
               class="board_dialog__input"
               [class.board_dialog__input--invalid]="
-                editForm.controls.title.invalid &&
-                editForm.controls.title.touched
+                editForm.controls.title.invalid && editForm.controls.title.touched
               "
               type="text"
               maxlength="120"
@@ -254,30 +187,19 @@
               autocomplete="off"
             />
 
-            @if (
-              editForm.controls.title.invalid &&
-              editForm.controls.title.touched
-            ) {
-              <p class="board_dialog__field_error">
-                Please enter a title.
-              </p>
+            @if (editForm.controls.title.invalid && editForm.controls.title.touched) {
+              <p class="board_dialog__field_error">Please enter a title.</p>
             }
           </div>
 
           <div class="board_dialog__field">
-            <label
-              class="board_dialog__field_label"
-              for="edit_task_description"
-            >
+            <label class="board_dialog__field_label" for="edit_task_description">
               Description
             </label>
 
             <textarea
               id="edit_task_description"
-              class="
-                board_dialog__input
-                board_dialog__textarea
-              "
+              class="board_dialog__input board_dialog__textarea"
               maxlength="1000"
               rows="4"
               formControlName="description"
@@ -285,10 +207,7 @@
           </div>
 
           <div class="board_dialog__field">
-            <label
-              class="board_dialog__field_label"
-              for="edit_task_due_date"
-            >
+            <label class="board_dialog__field_label" for="edit_task_due_date">
               Due date
               <span aria-hidden="true">*</span>
             </label>
@@ -297,148 +216,89 @@
               id="edit_task_due_date"
               class="board_dialog__input"
               [class.board_dialog__input--invalid]="
-                editForm.controls.dueDate.invalid &&
-                editForm.controls.dueDate.touched
+                editForm.controls.dueDate.invalid && editForm.controls.dueDate.touched
               "
               type="date"
               formControlName="dueDate"
             />
 
-            @if (
-              editForm.controls.dueDate.invalid &&
-              editForm.controls.dueDate.touched
-            ) {
-              <p class="board_dialog__field_error">
-                Please select a due date.
-              </p>
+            @if (editForm.controls.dueDate.invalid && editForm.controls.dueDate.touched) {
+              <p class="board_dialog__field_error">Please select a due date.</p>
             }
           </div>
 
-          <fieldset
-            class="
-              board_dialog__field
-              board_dialog__fieldset
-            "
-          >
-            <legend class="board_dialog__field_label">
-              Priority
-            </legend>
+          <fieldset class="board_dialog__field board_dialog__fieldset">
+            <legend class="board_dialog__field_label">Priority</legend>
 
             <div class="board_dialog__priorities">
               <button
                 type="button"
-                class="
-                  board_dialog__priority_button
-                  board_dialog__priority_button--urgent
-                "
+                class="board_dialog__priority_button board_dialog__priority_button--urgent"
                 [class.board_dialog__priority_button--active]="
-                  editForm.controls.priority.value ===
-                  'urgent'
+                  editForm.controls.priority.value === 'urgent'
                 "
                 (click)="setPriority('urgent')"
               >
                 <span>Urgent</span>
 
-                <img
-                  src="assets/board/board-card/urgent.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
+                <img src="assets/board/board-card/urgent.svg" alt="" aria-hidden="true" />
               </button>
 
               <button
                 type="button"
-                class="
-                  board_dialog__priority_button
-                  board_dialog__priority_button--medium
-                "
+                class="board_dialog__priority_button board_dialog__priority_button--medium"
                 [class.board_dialog__priority_button--active]="
-                  editForm.controls.priority.value ===
-                  'medium'
+                  editForm.controls.priority.value === 'medium'
                 "
                 (click)="setPriority('medium')"
               >
                 <span>Medium</span>
 
-                <img
-                  src="assets/board/board-card/medium.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
+                <img src="assets/board/board-card/medium.svg" alt="" aria-hidden="true" />
               </button>
 
               <button
                 type="button"
-                class="
-                  board_dialog__priority_button
-                  board_dialog__priority_button--low
-                "
+                class="board_dialog__priority_button board_dialog__priority_button--low"
                 [class.board_dialog__priority_button--active]="
-                  editForm.controls.priority.value ===
-                  'low'
+                  editForm.controls.priority.value === 'low'
                 "
                 (click)="setPriority('low')"
               >
                 <span>Low</span>
 
-                <img
-                  src="assets/board/board-card/low.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
+                <img src="assets/board/board-card/low.svg" alt="" aria-hidden="true" />
               </button>
             </div>
           </fieldset>
 
           <div class="board_dialog__field">
-            <label
-              class="board_dialog__field_label"
-              for="edit_task_category"
-            >
-              Category
-            </label>
+            <label class="board_dialog__field_label" for="edit_task_category"> Category </label>
 
             <div class="board_dialog__select_control">
               <select
                 id="edit_task_category"
-                class="
-                  board_dialog__input
-                  board_dialog__select_input
-                "
+                class="board_dialog__input board_dialog__select_input"
                 formControlName="category"
               >
-                <option value="user_story">
-                  User Story
-                </option>
+                <option value="user_story">User Story</option>
 
-                <option value="technical_task">
-                  Technical Task
-                </option>
+                <option value="technical_task">Technical Task</option>
               </select>
 
-              <span
-                class="board_dialog__dropdown_arrow"
-                aria-hidden="true"
-              ></span>
+              <span class="board_dialog__dropdown_arrow" aria-hidden="true"></span>
             </div>
           </div>
 
           <div class="board_dialog__field">
-            <span class="board_dialog__field_label">
-              Assigned to
-            </span>
+            <span class="board_dialog__field_label"> Assigned to </span>
 
             <div class="board_dialog__contact_select">
               <button
                 type="button"
-                class="
-                  board_dialog__input
-                  board_dialog__contact_toggle
-                "
+                class="board_dialog__input board_dialog__contact_toggle"
                 aria-haspopup="listbox"
-                [attr.aria-expanded]="
-                  contactsMenuOpen()
-                "
+                [attr.aria-expanded]="contactsMenuOpen()"
                 (click)="toggleContactsMenu()"
               >
                 <span>
@@ -447,9 +307,7 @@
 
                 <span
                   class="board_dialog__dropdown_arrow"
-                  [class.board_dialog__dropdown_arrow--open]="
-                    contactsMenuOpen()
-                  "
+                  [class.board_dialog__dropdown_arrow--open]="contactsMenuOpen()"
                   aria-hidden="true"
                 ></span>
               </button>
@@ -461,32 +319,21 @@
                   aria-label="Available contacts"
                   aria-multiselectable="true"
                 >
-                  @if (
-                    availableContacts().length === 0
-                  ) {
-                    <p class="board_dialog__contact_empty">
-                      No contacts available.
-                    </p>
+                  @if (availableContacts().length === 0) {
+                    <p class="board_dialog__contact_empty">No contacts available.</p>
                   } @else {
-                    @for (
-                      contact of availableContacts();
-                      track contact.id
-                    ) {
+                    @for (contact of availableContacts(); track contact.id) {
                       <label
                         class="board_dialog__contact_option"
                         [class.board_dialog__contact_option--selected]="
                           isContactSelected(contact.id)
                         "
-                        [attr.aria-selected]="
-                          isContactSelected(contact.id)
-                        "
+                        [attr.aria-selected]="isContactSelected(contact.id)"
                         role="option"
                       >
                         <span
                           class="board_dialog__badge"
-                          [style.background-color]="
-                            contact.badgeColor
-                          "
+                          [style.background-color]="contact.badgeColor"
                         >
                           {{ getInitials(contact) }}
                         </span>
@@ -499,18 +346,11 @@
                         <input
                           class="board_dialog__contact_checkbox"
                           type="checkbox"
-                          [checked]="
-                            isContactSelected(contact.id)
-                          "
-                          (change)="
-                            toggleContactSelection(contact.id)
-                          "
+                          [checked]="isContactSelected(contact.id)"
+                          (change)="toggleContactSelection(contact.id)"
                         />
 
-                        <span
-                          class="board_dialog__contact_check"
-                          aria-hidden="true"
-                        ></span>
+                        <span class="board_dialog__contact_check" aria-hidden="true"></span>
                       </label>
                     }
                   }
@@ -519,24 +359,12 @@
             </div>
 
             @if (selectedContacts().length > 0) {
-              <div
-                class="board_dialog__selected_contacts"
-                aria-label="Selected contacts"
-              >
-                @for (
-                  contact of selectedContacts() | slice: 0 : 3;
-                  track contact.id
-                ) {
+              <div class="board_dialog__selected_contacts" aria-label="Selected contacts">
+                @for (contact of selectedContacts() | slice: 0 : 3; track contact.id) {
                   <span
                     class="board_dialog__badge"
-                    [style.background-color]="
-                      contact.badgeColor
-                    "
-                    [attr.title]="
-                      contact.firstName +
-                      ' ' +
-                      contact.lastName
-                    "
+                    [style.background-color]="contact.badgeColor"
+                    [attr.title]="contact.firstName + ' ' + contact.lastName"
                   >
                     {{ getInitials(contact) }}
                   </span>
@@ -544,14 +372,8 @@
 
                 @if (selectedContacts().length > 3) {
                   <span
-                    class="
-                      board_dialog__badge
-                      board_dialog__badge--more
-                    "
-                    [attr.title]="
-                      selectedContacts().length - 3 +
-                      ' more contacts'
-                    "
+                    class="board_dialog__badge board_dialog__badge--more"
+                    [attr.title]="selectedContacts().length - 3 + ' more contacts'"
                   >
                     +{{ selectedContacts().length - 3 }}
                   </span>
@@ -561,12 +383,7 @@
           </div>
 
           <div class="board_dialog__field">
-            <label
-              class="board_dialog__field_label"
-              for="edit_new_subtask"
-            >
-              Subtasks
-            </label>
+            <label class="board_dialog__field_label" for="edit_new_subtask"> Subtasks </label>
 
             <div class="board_dialog__subtask_creator">
               <input
@@ -577,10 +394,7 @@
                 placeholder="Add new subtask"
                 [value]="newSubtaskTitle()"
                 (input)="updateNewSubtaskTitle($event)"
-                (keydown.enter)="
-                  $event.preventDefault();
-                  addSubtask()
-                "
+                (keydown.enter)="$event.preventDefault(); addSubtask()"
               />
 
               <button
@@ -595,67 +409,43 @@
             </div>
 
             @if (editableSubtasks().length > 0) {
-              <div class="board_dialog__editable_subtasks">
-                @for (
-                  subtask of editableSubtasks();
-                  track $index;
-                  let index = $index
-                ) {
-                  <div class="board_dialog__editable_subtask">
-                    <input
-                      class="
-                        board_dialog__input
-                        board_dialog__subtask_input
-                      "
-                      [class.board_dialog__input--invalid]="
-                        !subtask.title.trim()
-                      "
-                      type="text"
-                      maxlength="160"
-                      [value]="subtask.title"
-                      (input)="
-                        updateEditableSubtaskTitle(
-                          index,
-                          $event
-                        )
-                      "
-                    />
+              <div class="board_dialog__scroll_wrapper board_dialog__scroll_wrapper--edit-subtasks">
+                <div class="board_dialog__editable_subtasks">
+                  @for (subtask of editableSubtasks(); track $index; let index = $index) {
+                    <div class="board_dialog__editable_subtask">
+                      <input
+                        class="board_dialog__input board_dialog__subtask_input"
+                        [class.board_dialog__input--invalid]="!subtask.title.trim()"
+                        type="text"
+                        maxlength="160"
+                        [value]="subtask.title"
+                        (input)="updateEditableSubtaskTitle(index, $event)"
+                      />
 
-                    <button
-                      type="button"
-                      class="board_dialog__subtask_remove"
-                      aria-label="Remove subtask"
-                      (click)="removeEditableSubtask(index)"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                }
+                      <button
+                        type="button"
+                        class="board_dialog__subtask_remove"
+                        aria-label="Remove subtask"
+                        (click)="removeEditableSubtask(index)"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  }
+                </div>
               </div>
             }
           </div>
 
           @if (errorMessage()) {
-            <p
-              class="board_dialog__error"
-              role="alert"
-            >
+            <p class="board_dialog__error" role="alert">
               {{ errorMessage() }}
             </p>
           }
         </div>
 
-        <footer
-          class="
-            board_dialog__actions
-            board_dialog__actions--edit
-          "
-        >
-          <button
-            type="submit"
-            class="board_dialog__edit_button"
-            [disabled]="isSaving()"
-          >
+        <footer class="board_dialog__actions board_dialog__actions--edit">
+          <button type="submit" class="board_dialog__edit_button" [disabled]="isSaving()">
             @if (isSaving()) {
               <span>Saving...</span>
             } @else {

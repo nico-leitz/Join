@@ -232,6 +232,42 @@
     gap: 12px;
   }
 
+  &__scroll_wrapper {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+    overscroll-behavior: contain;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      background-color: #d1d1d1;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background-color: #a8a8a8;
+    }
+
+    &--assignees {
+      max-height: 150px; 
+    }
+
+    &--subtasks {
+      max-height: 120px;
+    }
+
+    &--edit-subtasks {
+      max-height: 148px;
+    }
+  }
+
   &__assignee {
     display: flex;
     align-items: center;
@@ -550,7 +586,7 @@
     left: 0;
     z-index: 20;
     display: flex;
-    max-height: 220px;
+    max-height: 186px;
     flex-direction: column;
     gap: 2px;
     padding: 8px 6px 6px;
