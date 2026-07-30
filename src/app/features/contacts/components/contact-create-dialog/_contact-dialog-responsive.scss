@@ -194,7 +194,7 @@
   }
 }
 
-@media (max-width: bp.$breakpoint-mobile-m) and (orientation: portrait) {
+@media (max-width: bp.$breakpoint-mobile-l) and (orientation: portrait) {
   .contact-dialog {
     animation: contact-dialog-mobile-slide-up-in 300ms ease-out both;
 
