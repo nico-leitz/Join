@@ -13,6 +13,12 @@ import { TaskService } from '../../../../core/services/task.service';
 import { Header } from '../../../../layout/header/header';
 import { Sidebar } from '../../../../layout/sidebar/sidebar';
 
+/**
+ * Displays the authenticated user's task summary.
+ *
+ * Loads the current task collection and derives status counts, the next
+ * deadline and time-dependent greeting state for desktop and mobile layouts.
+ */
 @Component({
   selector: 'app-summary',
   imports: [Sidebar, Header, RouterLink],
@@ -20,9 +26,13 @@ import { Sidebar } from '../../../../layout/sidebar/sidebar';
   styleUrl: './summary.scss',
 })
 export class Summary implements OnInit, OnDestroy {
+  /** Service used to restore authentication and access the current user. */
   private readonly authService = inject(AuthService);
+
+  /** Service used to load and expose the current task collection. */
   private readonly taskService = inject(TaskService);
 
+  /** Numeric priority order used when tasks share the same due date. */
   private readonly priorityRank: Record<
     Task['priority'],
     number
@@ -32,6 +42,7 @@ export class Summary implements OnInit, OnDestroy {
     low: 2,
   };
 
+  /** Formatter used to create the user-facing upcoming deadline. */
   private readonly deadlineFormatter =
     new Intl.DateTimeFormat('en-US', {
       month: 'long',
@@ -39,57 +50,74 @@ export class Summary implements OnInit, OnDestroy {
       year: 'numeric',
     });
 
+  /** Current local date used by greeting and deadline calculations. */
   private readonly currentDate = signal(new Date());
 
+  /** Identifier of the interval keeping time-dependent values current. */
   private clockTimer?: ReturnType<
     typeof window.setInterval
   >;
 
+  /** Identifier of the timer starting the mobile greeting fade-out. */
   private greetingFadeTimer?: ReturnType<
     typeof window.setTimeout
   >;
 
+  /** Identifier of the timer removing the mobile greeting. */
   private greetingHideTimer?: ReturnType<
     typeof window.setTimeout
   >;
 
+  /** Indicates whether the mobile login greeting is rendered. */
   readonly showMobileGreeting = signal(false);
 
+  /** Indicates whether the mobile login greeting is fading out. */
   readonly isMobileGreetingLeaving =
     signal(false);
 
+  /** Complete task collection exposed by the task service. */
   readonly tasks = this.taskService.allTasks;
+
+  /** Indicates whether the task collection is being loaded. */
   readonly isLoading = this.taskService.isLoading;
 
+  /** User-facing task loading error exposed by the task service. */
   readonly errorMessage =
     this.taskService.errorMessage;
 
+  /** Number of tasks currently in the to-do status. */
   readonly todoCount = computed(() => {
     return this.countTasksByStatus('todo');
   });
 
+  /** Number of tasks currently in the done status. */
   readonly doneCount = computed(() => {
     return this.countTasksByStatus('done');
   });
 
+  /** Number of tasks currently in the in-progress status. */
   readonly inProgressCount = computed(() => {
     return this.countTasksByStatus('in_progress');
   });
 
+  /** Number of tasks currently awaiting feedback. */
   readonly awaitingFeedbackCount = computed(() => {
     return this.countTasksByStatus(
       'awaiting_feedback',
     );
   });
 
+  /** Number of urgent tasks which are not completed. */
   readonly urgentCount = computed(() => {
     return this.activeUrgentTasks().length;
   });
 
+  /** Earliest non-completed task with an upcoming due date. */
   readonly upcomingTask = computed(() => {
     return this.getNextDueTask();
   });
 
+  /** Query parameters linking the deadline card to its upcoming task. */
   readonly upcomingTaskQueryParams = computed(() => {
     const task = this.upcomingTask();
 
@@ -98,16 +126,19 @@ export class Summary implements OnInit, OnDestroy {
       : {};
   });
 
+  /** Formatted deadline of the next upcoming task. */
   readonly upcomingDeadline = computed(() => {
     return this.resolveUpcomingDeadline();
   });
 
+  /** Greeting matching the current local time of day. */
   readonly greetingText = computed(() => {
     return this.resolveGreeting(
       this.currentDate().getHours(),
     );
   });
 
+  /** Display name of the authenticated non-anonymous user. */
   readonly greetingName = computed(() => {
     const user = this.authService.currentUser();
 
@@ -118,10 +149,14 @@ export class Summary implements OnInit, OnDestroy {
     return user.fullName.trim();
   });
 
+  /** Indicates whether a user name should be included in the greeting. */
   readonly showGreetingName = computed(() => {
     return this.greetingName().length > 0;
   });
 
+  /**
+   * Initializes the optional mobile greeting and the summary clock.
+   */
   constructor() {
     this.initializeMobileGreeting();
     this.startClock();
@@ -154,6 +189,8 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Loads the task state from Supabase.
+   *
+   * @returns A promise that resolves after the load attempt.
    */
   private async loadTasks(): Promise<void> {
     try {
@@ -168,6 +205,9 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Counts tasks matching one board status.
+   *
+   * @param status - Board status whose tasks should be counted.
+   * @returns Number of tasks matching the supplied status.
    */
   private countTasksByStatus(
     status: Task['status'],
@@ -179,6 +219,8 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Returns urgent tasks which are not completed.
+   *
+   * @returns Active tasks with urgent priority.
    */
   private activeUrgentTasks(): Task[] {
     return this.tasks().filter((task) => {
@@ -191,6 +233,8 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Resolves the earliest upcoming task deadline.
+   *
+   * @returns Formatted deadline or fallback text when no task is upcoming.
    */
   private resolveUpcomingDeadline(): string {
     const task = this.upcomingTask();
@@ -204,6 +248,8 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Finds the next non-completed task due.
+   *
+   * @returns Earliest upcoming task or undefined when none exists.
    */
   private getNextDueTask(): Task | undefined {
     const today = this.toDateKey(this.currentDate());
@@ -225,6 +271,10 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Sorts by due date and uses priority as tie-breaker.
+   *
+   * @param firstTask - First task participating in the comparison.
+   * @param secondTask - Second task participating in the comparison.
+   * @returns Negative, zero or positive order value for array sorting.
    */
   private compareByDueDateAndPriority(
     firstTask: Task,
@@ -243,6 +293,9 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Formats an ISO date without a timezone shift.
+   *
+   * @param dateValue - Date value expected in YYYY-MM-DD format.
+   * @returns Formatted date or fallback text for an invalid value.
    */
   private formatDueDate(dateValue: string): string {
     const [year, month, day] = dateValue
@@ -258,6 +311,9 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Creates a local YYYY-MM-DD comparison key.
+   *
+   * @param date - Local date to convert.
+   * @returns Date key formatted as YYYY-MM-DD.
    */
   private toDateKey(date: Date): string {
     const year = date.getFullYear();
@@ -274,6 +330,9 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Resolves the greeting for the current daypart.
+   *
+   * @param hour - Current local hour in 24-hour format.
+   * @returns Greeting matching the supplied hour.
    */
   private resolveGreeting(hour: number): string {
     if (hour < 12) {
@@ -334,6 +393,9 @@ export class Summary implements OnInit, OnDestroy {
 
   /**
    * Clears one optional browser timer.
+   *
+   * @param timer - Identifier of the timer to clear.
+   * @param type - Browser timer type determining the clear operation.
    */
   private clearTimer(
     timer: number | undefined,
