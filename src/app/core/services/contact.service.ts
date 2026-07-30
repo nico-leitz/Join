@@ -7,16 +7,31 @@ import {
 } from '../models/contact.model';
 import { SupabaseService } from '../supabase/supabase';
 
+/**
+ * Manages contact persistence, mapping, sorting and application state.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ContactService {
+  /** Name of the contact database table. */
   private readonly tableName = 'contacts';
+
+  /** Supabase client used for contact persistence requests. */
   private readonly supabase = inject(SupabaseService).client;
 
+  /** Currently selected contact or null when no contact is selected. */
   selectedContact = signal<Contact | null>(null);
+
+  /** Complete sorted contact collection held in application state. */
   allContacts = signal<Contact[]>([]);
 
+  /**
+   * Retrieves all contacts from the database.
+   *
+   * @returns Mapped contacts sorted by first and last name.
+   * @throws The database error returned by Supabase.
+   */
   async getContacts(): Promise<Contact[]> {
     const { data, error } = await this.supabase
       .from(this.tableName)
@@ -33,6 +48,13 @@ export class ContactService {
     );
   }
 
+  /**
+   * Retrieves a single contact by its identifier.
+   *
+   * @param id - Identifier of the requested contact.
+   * @returns Mapped contact or null when the contact does not exist.
+   * @throws The database error returned by Supabase.
+   */
   async getContactById(
     id: string,
   ): Promise<Contact | null> {
@@ -51,6 +73,13 @@ export class ContactService {
       : null;
   }
 
+  /**
+   * Creates a contact and adds it to the local contact state.
+   *
+   * @param contact - Contact data to persist.
+   * @returns Created and mapped contact.
+   * @throws The database error returned by Supabase.
+   */
   async createContact(
     contact: CreateContact,
   ): Promise<Contact> {
@@ -72,6 +101,15 @@ export class ContactService {
     return createdContact;
   }
 
+  /**
+   * Updates a contact and synchronizes the local contact state.
+   *
+   * @param id - Identifier of the contact to update.
+   * @param contact - Contact fields to persist.
+   * @returns Updated and mapped contact.
+   * @throws The database error returned by Supabase.
+   * @throws An error when no contact row was updated.
+   */
   async updateContact(
     id: string,
     contact: UpdateContact,
@@ -95,6 +133,14 @@ export class ContactService {
     return updatedContact;
   }
 
+  /**
+   * Deletes a contact and removes it from the local contact state.
+   *
+   * @param id - Identifier of the contact to delete.
+   * @returns A promise that resolves after deletion.
+   * @throws The database error returned by Supabase.
+   * @throws An error when no contact row was deleted.
+   */
   async deleteContact(id: string): Promise<void> {
     const { data, error } = await this.supabase
       .from(this.tableName)
@@ -111,6 +157,13 @@ export class ContactService {
     this.removeContactFromState(id);
   }
 
+  /**
+   * Creates uppercase initials from a contact name.
+   *
+   * @param firstName - Contact first name.
+   * @param lastName - Contact last name.
+   * @returns Combined first characters of the trimmed names.
+   */
   getInitials(
     firstName: string,
     lastName: string,
@@ -123,6 +176,13 @@ export class ContactService {
     return `${firstInitial}${lastInitial}`.toUpperCase();
   }
 
+  /**
+   * Inserts a contact row using normalized application data.
+   *
+   * @param contact - Contact data to persist.
+   * @param badgeColor - Badge color assigned to the contact.
+   * @returns Supabase response containing the inserted contact row.
+   */
   private async insertContact(
     contact: CreateContact,
     badgeColor: string,
@@ -139,6 +199,13 @@ export class ContactService {
       .single();
   }
 
+  /**
+   * Creates a normalized database payload for a new contact.
+   *
+   * @param contact - Contact data to transform.
+   * @param badgeColor - Badge color assigned to the contact.
+   * @returns Contact insert payload using database field names.
+   */
   private createInsertPayload(
     contact: CreateContact,
     badgeColor: string,
@@ -152,6 +219,12 @@ export class ContactService {
     };
   }
 
+  /**
+   * Creates a database payload containing the provided contact updates.
+   *
+   * @param contact - Contact fields to update.
+   * @returns Normalized contact update payload with a new update timestamp.
+   */
   private createUpdatePayload(
     contact: UpdateContact,
   ): Partial<ContactRow> {
@@ -172,6 +245,11 @@ export class ContactService {
     };
   }
 
+  /**
+   * Adds a contact to the local collection and restores sort order.
+   *
+   * @param contact - Contact to add.
+   */
   private addContactToState(
     contact: Contact,
   ): void {
@@ -183,6 +261,11 @@ export class ContactService {
     });
   }
 
+  /**
+   * Replaces an existing contact in all relevant local state.
+   *
+   * @param updatedContact - Persisted contact containing the latest values.
+   */
   private updateContactInState(
     updatedContact: Contact,
   ): void {
@@ -195,6 +278,13 @@ export class ContactService {
     });
   }
 
+  /**
+   * Replaces a contact within a collection and sorts the result.
+   *
+   * @param contacts - Contact collection to update.
+   * @param updatedContact - Contact containing the replacement values.
+   * @returns Sorted collection containing the updated contact.
+   */
   private replaceContact(
     contacts: Contact[],
     updatedContact: Contact,
@@ -210,6 +300,11 @@ export class ContactService {
     return this.sortContacts(updatedContacts);
   }
 
+  /**
+   * Removes a contact from local state and clears its selection when required.
+   *
+   * @param contactId - Identifier of the contact to remove.
+   */
   private removeContactFromState(
     contactId: string,
   ): void {
@@ -224,6 +319,16 @@ export class ContactService {
     }
   }
 
+  /**
+   * Ensures that a database mutation succeeded and returned a row.
+   *
+   * @param data - Row returned by the mutation.
+   * @param error - Database error returned by Supabase.
+   * @param action - Mutation action used in the fallback error message.
+   * @returns Validated mutation row.
+   * @throws The provided database error when one is present.
+   * @throws An error when the mutation returned no row.
+   */
   private requireMutationRow<T>(
     data: T | null,
     error: unknown,
@@ -242,6 +347,12 @@ export class ContactService {
     return data;
   }
 
+  /**
+   * Generates a badge color while attempting to avoid colors already in use.
+   *
+   * @returns Newly generated HSL badge color.
+   * @throws The database error returned while loading used colors.
+   */
   private async createUniqueBadgeColor():
     Promise<string> {
     const usedColors =
@@ -263,6 +374,12 @@ export class ContactService {
     return this.createRandomBadgeColor();
   }
 
+  /**
+   * Retrieves all badge colors currently stored for contacts.
+   *
+   * @returns Set containing the stored badge colors.
+   * @throws The database error returned by Supabase.
+   */
   private async getUsedBadgeColors():
     Promise<Set<string>> {
     const { data, error } = await this.supabase
@@ -280,6 +397,11 @@ export class ContactService {
     );
   }
 
+  /**
+   * Generates a badge color within the configured HSL ranges.
+   *
+   * @returns Random HSL color string.
+   */
   private createRandomBadgeColor(): string {
     const hue = this.getRandomNumber(0, 359);
     const saturation =
@@ -290,6 +412,13 @@ export class ContactService {
     return `hsl(${hue} ${saturation}% ${lightness}%)`;
   }
 
+  /**
+   * Generates a random integer within an inclusive range.
+   *
+   * @param minimum - Lowest possible integer.
+   * @param maximum - Highest possible integer.
+   * @returns Random integer between the provided boundaries.
+   */
   private getRandomNumber(
     minimum: number,
     maximum: number,
@@ -302,6 +431,12 @@ export class ContactService {
     );
   }
 
+  /**
+   * Maps multiple database contact rows to application contacts.
+   *
+   * @param contactRows - Contact rows to transform.
+   * @returns Mapped application contacts.
+   */
   private mapContactRows(
     contactRows: ContactRow[],
   ): Contact[] {
@@ -310,6 +445,12 @@ export class ContactService {
     });
   }
 
+  /**
+   * Maps a database contact row to the application contact model.
+   *
+   * @param contactRow - Contact row to transform.
+   * @returns Mapped application contact.
+   */
   private mapContactRow(
     contactRow: ContactRow,
   ): Contact {
@@ -326,6 +467,12 @@ export class ContactService {
     };
   }
 
+  /**
+   * Returns a copy of a contact collection sorted by name.
+   *
+   * @param contacts - Contacts to sort.
+   * @returns Sorted contact collection.
+   */
   private sortContacts(
     contacts: Contact[],
   ): Contact[] {
@@ -339,6 +486,13 @@ export class ContactService {
     );
   }
 
+  /**
+   * Compares two contacts by first name and then by last name.
+   *
+   * @param firstContact - First contact to compare.
+   * @param secondContact - Second contact to compare.
+   * @returns Locale comparison result used for sorting.
+   */
   private compareContacts(
     firstContact: Contact,
     secondContact: Contact,

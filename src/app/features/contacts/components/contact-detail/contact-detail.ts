@@ -3,13 +3,10 @@ import { Contact } from '../../../../core/models/contact.model';
 import { ContactService } from '../../../../core/services/contact.service';
 
 /**
- * Component for displaying the detailed view of a selected contact.
- * 
- * @remarks
- * This component manages the display of contact information, provides an interface
- * for editing or deleting contacts, and handles the responsive mobile action menu state.
- * 
- * @public
+ * Displays the selected contact and coordinates its available actions.
+ *
+ * Provides edit, delete and back requests while managing the animated mobile
+ * action menu.
  */
 @Component({
   selector: 'app-contact-detail',
@@ -18,58 +15,55 @@ import { ContactService } from '../../../../core/services/contact.service';
   styleUrl: './contact-detail.scss',
 })
 export class ContactDetail {
-  /** @internal Duration of the mobile menu closing animation in milliseconds. */
+  /** Duration of the mobile menu closing animation in milliseconds. */
   private readonly mobileMenuAnimationMs = 180;
   
-  /** @internal Timeout ID for the mobile menu closing operation. */
+  /** Identifier of the pending mobile menu close timer. */
   private mobileMenuCloseTimeoutId: number | null = null;
 
-  /** Event emitted when the user requests to navigate back. */
+  /** Emits when the contact detail view should navigate back. */
   backRequested = output<void>();
 
-  /** Event emitted when the user requests to edit the contact. */
+  /** Emits the contact selected for editing. */
   editContactRequested = output<Contact>();
 
-  /** Signal tracking if the mobile action menu is currently open. */
+  /** Indicates whether the mobile action menu is visible. */
   isMobileActionMenuOpen = signal(false);
 
-  /** Signal tracking if the mobile action menu is currently animating to close. */
+  /** Indicates whether the mobile action menu is currently closing. */
   isMobileActionMenuClosing = signal(false);
 
-  /** Service for accessing contact data and logic. */
+  /** Service exposing contact state and persistence operations. */
   private readonly contactService = inject(ContactService);
 
-  /** The currently selected contact data. */
+  /** Contact currently selected in shared contact state. */
   contact = this.contactService.selectedContact;
 
-  /** The list of all available contacts. */
+  /** Complete contact collection exposed by shared contact state. */
   contacts = this.contactService.allContacts;
 
   /**
-   * Retrieves the initials for a given contact by delegating to the service.
-   * 
+   * Creates the initials displayed in a contact badge.
+   *
    * @param firstName - The first name of the contact.
    * @param lastName - The last name of the contact.
    * @returns The contact's initials.
-   * @public
    */
   getInitials(firstName: string, lastName: string): string {
     return this.contactService.getInitials(firstName, lastName);
   }
 
   /**
-   * Emits the edit contact request output.
-   * 
-   * @param contact - The contact object to be edited.
-   * @public
+   * Requests editing for the selected contact.
+   *
+   * @param contact - Contact that should be edited.
    */
   openEditDialog(contact: Contact): void {
     this.editContactRequested.emit(contact);
   }
 
   /**
-   * Toggles the visibility of the mobile action menu.
-   * @public
+   * Opens the mobile action menu or starts closing an open menu.
    */
   toggleMobileActionMenu(): void {
     if (this.isMobileActionMenuOpen()) {
@@ -83,8 +77,7 @@ export class ContactDetail {
   }
 
   /**
-   * Triggers the closing animation for the mobile action menu.
-   * @public
+   * Starts the mobile action menu closing animation when possible.
    */
   closeMobileActionMenu(): void {
     if (!this.isMobileActionMenuOpen() || this.isMobileActionMenuClosing()) {
@@ -101,8 +94,7 @@ export class ContactDetail {
   }
 
   /**
-   * Immediately closes the mobile action menu without animation.
-   * @public
+   * Closes the mobile action menu immediately and clears its timer.
    */
   closeMobileActionMenuImmediately(): void {
     this.clearMobileMenuCloseTimeout();
@@ -111,10 +103,9 @@ export class ContactDetail {
   }
 
   /**
-   * Closes the menu and triggers the edit dialog.
-   * 
+   * Closes the mobile menu and requests editing for a contact.
+   *
    * @param contact - The contact to edit.
-   * @public
    */
   editFromMobileMenu(contact: Contact): void {
     this.closeMobileActionMenuImmediately();
@@ -122,11 +113,11 @@ export class ContactDetail {
   }
 
   /**
-   * Closes the menu and initiates contact deletion.
-   * 
-   * @param contactId - The ID of the contact to delete.
-   * @returns A promise that resolves when the deletion is complete.
-   * @public
+   * Closes the mobile menu and deletes the selected contact.
+   *
+   * @param contactId - Identifier of the contact to delete.
+   * @returns A promise that resolves after deletion and navigation.
+   * @throws The contact deletion error returned by the contact service.
    */
   async deleteFromMobileMenu(contactId: string): Promise<void> {
     this.closeMobileActionMenuImmediately();
@@ -134,11 +125,11 @@ export class ContactDetail {
   }
 
   /**
-   * Deletes a contact and returns to the previous view.
-   * 
-   * @param contactId - The ID of the contact to delete.
-   * @returns A promise that resolves when the operation completes.
-   * @public
+   * Deletes a contact and returns to the contact list.
+   *
+   * @param contactId - Identifier of the contact to delete.
+   * @returns A promise that resolves after deletion and navigation.
+   * @throws The contact deletion error returned by the contact service.
    */
   async deleteContact(contactId: string): Promise<void> {
     await this.contactService.deleteContact(contactId);
@@ -146,8 +137,7 @@ export class ContactDetail {
   }
 
   /**
-   * Clears selection, closes the mobile menu, and emits the back request.
-   * @public
+   * Clears the current selection and requests navigation back to the list.
    */
   goBack(): void {
     this.closeMobileActionMenuImmediately();
@@ -156,7 +146,7 @@ export class ContactDetail {
   }
 
   /**
-   * @internal Clears the timeout used for the mobile menu closing animation.
+   * Cancels and clears the pending mobile menu close timer.
    */
   private clearMobileMenuCloseTimeout(): void {
     if (this.mobileMenuCloseTimeoutId === null) {
