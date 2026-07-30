@@ -11,29 +11,14 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import {
-  ActivatedRoute,
-  Router,
-} from '@angular/router';
-import { isTaskStatus } from '../../../../core/constants/task-status.constants';
+import { Router } from '@angular/router';
 import { Contact } from '../../../../core/models/contact.model';
 import { Subtask } from '../../../../core/models/subtask.model';
-import { TaskAssignmentRow } from '../../../../core/models/task-assignment.model';
 import {
   Task,
-  TaskPositionUpdate,
   TaskStatus,
 } from '../../../../core/models/task.model';
-import { ContactService } from '../../../../core/services/contact.service';
 import { TaskService } from '../../../../core/services/task.service';
-import {
-  filterTasksBySearchTerm,
-  filterTasksByStatus,
-} from '../../../../core/utils/task-filter.utils';
-import {
-  createDropTaskUpdates,
-  createStatusMoveTaskUpdates,
-} from '../../../../core/utils/task-order.utils';
 import { Header } from '../../../../layout/header/header';
 import { Sidebar } from '../../../../layout/sidebar/sidebar';
 import { AddTaskDialog } from '../../../add-task/components/add-task-dialog/add-task-dialog';
@@ -42,13 +27,11 @@ import {
   TaskDialogUpdate,
 } from '../../components/board-cards-dialog/board-cards-dialog';
 import { TaskCard } from '../../components/task-card/task-card';
+import { BoardDataStateService } from '../../services/board-data-state.service';
+import { BoardDialogStateService } from '../../services/board-dialog-state.service';
 import { BoardHorizontalScrollService } from '../../services/board-horizontal-scroll.service';
-import {
-  createContactMap,
-  groupContactIdsByTaskId,
-  groupSubtasksByTaskId,
-  replaceBoardSubtask,
-} from '../../utils/board-data.utils';
+import { BoardRouteService } from '../../services/board-route.service';
+import { BoardTaskPositionService } from '../../services/board-task-position.service';
 
 @Component({
   selector: 'app-board',
@@ -63,65 +46,90 @@ import {
     CdkDropList,
     CdkDrag,
   ],
-  providers: [BoardHorizontalScrollService],
+  providers: [
+    BoardDataStateService,
+    BoardDialogStateService,
+    BoardHorizontalScrollService,
+    BoardRouteService,
+    BoardTaskPositionService,
+  ],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {
-    '(window:resize)': 'onWindowResize()',
+    '(window:resize)':
+      'horizontalScroll.updateViewport()',
     '(pointerdown)':
-      'onHorizontalPointerDown($event)',
+      'horizontalScroll.start($event, isDragging())',
     '(pointermove)':
-      'onHorizontalPointerMove($event)',
+      'horizontalScroll.move($event)',
     '(pointerup)':
-      'onHorizontalPointerEnd($event)',
+      'horizontalScroll.end($event)',
     '(pointercancel)':
-      'onHorizontalPointerEnd($event)',
+      'horizontalScroll.end($event)',
   },
 })
 export class Board implements OnInit {
-  private readonly taskService =
-    inject(TaskService);
+  private readonly taskService = inject(TaskService);
 
-  private readonly contactService =
-    inject(ContactService);
+  private readonly boardData = inject(
+    BoardDataStateService,
+  );
 
-  private readonly horizontalScroll = inject(
+  private readonly dialogState = inject(
+    BoardDialogStateService,
+  );
+
+  protected readonly horizontalScroll = inject(
     BoardHorizontalScrollService,
   );
 
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly boardRoute = inject(
+    BoardRouteService,
+  );
 
-  readonly isDialogOpen = signal(false);
+  private readonly taskPosition = inject(
+    BoardTaskPositionService,
+  );
+
+  private readonly router = inject(Router);
+
+  readonly isDialogOpen =
+    this.dialogState.isOpen;
+
   readonly isAddTaskDialogOpen = signal(false);
 
   readonly addTaskStatus =
     signal<TaskStatus>('todo');
 
   readonly isBoardLoading = signal(false);
-  readonly isBoardUpdating = signal(false);
+
+  readonly isBoardUpdating =
+    this.taskPosition.isUpdating;
+
   readonly isDragging = signal(false);
+
   readonly boardError = signal('');
-  readonly searchTerm = signal('');
-  readonly allSubtasks = signal<Subtask[]>([]);
+
+  readonly searchTerm =
+    this.boardData.searchTerm;
+
+  readonly allSubtasks =
+    this.boardData.allSubtasks;
 
   readonly allAssignments =
-    signal<TaskAssignmentRow[]>([]);
+    this.boardData.allAssignments;
 
   readonly allContacts =
-    this.contactService.allContacts;
+    this.boardData.allContacts;
 
-  readonly dialogTask = signal<Task | null>(
-    null,
-  );
+  readonly dialogTask =
+    this.dialogState.task;
 
-  readonly dialogSubtasks = signal<Subtask[]>(
-    [],
-  );
+  readonly dialogSubtasks =
+    this.dialogState.subtasks;
 
-  readonly dialogContacts = signal<Contact[]>(
-    [],
-  );
+  readonly dialogContacts =
+    this.dialogState.contacts;
 
   protected readonly isMobileViewport =
     this.horizontalScroll.isMobileViewport;
@@ -129,44 +137,21 @@ export class Board implements OnInit {
   protected readonly dropListOrientation =
     this.horizontalScroll.dropListOrientation;
 
-  readonly filteredTasks = computed(() => {
-    return filterTasksBySearchTerm(
-      this.taskService.allTasks(),
-      this.searchTerm(),
-    );
-  });
+  readonly filteredTasks =
+    this.boardData.filteredTasks;
 
-  readonly todo = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'todo',
-    );
-  });
+  readonly todo = this.boardData.todo;
 
-  readonly inProgress = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'in_progress',
-    );
-  });
+  readonly inProgress =
+    this.boardData.inProgress;
 
-  readonly awaitFeedback = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'awaiting_feedback',
-    );
-  });
+  readonly awaitFeedback =
+    this.boardData.awaitFeedback;
 
-  readonly done = computed(() => {
-    return filterTasksByStatus(
-      this.filteredTasks(),
-      'done',
-    );
-  });
+  readonly done = this.boardData.done;
 
-  readonly isSearchActive = computed(() => {
-    return this.searchTerm().trim().length > 0;
-  });
+  readonly isSearchActive =
+    this.boardData.isSearchActive;
 
   readonly isDragDisabled = computed(() => {
     return (
@@ -174,27 +159,6 @@ export class Board implements OnInit {
       this.isBoardUpdating()
     );
   });
-
-  private readonly subtasksByTaskId =
-    computed(() => {
-      return groupSubtasksByTaskId(
-        this.allSubtasks(),
-      );
-    });
-
-  private readonly contactIdsByTaskId =
-    computed(() => {
-      return groupContactIdsByTaskId(
-        this.allAssignments(),
-      );
-    });
-
-  private readonly contactsById =
-    computed(() => {
-      return createContactMap(
-        this.allContacts(),
-      );
-    });
 
   async ngOnInit(): Promise<void> {
     await this.loadBoard();
@@ -205,7 +169,7 @@ export class Board implements OnInit {
     this.boardError.set('');
 
     try {
-      await this.loadBoardContent();
+      await this.boardData.load();
       this.openRequestedTaskDialog();
     } catch (error) {
       console.error(
@@ -218,7 +182,9 @@ export class Board implements OnInit {
       );
     } finally {
       this.isBoardLoading.set(false);
-      this.scheduleRequestedStatusScroll();
+
+      this.boardRoute
+        .scheduleRequestedStatusScroll();
     }
   }
 
@@ -228,24 +194,16 @@ export class Board implements OnInit {
     );
   }
 
-  getSubtasksForTask(taskId: string): Subtask[] {
-    return (
-      this.subtasksByTaskId().get(taskId) ?? []
-    );
+  getSubtasksForTask(
+    taskId: string,
+  ): Subtask[] {
+    return this.boardData.getSubtasks(taskId);
   }
 
-  getContactsForTask(taskId: string): Contact[] {
-    const contactIds =
-      this.contactIdsByTaskId().get(taskId) ??
-      [];
-
-    const contactsById = this.contactsById();
-
-    return contactIds.flatMap((id) => {
-      const contact = contactsById.get(id);
-
-      return contact ? [contact] : [];
-    });
+  getContactsForTask(
+    taskId: string,
+  ): Contact[] {
+    return this.boardData.getContacts(taskId);
   }
 
   openAddTaskDialog(
@@ -269,7 +227,7 @@ export class Board implements OnInit {
 
   closeAddTaskDialog(): void {
     this.isAddTaskDialogOpen.set(false);
-    this.clearTaskSelectionState();
+    this.dialogState.clearSelection();
   }
 
   async handleTaskCreated(): Promise<void> {
@@ -277,19 +235,20 @@ export class Board implements OnInit {
     this.boardError.set('');
 
     try {
-      await this.refreshBoardRelations();
+      await this.boardData.refreshRelations();
     } catch {
       this.boardError.set(
         'Task was created, but the board could not be refreshed completely.',
       );
     } finally {
-      this.clearTaskSelectionState();
+      this.dialogState.clearSelection();
     }
   }
 
   openDialog(task: Task): void {
     if (
-      this.horizontalScroll.consumeSuppressedCardClick()
+      this.horizontalScroll
+        .consumeSuppressedCardClick()
     ) {
       return;
     }
@@ -302,90 +261,49 @@ export class Board implements OnInit {
       task.id,
     );
 
-    this.dialogTask.set(task);
-    this.dialogSubtasks.set(subtasks);
-    this.dialogContacts.set(contacts);
-    this.taskService.selectedTask.set(task);
-
-    this.taskService.selectedSubtasks.set(
+    this.dialogState.open(
+      task,
       subtasks,
-    );
-
-    this.taskService.assignedContacts.set(
       contacts,
     );
-
-    this.isDialogOpen.set(true);
   }
 
   closeDialog(): void {
-    this.isDialogOpen.set(false);
-    this.dialogTask.set(null);
-    this.dialogSubtasks.set([]);
-    this.dialogContacts.set([]);
-    this.clearTaskSelectionState();
-    this.clearRequestedTaskQuery();
+    this.dialogState.close();
+    this.boardRoute.clearRequestedTask();
   }
 
   handleSubtaskUpdated(
     updatedSubtask: Subtask,
   ): void {
-    this.allSubtasks.update((subtasks) => {
-      return replaceBoardSubtask(
-        subtasks,
-        updatedSubtask,
-      );
-    });
+    this.boardData.updateSubtask(
+      updatedSubtask,
+    );
 
-    this.dialogSubtasks.update((subtasks) => {
-      return replaceBoardSubtask(
-        subtasks,
-        updatedSubtask,
-      );
-    });
+    this.dialogState.updateSubtask(
+      updatedSubtask,
+    );
   }
 
   handleTaskDeleted(taskId: string): void {
-    this.allSubtasks.update((subtasks) => {
-      return subtasks.filter(
-        (subtask) =>
-          subtask.taskId !== taskId,
-      );
-    });
-
-    this.allAssignments.update(
-      (assignments) => {
-        return assignments.filter(
-          (assignment) =>
-            assignment.task_id !== taskId,
-        );
-      },
-    );
+    this.boardData.removeTaskRelations(taskId);
   }
 
   async handleTaskUpdated(
     update: TaskDialogUpdate,
   ): Promise<void> {
-    this.dialogTask.set(update.task);
-    this.dialogSubtasks.set(update.subtasks);
-
-    this.dialogContacts.set(
+    this.dialogState.update(
+      update.task,
+      update.subtasks,
       update.assignedContacts,
     );
 
     this.boardError.set('');
 
     try {
-      await this.refreshBoardRelations();
+      await this.boardData.refreshRelations();
     } catch (error) {
-      console.error(
-        'Task was saved, but board relations could not be refreshed.',
-        error,
-      );
-
-      this.boardError.set(
-        'Task was saved, but the board could not be refreshed completely.',
-      );
+      this.handleRelationRefreshError(error);
     }
   }
 
@@ -397,47 +315,19 @@ export class Board implements OnInit {
     this.isDragging.set(false);
   }
 
-  protected onWindowResize(): void {
-    this.horizontalScroll.updateViewport();
-  }
-
-  protected onHorizontalPointerDown(
-    event: PointerEvent,
-  ): void {
-    this.horizontalScroll.start(
-      event,
-      this.isDragging(),
-    );
-  }
-
-  protected onHorizontalPointerMove(
-    event: PointerEvent,
-  ): void {
-    this.horizontalScroll.move(event);
-  }
-
-  protected onHorizontalPointerEnd(
-    event: PointerEvent,
-  ): void {
-    this.horizontalScroll.end(event);
-  }
-
   protected async moveTaskToStatus(
     task: Task,
     targetStatus: TaskStatus,
   ): Promise<void> {
-    if (this.isBoardUpdating()) {
-      return;
-    }
+    this.boardError.set('');
 
-    const updates =
-      createStatusMoveTaskUpdates(
-        this.taskService.allTasks(),
-        task.id,
+    const error =
+      await this.taskPosition.moveToStatus(
+        task,
         targetStatus,
       );
 
-    await this.persistTaskUpdates(updates);
+    this.boardError.set(error);
   }
 
   async drop(
@@ -447,123 +337,24 @@ export class Board implements OnInit {
       return;
     }
 
-    const updates = createDropTaskUpdates(
-      this.taskService.allTasks(),
-      {
-        sourceStatus:
-          event.previousContainer
-            .id as TaskStatus,
-        targetStatus:
-          event.container.id as TaskStatus,
-        sourceIndex: event.previousIndex,
-        targetIndex: event.currentIndex,
-      },
-    );
+    this.boardError.set('');
 
-    await this.persistTaskUpdates(updates);
-  }
-
-  private async loadBoardContent():
-    Promise<void> {
-    const [, boardData, contacts] =
-      await Promise.all([
-        this.taskService.getTasks(),
-        this.taskService.loadAllBoardData(),
-        this.contactService.getContacts(),
-      ]);
-
-    this.allSubtasks.set(boardData.subtasks);
-
-    this.allAssignments.set(
-      boardData.assignments,
-    );
-
-    this.allContacts.set(contacts);
-  }
-
-  private async refreshBoardRelations():
-    Promise<void> {
-    const boardData =
-      await this.taskService.loadAllBoardData();
-
-    this.allSubtasks.set(boardData.subtasks);
-
-    this.allAssignments.set(
-      boardData.assignments,
-    );
-  }
-
-  private scheduleRequestedStatusScroll(): void {
-    const status =
-      this.route.snapshot.queryParamMap.get(
-        'status',
+    const error =
+      await this.taskPosition.moveFromDrop(
+        event,
       );
 
-    if (!status || !isTaskStatus(status)) {
-      return;
-    }
-
-    window.requestAnimationFrame(() => {
-      this.scrollToRequestedStatus(status);
-    });
-  }
-
-  private scrollToRequestedStatus(
-    status: TaskStatus,
-  ): void {
-    const target = document
-      .getElementById(status)
-      ?.closest<HTMLElement>(
-        '.board__column',
-      );
-
-    if (target && this.hasStackedColumns()) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  }
-
-  private hasStackedColumns(): boolean {
-    const columns =
-      document.querySelectorAll<HTMLElement>(
-        '.board__column',
-      );
-
-    const firstColumn = columns.item(0);
-    const secondColumn = columns.item(1);
-
-    return Boolean(
-      firstColumn &&
-      secondColumn &&
-      Math.abs(
-        firstColumn.offsetTop -
-          secondColumn.offsetTop,
-      ) > 1,
-    );
+    this.boardError.set(error);
   }
 
   private openRequestedTaskDialog(): void {
     const taskId =
-      this.route.snapshot.queryParamMap.get(
-        'taskId',
-      );
+      this.boardRoute.getRequestedTaskId();
 
     if (!taskId) {
       return;
     }
 
-    const task = this.findTaskById(taskId);
-
-    if (task) {
-      this.openDialog(task);
-    }
-  }
-
-  private findTaskById(
-    taskId: string,
-  ): Task | undefined {
     const task = this.taskService
       .allTasks()
       .find((item) => item.id === taskId);
@@ -572,82 +363,23 @@ export class Board implements OnInit {
       this.boardError.set(
         'Requested task could not be found.',
       );
-    }
 
-    return task;
-  }
-
-  private clearRequestedTaskQuery(): void {
-    if (
-      !this.route.snapshot.queryParamMap.has(
-        'taskId',
-      )
-    ) {
       return;
     }
 
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        taskId: null,
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
+    this.openDialog(task);
   }
 
-  private clearTaskSelectionState(): void {
-    this.taskService.selectedTask.set(null);
-
-    this.taskService.selectedSubtasks.set(
-      [],
-    );
-
-    this.taskService.assignedContacts.set(
-      [],
-    );
-  }
-
-  private async persistTaskUpdates(
-    updates: TaskPositionUpdate[],
-  ): Promise<void> {
-    if (updates.length === 0) {
-      return;
-    }
-
-    this.isBoardUpdating.set(true);
-    this.boardError.set('');
-
-    try {
-      await this.taskService.updateTaskPositions(
-        updates,
-      );
-    } catch (error) {
-      await this.handleTaskUpdateError(error);
-    } finally {
-      this.isBoardUpdating.set(false);
-    }
-  }
-
-  private async handleTaskUpdateError(
+  private handleRelationRefreshError(
     error: unknown,
-  ): Promise<void> {
+  ): void {
     console.error(
-      'Task positions could not be saved.',
+      'Task was saved, but board relations could not be refreshed.',
       error,
     );
 
     this.boardError.set(
-      'Task positions could not be saved.',
+      'Task was saved, but the board could not be refreshed completely.',
     );
-
-    try {
-      await this.taskService.getTasks();
-    } catch (reloadError) {
-      console.error(
-        'Tasks could not be reloaded.',
-        reloadError,
-      );
-    }
   }
 }
