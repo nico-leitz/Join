@@ -55,11 +55,17 @@
 			font-weight: 700;
 		}
 
-		p {
+		p,
+		li {
 			margin: 0;
 			color: #2a3647;
 			font-size: 20px;
 			line-height: 1.35;
+		}
+
+		ul {
+			margin: 12px 0 0;
+			padding-left: 24px;
 		}
 	}
 }
