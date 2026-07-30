@@ -1,0 +1,83 @@
+.detail {
+  &__title {
+    order: 1;
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    line-height: var(--line-height-base);
+    white-space: nowrap;
+  }
+
+  &__subtitle {
+    order: 2;
+    color: var(--color-primary);
+    font-size: var(--font-size-xl);
+    font-weight: 400;
+    line-height: var(--line-height-base);
+    white-space: nowrap;
+  }
+
+  &__divider {
+    order: 3;
+    display: block;
+    width: 90px;
+    height: 3px;
+    flex-shrink: 0;
+    background-color: var(--color-primary-hover);
+  }
+
+  &__badge {
+    width: 120px;
+    height: 120px;
+    font-size: var(--font-size-2xl);
+  }
+
+  &__name {
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--font-size-2xl);
+    font-weight: 500;
+    line-height: var(--line-height-base);
+    word-break: break-word;
+  }
+
+  &__info-title {
+    min-height: 74px;
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--font-size-md);
+    font-weight: 400;
+    line-height: var(--line-height-base);
+  }
+
+  &__info-label {
+    color: var(--color-text-main);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    line-height: var(--line-height-base);
+  }
+
+  &__info-value {
+    color: var(--color-text-main);
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: var(--line-height-base);
+    word-break: break-word;
+  }
+
+  &__info-link {
+    color: var(--color-link);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__placeholder {
+    color: var(--color-text-main);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-base);
+  }
+}

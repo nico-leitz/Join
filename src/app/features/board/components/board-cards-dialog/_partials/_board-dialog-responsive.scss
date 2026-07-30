@@ -1,0 +1,111 @@
+@use 'abstracts/breakpoints' as bp;
+
+@media (max-width: 767px) {
+  .dialog_overlay {
+    padding: 1rem;
+  }
+
+  .board_dialog {
+    width: 100%;
+    max-height: calc(100dvh - 2rem);
+    border-radius: 24px;
+
+    &__header {
+      min-height: 72px;
+      padding: 20px 24px 12px;
+    }
+
+    &__content {
+      gap: 18px;
+      padding: 8px 24px 20px;
+
+      &--edit {
+        gap: 18px;
+      }
+    }
+
+    &__actions {
+      min-height: 64px;
+      padding: 12px 24px 20px;
+
+      &--edit {
+        padding-top: 8px;
+      }
+    }
+
+    &__edit_heading {
+      font-size: 24px;
+    }
+
+    &__type,
+    &__desc,
+    &__meta,
+    &__section_title {
+      font-size: 16px;
+    }
+
+    &__assignee,
+    &__subtask {
+      font-size: 16px;
+    }
+
+    &__meta {
+      align-items: flex-start;
+    }
+    &__label {
+      width: 80px;
+    }
+    &__priorities {
+      gap: 8px;
+    }
+
+    &__priority_button {
+      gap: 5px;
+      padding-inline: 6px;
+      font-size: 16px;
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &__edit_button {
+      min-width: 60px;
+      min-height: 42px;
+      padding: 9px 12px;
+    }
+  }
+}
+
+@media (max-width: bp.$breakpoint-mobile-l) and (orientation: portrait) {
+  .board_dialog {
+    animation: board-dialog-mobile-slide-up-in 300ms ease-out both;
+
+    &--closing {
+      animation: board-dialog-mobile-slide-down-out 200ms ease-in both;
+    }
+  }
+}
+
+@media (max-width: 390px) {
+  .board_dialog {
+    &__header {
+      padding-inline: 18px;
+    }
+    &__content {
+      padding-inline: 18px;
+    }
+    &__actions {
+      padding-inline: 18px;
+    }
+    &__priorities {
+      grid-template-columns: 1fr;
+    }
+
+    &__priority_button {
+      justify-content: space-between;
+      padding-inline: 14px;
+    }
+  }
+}
