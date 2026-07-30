@@ -1,89 +1,253 @@
-<section class="summary_page">
-    <app-sidebar></app-sidebar>
-    <section class="summary_page_content">
-        <app-header></app-header>
-        @if (showMobileGreeting()) {
-            <section class="mobile-greeting" [class.mobile-greeting--leaving]="isMobileGreetingLeaving()" aria-live="polite">
-                <p class="mobile-greeting__text">Good morning,</p>
-                @if (showGreetingName()) {
-                    <p class="mobile-greeting__name">Sandra Müller</p>
-                }
-            </section>
-        } @else {
-            <section class="summary_element">
-                <div class="title_wrapper">
-                    <p class="title_title">Join 360</p>
-                    <div class="title_divider"></div>
-                    <p class="title_paragraph">Key Metrics at a Glance</p>
-                    <div class="title_divider_mobile"></div>
-                </div>
-                <section class="summary_content">
-                    <div class="summary_content_cards_wrapper">
-                        <div class="summary_content_upper">
-                            <div class="card card_medium hover hover_left">
-                                <div class="card_medium_icon_wrapper">
-                                    <div class="card_medium_icon_pencil"></div>
-                                </div>
-                                <div class="card_medium_text_wrapper">
-                                    <p class="card_medium_stat">1</p>
-                                    <p class="card_medium_text">To-Do</p>
-                                </div>
-                            </div>
-                            <div class="card card_medium hover hover_right">
-                                <div class="card_medium_icon_wrapper">
-                                    <div class="card_medium_icon_check"></div>
-                                </div>
-                                <div class="card_medium_text_wrapper">
-                                    <p class="card_medium_stat">1</p>
-                                    <p class="card_medium_text">Done</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="summary_content_mid hover_height">
-                            <div class="card card_large hover">
-                                <div class="card_large">
-                                    <div class="card_large_content_left">
-                                        <div class="card_large_icon_wrapper">
-                                            <div class="card_large_icon_doubleArrow"></div>
-                                        </div>
-                                        <div class="card_medium_text_wrapper">
-                                            <p class="card_large_stat">1</p>
-                                            <p class="card_large_text">Done</p>
-                                        </div>
-                                    </div>
-                                    <div class="card_large_content_divider"></div>
-                                    <div class="card_large_content_right">
-                                        <p class="card_large_content_right_date">October 16, 2022</p>
-                                        <p class="card_large_content_right_text">Upcoming Deadline</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="summary_content_lower">
-                            <div class="card card_small hover hover_left">
-                                <p class="card_medium_stat">5</p>
-                                <p class="card_medium_text">Tasks in <br> Board</p>
-                            </div>
-                            <div class="card card_small hover hover_mid">
-                                <p class="card_medium_stat">2</p>
-                                <p class="card_medium_text">Tasks in <br> Progress</p>
-                            </div>
-                            <div class="card card_small hover hover_right">
-                                <p class="card_medium_stat">2</p>
-                                <p class="card_medium_text">Awaiting <br> Feedback</p>
-                            </div>
-                        </div>
-                    </div>
-                    <aside class="summary_content_right">
-                        <div class="summary_content_greeting_wrapper">
-                            <div class="greeting">
-                                <p class="greeting_paragraph">Good morning,</p>
-                                <p class="greeting_name">Sofia Müller</p>
-                            </div>
-                        </div>
-                    </aside>
-                </section>
-            </section>
+<section class="summary-page">
+  <app-sidebar></app-sidebar>
+
+  <section class="summary-page__content">
+    <app-header></app-header>
+
+    @if (showMobileGreeting()) {
+      <section
+        class="mobile-greeting"
+        [class.mobile-greeting--leaving]="
+          isMobileGreetingLeaving()
+        "
+        aria-live="polite"
+      >
+        <p class="mobile-greeting__text">
+          {{ greetingText()
+          }}{{ showGreetingName() ? ',' : '!' }}
+        </p>
+
+        @if (showGreetingName()) {
+          <p class="mobile-greeting__name">
+            {{ greetingName() }}
+          </p>
         }
-    </section>
+      </section>
+    } @else {
+      <main
+        class="summary"
+        aria-labelledby="summary-title"
+      >
+        <header class="summary__header">
+          <h1
+            id="summary-title"
+            class="summary__title"
+          >
+            Join 360
+          </h1>
+
+          <span
+            class="summary__divider"
+            aria-hidden="true"
+          ></span>
+
+          <p class="summary__subtitle">
+            Key Metrics at a Glance
+          </p>
+
+          <span
+            class="summary__mobile-divider"
+            aria-hidden="true"
+          ></span>
+        </header>
+
+        @if (errorMessage()) {
+          <p
+            class="summary__error"
+            role="alert"
+          >
+            {{ errorMessage() }}
+          </p>
+        }
+
+        <section class="summary__layout">
+          <section
+            class="metrics"
+            aria-label="Task overview"
+            [attr.aria-busy]="isLoading()"
+          >
+            <a
+              class="metric-card metric-card--medium metric-card--todo"
+              routerLink="/board"
+              [attr.aria-label]="
+                'Open board. ' +
+                todoCount() +
+                ' tasks to do.'
+              "
+            >
+              <span
+                class="metric-card__icon-wrapper"
+                aria-hidden="true"
+              >
+                <span
+                  class="metric-card__icon metric-card__icon--todo"
+                ></span>
+              </span>
+
+              <span class="metric-card__text-group">
+                <span class="metric-card__number">
+                  {{ isLoading() ? '–' : todoCount() }}
+                </span>
+                <span class="metric-card__label">
+                  To-do
+                </span>
+              </span>
+            </a>
+
+            <a
+              class="metric-card metric-card--medium metric-card--done"
+              routerLink="/board"
+              [attr.aria-label]="
+                'Open board. ' +
+                doneCount() +
+                ' completed tasks.'
+              "
+            >
+              <span
+                class="metric-card__icon-wrapper"
+                aria-hidden="true"
+              >
+                <span
+                  class="metric-card__icon metric-card__icon--done"
+                ></span>
+              </span>
+
+              <span class="metric-card__text-group">
+                <span class="metric-card__number">
+                  {{ isLoading() ? '–' : doneCount() }}
+                </span>
+                <span class="metric-card__label">
+                  Done
+                </span>
+              </span>
+            </a>
+
+            <a
+              class="metric-card metric-card--urgent"
+              routerLink="/board"
+              [attr.aria-label]="
+                'Open board. ' +
+                urgentCount() +
+                ' urgent tasks. Upcoming deadline: ' +
+                upcomingDeadline()
+              "
+            >
+              <span class="urgent-summary">
+                <span
+                  class="urgent-summary__icon"
+                  aria-hidden="true"
+                ></span>
+
+                <span class="metric-card__text-group">
+                  <span class="metric-card__number">
+                    {{
+                      isLoading()
+                        ? '–'
+                        : urgentCount()
+                    }}
+                  </span>
+                  <span class="metric-card__label">
+                    Urgent
+                  </span>
+                </span>
+              </span>
+
+              <span
+                class="urgent-summary__divider"
+                aria-hidden="true"
+              ></span>
+
+              <span class="deadline">
+                <span class="deadline__date">
+                  {{
+                    isLoading()
+                      ? 'Loading...'
+                      : upcomingDeadline()
+                  }}
+                </span>
+                <span class="deadline__label">
+                  Upcoming Deadline
+                </span>
+              </span>
+            </a>
+
+            <a
+              class="metric-card metric-card--small"
+              routerLink="/board"
+              [attr.aria-label]="
+                'Open board. ' +
+                tasks().length +
+                ' tasks in board.'
+              "
+            >
+              <span class="metric-card__number">
+                {{ isLoading() ? '–' : tasks().length }}
+              </span>
+              <span class="metric-card__label">
+                Tasks in<br />Board
+              </span>
+            </a>
+
+            <a
+              class="metric-card metric-card--small"
+              routerLink="/board"
+              [attr.aria-label]="
+                'Open board. ' +
+                inProgressCount() +
+                ' tasks in progress.'
+              "
+            >
+              <span class="metric-card__number">
+                {{
+                  isLoading()
+                    ? '–'
+                    : inProgressCount()
+                }}
+              </span>
+              <span class="metric-card__label">
+                Tasks in<br />Progress
+              </span>
+            </a>
+
+            <a
+              class="metric-card metric-card--small"
+              routerLink="/board"
+              [attr.aria-label]="
+                'Open board. ' +
+                awaitingFeedbackCount() +
+                ' tasks awaiting feedback.'
+              "
+            >
+              <span class="metric-card__number">
+                {{
+                  isLoading()
+                    ? '–'
+                    : awaitingFeedbackCount()
+                }}
+              </span>
+              <span class="metric-card__label">
+                Awaiting<br />Feedback
+              </span>
+            </a>
+          </section>
+
+          <aside
+            class="summary__greeting"
+            aria-live="polite"
+          >
+            <p class="summary__greeting-text">
+              {{ greetingText()
+              }}{{ showGreetingName() ? ',' : '!' }}
+            </p>
+
+            @if (showGreetingName()) {
+              <p class="summary__greeting-name">
+                {{ greetingName() }}
+              </p>
+            }
+          </aside>
+        </section>
+      </main>
+    }
+  </section>
 </section>
