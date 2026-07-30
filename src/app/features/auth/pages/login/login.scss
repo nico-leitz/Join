@@ -33,14 +33,17 @@
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding: 3rem 5rem;
+    position: relative;
+    z-index: 10;
   }
 
   &__logo {
     img {
-      height: 4rem;
+      height: 7rem;
       width: auto;
+      transition: height 0.2s ease-in-out;
     }
   }
 
@@ -48,6 +51,10 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+
+    &--mobile {
+      display: none;
+    }
   }
 
   &__signup-text {
@@ -89,6 +96,8 @@
     justify-content: center;
     gap: 2rem;
     padding: 2rem;
+    position: relative;
+    z-index: 10;
   }
 
   &__footer-link {
@@ -384,23 +393,34 @@
       padding: 1.25rem 1rem 1.25rem;
     }
 
+    &__header {
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--color-bg-page);
+    }
+
+    &__signup {
+      &--desktop {
+        display: none;
+      }
+
+      &--mobile {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+        margin-bottom: 2rem;
+      }
+    }
+
     &__footer {
       position: sticky;
       bottom: 0;
-      z-index: 5;
+      z-index: 10;
       flex: 0 0 auto;
       background-color: var(--color-bg-page);
       padding: 1rem;
-    }
-  }
-
-  .login-page {
-    &__header {
-      padding: 1.5rem 1rem;
-    }
-
-    &__signup-text {
-      display: none;
     }
   }
 
@@ -429,6 +449,10 @@
   .login-page {
     &__header {
       padding: 0.625rem 0.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--color-bg-page);
     }
 
     &__logo img {
