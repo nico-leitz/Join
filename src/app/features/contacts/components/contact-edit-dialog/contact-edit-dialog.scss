@@ -109,6 +109,18 @@
   }
 }
 
+@media (max-width: bp.$breakpoint-mobile-l) and (orientation: portrait) {
+  .contact-dialog {
+    &--edit {
+      animation: contact-dialog-mobile-slide-up-in 300ms ease-out both;
+    }
+
+    &--edit.contact-dialog--closing {
+      animation: contact-dialog-mobile-slide-down-out 200ms ease-in both;
+    }
+  }
+}
+
 @media (orientation: landscape) and (max-height: bp.$breakpoint-landscape-height-md) and (max-width: bp.$breakpoint-landscape-width-lg) {
   .contact-dialog {
     &__actions {
