@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 import { AddTaskPage } from './features/add-task/pages/add-task-page/add-task-page';
 import { AuthPage } from './features/auth/auth-page/auth-page';
 import { Login } from './features/auth/pages/login/login';
@@ -31,20 +32,30 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'summary',
-    component: Summary,
-  },
-  {
-    path: 'add-task',
-    component: AddTaskPage,
-  },
-  {
-    path: 'board',
-    component: Board,
-  },
-  {
-    path: 'contacts',
-    component: Contacts,
+    path: '',
+    canActivateChild: [authGuard],
+    children: [
+      {
+        path: 'summary',
+        component: Summary,
+      },
+      {
+        path: 'add-task',
+        component: AddTaskPage,
+      },
+      {
+        path: 'board',
+        component: Board,
+      },
+      {
+        path: 'contacts',
+        component: Contacts,
+      },
+      {
+        path: 'help',
+        component: Help,
+      },
+    ],
   },
   {
     path: 'legal-notice',
@@ -53,10 +64,6 @@ export const routes: Routes = [
   {
     path: 'privacy-policy',
     component: PrivacyPolicy,
-  },
-  {
-    path: 'help',
-    component: Help,
   },
   {
     path: '**',
