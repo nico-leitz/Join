@@ -1,0 +1,13 @@
+:host {
+  --color-bg-page: #f6f7f8;
+  --color-bg-form: #ffffff;
+  --color-text-dark: #2a3647;
+  --color-text-muted: #686868;
+  --color-border: #d1d1d1;
+  --color-cyan: #29abe2;
+  --color-error: #ff8190;
+
+  display: block;
+  min-height: 100vh;
+  background-color: var(--color-bg-page);
+}
