@@ -23,15 +23,15 @@ describe('Login Component', () => {
       clearError: vi.fn(),
       signIn: vi.fn(),
       signInAsGuest: vi.fn(),
-      queueSummaryGreeting: vi.fn()
+      queueSummaryGreeting: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
       imports: [Login],
       providers: [
         provideRouter([]),
-        { provide: AuthService, useValue: mockAuthService }
-      ]
+        { provide: AuthService, useValue: mockAuthService },
+      ],
     }).compileComponents();
 
     router = TestBed.inject(Router);
@@ -39,7 +39,7 @@ describe('Login Component', () => {
 
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
-    
+
     fixture.detectChanges();
   });
 
@@ -69,16 +69,16 @@ describe('Login Component', () => {
   });
 
   /**
-   * @test Verifies that a malformed email address triggers the email validation error.
+   * @test Verifies that login leaves email-format validation to the authentication service.
    */
-  it('should invalidate a malformed email address', () => {
+  it('should accept any non-empty email value', () => {
     const control = component.loginForm.controls.email;
     control.markAsTouched();
     control.setValue('invalid-email-format');
 
-    expect(control.invalid).toBe(true);
-    expect(control.hasError('email')).toBe(true);
-    expect(component.isControlInvalid('email')).toBe(true);
+    expect(control.valid).toBe(true);
+    expect(control.hasError('email')).toBe(false);
+    expect(component.isControlInvalid('email')).toBe(false);
   });
 
   /**
@@ -100,7 +100,7 @@ describe('Login Component', () => {
   it('should not call signIn when submitting an invalid form', async () => {
     component.loginForm.controls.email.setValue('');
     component.loginForm.controls.password.setValue('');
-    
+
     await component.onSubmit();
 
     expect(component.submitted()).toBe(true);
@@ -113,10 +113,10 @@ describe('Login Component', () => {
    */
   it('should normalize credentials, call signIn, and navigate to summary on successful login', async () => {
     mockAuthService.signIn.mockResolvedValue(true);
-    
+
     component.loginForm.patchValue({
       email: 'TestUser@Example.com',
-      password: 'SecurePassword123'
+      password: 'SecurePassword123',
     });
 
     await component.onSubmit();
@@ -124,7 +124,7 @@ describe('Login Component', () => {
     expect(component.submitted()).toBe(true);
     expect(mockAuthService.signIn).toHaveBeenCalledWith({
       email: 'testuser@example.com',
-      password: 'SecurePassword123'
+      password: 'SecurePassword123',
     });
     expect(mockAuthService.queueSummaryGreeting).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/summary']);
@@ -135,10 +135,10 @@ describe('Login Component', () => {
    */
   it('should not navigate to summary if user login fails', async () => {
     mockAuthService.signIn.mockResolvedValue(false);
-    
+
     component.loginForm.patchValue({
       email: 'test@example.com',
-      password: 'wrongpassword'
+      password: 'wrongpassword',
     });
 
     await component.onSubmit();
@@ -179,7 +179,7 @@ describe('Login Component', () => {
    */
   it('should clear backend auth errors when form input changes', () => {
     mockAuthService.errorMessage.set('Invalid credentials');
-    
+
     component.onFormChange();
 
     expect(mockAuthService.clearError).toHaveBeenCalled();
@@ -191,7 +191,7 @@ describe('Login Component', () => {
   it('should not call clearError on form change if no error message exists', () => {
     mockAuthService.clearError.mockClear();
     mockAuthService.errorMessage.set('');
-    
+
     component.onFormChange();
 
     expect(mockAuthService.clearError).not.toHaveBeenCalled();

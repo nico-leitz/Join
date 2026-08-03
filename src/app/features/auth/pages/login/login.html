@@ -1,21 +1,21 @@
 <div class="login-page">
   @if (showSplash()) {
-    <div
-      class="login-splash"
-      [class.login-splash--mobile]="isMobile()"
-      aria-hidden="true"
-    >
-      <img
-        class="login-splash__logo"
-        [class.login-splash__logo--mobile]="isMobile()"
-        [src]="
-          isMobile()
-            ? 'assets/sidebar/icons/join-logo.svg'
-            : 'assets/log-in/join-logo-blue.svg'
-        "
-        alt=""
-      />
-    </div>
+  <div
+    class="login-splash"
+    [class.login-splash--mobile]="isMobile()"
+    aria-hidden="true"
+  >
+    <img
+      class="login-splash__logo"
+      [class.login-splash__logo--mobile]="isMobile()"
+      [src]="
+        isMobile()
+          ? 'assets/sidebar/icons/join-logo.svg'
+          : 'assets/log-in/join-logo-blue.svg'
+      "
+      alt=""
+    />
+  </div>
   }
 
   <div class="login-page__content">
@@ -84,9 +84,7 @@
               "
             >
               @if (loginForm.controls.email.hasError('required')) {
-                Please enter your email address.
-              } @else if (loginForm.controls.email.hasError('email')) {
-                Please enter a valid email address.
+              Please enter your email address.
               }
             </p>
           </div>
@@ -124,7 +122,7 @@
               "
             >
               @if (isControlInvalid('password')) {
-                Please enter your password.
+              Please enter your password.
               }
             </p>
           </div>
@@ -147,9 +145,9 @@
               [disabled]="authService.isLoading()"
             >
               @if (activeLogin() === 'user') {
-                Logging in...
+              Logging in...
               } @else {
-                Log in
+              Log in
               }
             </button>
 
@@ -160,9 +158,9 @@
               (click)="onGuestLogin()"
             >
               @if (activeLogin() === 'guest') {
-                Logging in...
+              Logging in...
               } @else {
-                Guest Log in
+              Guest Log in
               }
             </button>
           </div>
