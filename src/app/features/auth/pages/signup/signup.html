@@ -1,10 +1,7 @@
 <div class="signup-page">
   <header class="signup-page__header">
     <div class="signup-page__logo">
-      <img
-        src="assets/sign-up/join-logo-blue.svg"
-        alt="Join Logo"
-      />
+      <img src="assets/sign-up/join-logo-blue.svg" alt="Join Logo" />
     </div>
   </header>
 
@@ -18,20 +15,13 @@
           routerLink="/login"
         >
           <span aria-hidden="true">
-            <img
-              src="assets/sign-up/arrow.svg"
-              alt=""
-            />
+            <img src="assets/sign-up/arrow.svg" alt="" />
           </span>
         </button>
 
         <div class="signup-card__title-wrapper">
           <h1 class="signup-card__title">Sign up</h1>
-
-          <div
-            class="signup-card__underline"
-            aria-hidden="true"
-          ></div>
+          <div class="signup-card__underline" aria-hidden="true"></div>
         </div>
       </header>
 
@@ -44,10 +34,7 @@
       >
         <div class="signup-card__field">
           <div class="signup-card__input-group">
-            <label
-              class="signup-card__visually-hidden"
-              for="signup-name"
-            >
+            <label class="signup-card__visually-hidden" for="signup-name">
               Name
             </label>
 
@@ -65,14 +52,8 @@
               [attr.aria-invalid]="isControlInvalid('fullName')"
             />
 
-            <span
-              class="signup-card__icon"
-              aria-hidden="true"
-            >
-              <img
-                src="assets/sign-up/person.svg"
-                alt=""
-              />
+            <span class="signup-card__icon" aria-hidden="true">
+              <img src="assets/sign-up/person.svg" alt="" />
             </span>
           </div>
 
@@ -83,18 +64,23 @@
               isControlInvalid('fullName')
             "
           >
-            @if (isControlInvalid('fullName')) {
-              Please enter your name.
+            @if (signupForm.controls.fullName.hasError('required')) {
+            Please enter your name.
+            } @else if (
+              signupForm.controls.fullName.hasError('invalidNameCharacters')
+            ) {
+            Use letters, spaces, hyphens, or apostrophes only.
+            } @else if (
+              signupForm.controls.fullName.hasError('minLetters')
+            ) {
+            Your name must contain at least 6 letters.
             }
           </p>
         </div>
 
         <div class="signup-card__field">
           <div class="signup-card__input-group">
-            <label
-              class="signup-card__visually-hidden"
-              for="signup-email"
-            >
+            <label class="signup-card__visually-hidden" for="signup-email">
               Email
             </label>
 
@@ -112,14 +98,8 @@
               [attr.aria-invalid]="isControlInvalid('email')"
             />
 
-            <span
-              class="signup-card__icon"
-              aria-hidden="true"
-            >
-              <img
-                src="assets/sign-up/mail.svg"
-                alt=""
-              />
+            <span class="signup-card__icon" aria-hidden="true">
+              <img src="assets/sign-up/mail.svg" alt="" />
             </span>
           </div>
 
@@ -131,21 +111,17 @@
             "
           >
             @if (signupForm.controls.email.hasError('required')) {
-              Please enter your email address.
-            } @else if (
-              signupForm.controls.email.hasError('email')
-            ) {
-              Please enter a valid email address.
+            Please enter your email address.
+            } @else if (signupForm.controls.email.hasError('strictEmail')) {
+            Enter an address like name&#64;provider.com with an ending of at
+            least 2 letters.
             }
           </p>
         </div>
 
         <div class="signup-card__field">
           <div class="signup-card__input-group">
-            <label
-              class="signup-card__visually-hidden"
-              for="signup-password"
-            >
+            <label class="signup-card__visually-hidden" for="signup-password">
               Password
             </label>
 
@@ -156,6 +132,8 @@
               formControlName="password"
               placeholder="Password"
               autocomplete="new-password"
+              minlength="8"
+              title="Use at least 8 characters, including one uppercase letter and one number."
               aria-describedby="signup-password-error"
               [class.signup-card__input--error]="
                 isControlInvalid('password')
@@ -163,14 +141,8 @@
               [attr.aria-invalid]="isControlInvalid('password')"
             />
 
-            <span
-              class="signup-card__icon"
-              aria-hidden="true"
-            >
-              <img
-                src="assets/sign-up/lock.svg"
-                alt=""
-              />
+            <span class="signup-card__icon" aria-hidden="true">
+              <img src="assets/sign-up/lock.svg" alt="" />
             </span>
           </div>
 
@@ -181,8 +153,23 @@
               isControlInvalid('password')
             "
           >
-            @if (isControlInvalid('password')) {
-              Please enter a password.
+            @if (signupForm.controls.password.hasError('required')) {
+            Please enter a password.
+            } @else if (signupForm.controls.password.hasError('minlength')) {
+            Use at least 8 characters.
+            } @else if (
+              signupForm.controls.password.hasError('missingUppercase') &&
+              signupForm.controls.password.hasError('missingNumber')
+            ) {
+            Include at least one uppercase letter and one number.
+            } @else if (
+              signupForm.controls.password.hasError('missingUppercase')
+            ) {
+            Include at least one uppercase letter.
+            } @else if (
+              signupForm.controls.password.hasError('missingNumber')
+            ) {
+            Include at least one number.
             }
           </p>
         </div>
@@ -205,23 +192,15 @@
               autocomplete="new-password"
               aria-describedby="signup-confirmation-error"
               [class.signup-card__input--error]="
-                isControlInvalid('confirmPassword')
-                || hasPasswordMismatch()
+                isControlInvalid('confirmPassword') || hasPasswordMismatch()
               "
               [attr.aria-invalid]="
-                isControlInvalid('confirmPassword')
-                || hasPasswordMismatch()
+                isControlInvalid('confirmPassword') || hasPasswordMismatch()
               "
             />
 
-            <span
-              class="signup-card__icon"
-              aria-hidden="true"
-            >
-              <img
-                src="assets/sign-up/lock.svg"
-                alt=""
-              />
+            <span class="signup-card__icon" aria-hidden="true">
+              <img src="assets/sign-up/lock.svg" alt="" />
             </span>
           </div>
 
@@ -229,16 +208,15 @@
             id="signup-confirmation-error"
             class="signup-card__error"
             [class.signup-card__error--visible]="
-              isControlInvalid('confirmPassword')
-              || hasPasswordMismatch()
+              isControlInvalid('confirmPassword') || hasPasswordMismatch()
             "
           >
             @if (
               signupForm.controls.confirmPassword.hasError('required')
             ) {
-              Please confirm your password.
+            Please confirm your password.
             } @else if (hasPasswordMismatch()) {
-              Your passwords do not match.
+            Your passwords do not match.
             }
           </p>
         </div>
@@ -255,9 +233,7 @@
               class="signup-card__checkbox"
               formControlName="privacyAccepted"
               aria-describedby="signup-privacy-error"
-              [attr.aria-invalid]="
-                isControlInvalid('privacyAccepted')
-              "
+              [attr.aria-invalid]="isControlInvalid('privacyAccepted')"
             />
 
             <span class="signup-card__checkbox-text">
@@ -280,7 +256,7 @@
             "
           >
             @if (isControlInvalid('privacyAccepted')) {
-              Please accept the Privacy Policy.
+            Please accept the Privacy Policy.
             }
           </p>
         </div>
@@ -300,14 +276,12 @@
           <button
             type="submit"
             class="signup-card__btn signup-card__btn--primary"
-            [disabled]="
-              signupForm.invalid || authService.isLoading()
-            "
+            [disabled]="signupForm.invalid || authService.isLoading()"
           >
             @if (authService.isLoading()) {
-              Signing up...
+            Signing up...
             } @else {
-              Sign up
+            Sign up
             }
           </button>
         </div>
@@ -316,17 +290,11 @@
   </main>
 
   <footer class="signup-page__footer">
-    <a
-      routerLink="/privacy-policy"
-      class="signup-page__footer-link"
-    >
+    <a routerLink="/privacy-policy" class="signup-page__footer-link">
       Privacy Policy
     </a>
 
-    <a
-      routerLink="/legal-notice"
-      class="signup-page__footer-link"
-    >
+    <a routerLink="/legal-notice" class="signup-page__footer-link">
       Legal notice
     </a>
   </footer>
