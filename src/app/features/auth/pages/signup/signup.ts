@@ -1,22 +1,22 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
-} from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { SignUpCredentials } from '../../../../core/models/auth.model';
-import { AuthService } from '../../../../core/services/auth.service';
+} from "@angular/forms";
+import { Router, RouterLink } from "@angular/router";
+import { SignUpCredentials } from "../../../../core/models/auth.model";
+import { AuthService } from "../../../../core/services/auth.service";
 
 /** Names of controls belonging to the signup form. */
 type SignupControlName =
-  | 'fullName'
-  | 'email'
-  | 'password'
-  | 'confirmPassword'
-  | 'privacyAccepted';
+  | "fullName"
+  | "email"
+  | "password"
+  | "confirmPassword"
+  | "privacyAccepted";
 
 /** Minimum number of alphabetic characters required in a name. */
 const MINIMUM_NAME_LETTERS = 6;
@@ -43,9 +43,9 @@ const EMAIL_TOP_LEVEL_DOMAIN_PATTERN = /^[A-Za-z]{2,63}$/;
  * @returns Detailed name errors or null when the name is valid.
  */
 function fullNameValidator(control: AbstractControl): ValidationErrors | null {
-  const normalizedName = String(control.value ?? '')
+  const normalizedName = String(control.value ?? "")
     .trim()
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, " ");
 
   if (!normalizedName) {
     return { required: true };
@@ -55,14 +55,14 @@ function fullNameValidator(control: AbstractControl): ValidationErrors | null {
   const errors: ValidationErrors = {};
 
   if (letterCount < MINIMUM_NAME_LETTERS) {
-    errors['minLetters'] = {
+    errors["minLetters"] = {
       required: MINIMUM_NAME_LETTERS,
       actual: letterCount,
     };
   }
 
   if (!FULL_NAME_PATTERN.test(normalizedName)) {
-    errors['invalidNameCharacters'] = true;
+    errors["invalidNameCharacters"] = true;
   }
 
   return Object.keys(errors).length ? errors : null;
@@ -79,21 +79,21 @@ function fullNameValidator(control: AbstractControl): ValidationErrors | null {
 function strictEmailValidator(
   control: AbstractControl,
 ): ValidationErrors | null {
-  const email = String(control.value ?? '').trim();
+  const email = String(control.value ?? "").trim();
 
   if (!email) {
     return null;
   }
 
-  const parts = email.split('@');
+  const parts = email.split("@");
 
   if (parts.length !== 2) {
     return { strictEmail: true };
   }
 
   const [localPart, domain] = parts;
-  const domainLabels = domain.split('.');
-  const topLevelDomain = domainLabels.at(-1) ?? '';
+  const domainLabels = domain.split(".");
+  const topLevelDomain = domainLabels.at(-1) ?? "";
   const providerLabels = domainLabels.slice(0, -1);
 
   const hasValidLength = email.length <= 254 && localPart.length <= 64;
@@ -121,7 +121,7 @@ function strictEmailValidator(
 function passwordStrengthValidator(
   control: AbstractControl,
 ): ValidationErrors | null {
-  const password = String(control.value ?? '');
+  const password = String(control.value ?? "");
 
   if (!password) {
     return null;
@@ -130,11 +130,11 @@ function passwordStrengthValidator(
   const errors: ValidationErrors = {};
 
   if (!/[A-Z]/.test(password)) {
-    errors['missingUppercase'] = true;
+    errors["missingUppercase"] = true;
   }
 
   if (!/[0-9]/.test(password)) {
-    errors['missingNumber'] = true;
+    errors["missingNumber"] = true;
   }
 
   return Object.keys(errors).length ? errors : null;
@@ -149,9 +149,9 @@ function passwordStrengthValidator(
 function passwordsMatchValidator(
   control: AbstractControl,
 ): ValidationErrors | null {
-  const password = control.get('password')?.value;
+  const password = control.get("password")?.value;
 
-  const confirmation = control.get('confirmPassword')?.value;
+  const confirmation = control.get("confirmPassword")?.value;
 
   return password === confirmation ? null : { passwordMismatch: true };
 }
@@ -160,13 +160,13 @@ function passwordsMatchValidator(
  * Provides account registration through the authentication service.
  *
  * Manages signup validation, credential normalization and navigation
- * according to the returned email-confirmation state.
+ * after Supabase creates the authenticated demo session.
  */
 @Component({
-  selector: 'app-signup',
+  selector: "app-signup",
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './signup.html',
-  styleUrl: './signup.scss',
+  templateUrl: "./signup.html",
+  styleUrl: "./signup.scss",
 })
 export class Signup {
   /** Non-nullable form builder used to construct the signup form. */
@@ -184,17 +184,17 @@ export class Signup {
   /** Reactive form containing registration and privacy fields. */
   readonly signupForm = this.formBuilder.group(
     {
-      fullName: ['', [Validators.required, fullNameValidator]],
-      email: ['', [Validators.required, strictEmailValidator]],
+      fullName: ["", [Validators.required, fullNameValidator]],
+      email: ["", [Validators.required, strictEmailValidator]],
       password: [
-        '',
+        "",
         [
           Validators.required,
           Validators.minLength(8),
           passwordStrengthValidator,
         ],
       ],
-      confirmPassword: ['', Validators.required],
+      confirmPassword: ["", Validators.required],
       privacyAccepted: [false, Validators.requiredTrue],
     },
     {
@@ -223,10 +223,10 @@ export class Signup {
       return;
     }
 
-    const result = await this.authService.signUp(this.buildCredentials());
+    const success = await this.authService.signUp(this.buildCredentials());
 
-    if (result) {
-      await this.navigateAfterSignup(result.requiresEmailConfirmation);
+    if (success) {
+      await this.router.navigate(["/summary"]);
     }
   }
 
@@ -260,7 +260,7 @@ export class Signup {
     const confirmation = this.signupForm.controls.confirmPassword;
 
     return (
-      this.signupForm.hasError('passwordMismatch') &&
+      this.signupForm.hasError("passwordMismatch") &&
       (confirmation.touched || this.submitted())
     );
   }
@@ -274,24 +274,10 @@ export class Signup {
     const formValue = this.signupForm.getRawValue();
 
     return {
-      fullName: formValue.fullName.trim().replace(/\s+/g, ' '),
+      fullName: formValue.fullName.trim().replace(/\s+/g, " "),
       email: formValue.email.trim().toLowerCase(),
       password: formValue.password,
       privacyAccepted: formValue.privacyAccepted,
     };
-  }
-
-  /**
-   * Navigates according to the returned email-confirmation state.
-   *
-   * @param requiresEmailConfirmation - Whether confirmation is required.
-   * @returns A promise containing the router navigation result.
-   */
-  private navigateAfterSignup(
-    requiresEmailConfirmation: boolean,
-  ): Promise<boolean> {
-    const target = requiresEmailConfirmation ? '/login' : '/summary';
-
-    return this.router.navigate([target]);
   }
 }

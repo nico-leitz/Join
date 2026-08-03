@@ -1,14 +1,14 @@
-import { Component, inject, OnDestroy, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { LoginCredentials } from '../../../../core/models/auth.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { Component, inject, OnDestroy, signal } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { Router, RouterLink } from "@angular/router";
+import { LoginCredentials } from "../../../../core/models/auth.model";
+import { AuthService } from "../../../../core/services/auth.service";
 
 /** Names of controls belonging to the login form. */
-type LoginControlName = 'email' | 'password';
+type LoginControlName = "email" | "password";
 
 /** Identifies the active login request or an idle state. */
-type LoginMode = 'user' | 'guest' | null;
+type LoginMode = "user" | "guest" | null;
 
 /**
  * Provides email and anonymous guest authentication.
@@ -17,10 +17,10 @@ type LoginMode = 'user' | 'guest' | null;
  * and navigation to the protected summary page.
  */
 @Component({
-  selector: 'app-login',
+  selector: "app-login",
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './login.html',
-  styleUrl: './login.scss',
+  templateUrl: "./login.html",
+  styleUrl: "./login.scss",
 })
 export class Login implements OnDestroy {
   /** Tracks whether the splash screen was already displayed. */
@@ -57,8 +57,8 @@ export class Login implements OnDestroy {
 
   /** Reactive form containing the email login credentials. */
   readonly loginForm = this.formBuilder.group({
-    email: ['', Validators.required],
-    password: ['', Validators.required],
+    email: ["", [Validators.required, Validators.email]],
+    password: ["", Validators.required],
   });
 
   /**
@@ -68,7 +68,7 @@ export class Login implements OnDestroy {
     this.authService.clearError();
     this.onResize();
 
-    window.addEventListener('resize', this.onResize);
+    window.addEventListener("resize", this.onResize);
 
     if (Login.hasShownSplash) {
       this.showSplash.set(false);
@@ -90,7 +90,7 @@ export class Login implements OnDestroy {
       window.clearTimeout(this.splashTimer);
     }
 
-    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener("resize", this.onResize);
   }
 
   /**
@@ -115,14 +115,14 @@ export class Login implements OnDestroy {
    * @returns A promise that resolves after the guest login attempt.
    */
   async onGuestLogin(): Promise<void> {
-    this.activeLogin.set('guest');
+    this.activeLogin.set("guest");
 
     const success = await this.authService.signInAsGuest();
 
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary('guest');
+      await this.navigateToSummary("guest");
     }
   }
 
@@ -153,14 +153,14 @@ export class Login implements OnDestroy {
    * @returns A promise that resolves after authentication and navigation.
    */
   private async performLogin(): Promise<void> {
-    this.activeLogin.set('user');
+    this.activeLogin.set("user");
 
     const success = await this.authService.signIn(this.buildCredentials());
 
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary('user');
+      await this.navigateToSummary("user");
     }
   }
 
@@ -187,6 +187,6 @@ export class Login implements OnDestroy {
   private navigateToSummary(mode: Exclude<LoginMode, null>): Promise<boolean> {
     this.authService.queueSummaryGreeting(mode);
 
-    return this.router.navigate(['/summary']);
+    return this.router.navigate(["/summary"]);
   }
 }
