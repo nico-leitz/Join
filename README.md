@@ -322,8 +322,8 @@ Final geprüfter Stand vom **31. Juli 2026**:
 
 | Prüfung | Ergebnis |
 | --- | ---: |
-| Testdateien | `23 passed` |
-| Unit-Tests | `214 passed` |
+| Testdateien | `26 passed` |
+| Unit-Tests | `324 passed` |
 | Produktions-Build | erfolgreich |
 | Build-Error-Budgets | eingehalten |
 
