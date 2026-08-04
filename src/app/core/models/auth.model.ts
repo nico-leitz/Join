@@ -42,14 +42,3 @@ export interface AuthUser {
   /** Indicates whether the account is an anonymous guest account. */
   isAnonymous: boolean;
 }
-
-/**
- * Represents the result of a successful registration request.
- */
-export interface SignUpResult {
-  /** Registered application user. */
-  user: AuthUser;
-
-  /** Indicates whether the user must confirm their email before login. */
-  requiresEmailConfirmation: boolean;
-}

@@ -1,31 +1,73 @@
+import { Component, inject, OnDestroy, signal } from "@angular/core";
 import {
-  Component,
-  inject,
-  OnDestroy,
-  signal,
-} from '@angular/core';
-import {
+  AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
-} from '@angular/forms';
-import {
-  Router,
-  RouterLink,
-} from '@angular/router';
-import { LoginCredentials } from '../../../../core/models/auth.model';
-import { AuthService } from '../../../../core/services/auth.service';
+} from "@angular/forms";
+import { Router, RouterLink } from "@angular/router";
+import { LoginCredentials } from "../../../../core/models/auth.model";
+import { AuthService } from "../../../../core/services/auth.service";
 
 /** Names of controls belonging to the login form. */
-type LoginControlName =
-  | 'email'
-  | 'password';
+type LoginControlName = "email" | "password";
 
 /** Identifies the active login request or an idle state. */
-type LoginMode =
-  | 'user'
-  | 'guest'
-  | null;
+type LoginMode = "user" | "guest" | null;
+
+/** Permits the RFC-compatible characters supported in the local email part. */
+const EMAIL_LOCAL_PART_PATTERN =
+  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*$/;
+
+/** Permits valid provider and subdomain labels. */
+const EMAIL_DOMAIN_LABEL_PATTERN =
+  /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/;
+
+/** Requires an alphabetic top-level domain containing at least two letters. */
+const EMAIL_TOP_LEVEL_DOMAIN_PATTERN = /^[A-Za-z]{2,63}$/;
+
+/**
+ * Validates the complete syntactic structure of an email address.
+ *
+ * @param control - Email control to validate.
+ * @returns A strict email error or null when the structure is valid.
+ */
+function strictEmailValidator(
+  control: AbstractControl,
+): ValidationErrors | null {
+  const email = String(control.value ?? "").trim();
+
+  if (!email) {
+    return null;
+  }
+
+  const parts = email.split("@");
+
+  if (parts.length !== 2) {
+    return { strictEmail: true };
+  }
+
+  const [localPart, domain] = parts;
+  const domainLabels = domain.split(".");
+  const topLevelDomain = domainLabels.at(-1) ?? "";
+  const providerLabels = domainLabels.slice(0, -1);
+
+  const hasValidLength = email.length <= 254 && localPart.length <= 64;
+  const hasValidLocalPart = EMAIL_LOCAL_PART_PATTERN.test(localPart);
+  const hasValidDomain =
+    providerLabels.length > 0 &&
+    providerLabels.every((label) => EMAIL_DOMAIN_LABEL_PATTERN.test(label));
+  const hasValidTopLevelDomain =
+    EMAIL_TOP_LEVEL_DOMAIN_PATTERN.test(topLevelDomain);
+
+  return hasValidLength &&
+    hasValidLocalPart &&
+    hasValidDomain &&
+    hasValidTopLevelDomain
+    ? null
+    : { strictEmail: true };
+}
 
 /**
  * Provides email and anonymous guest authentication.
@@ -34,72 +76,49 @@ type LoginMode =
  * and navigation to the protected summary page.
  */
 @Component({
-  selector: 'app-login',
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-  ],
-  templateUrl: './login.html',
-  styleUrl: './login.scss',
+  selector: "app-login",
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: "./login.html",
+  styleUrl: "./login.scss",
 })
 export class Login implements OnDestroy {
   /** Tracks whether the splash screen was already displayed. */
   private static hasShownSplash = false;
 
   /** Non-nullable form builder used to construct the login form. */
-  private readonly formBuilder =
-    inject(FormBuilder).nonNullable;
+  private readonly formBuilder = inject(FormBuilder).nonNullable;
 
   /** Router used after successful authentication. */
-  private readonly router =
-    inject(Router);
+  private readonly router = inject(Router);
 
   /** Authentication service exposed to the login template. */
-  readonly authService =
-    inject(AuthService);
+  readonly authService = inject(AuthService);
 
   /** Indicates whether the login form was submitted. */
-  readonly submitted =
-    signal(false);
+  readonly submitted = signal(false);
 
   /** Identifies the authentication request currently running. */
-  readonly activeLogin =
-    signal<LoginMode>(null);
+  readonly activeLogin = signal<LoginMode>(null);
 
   /** Controls visibility of the initial splash screen. */
-  readonly showSplash =
-    signal(true);
+  readonly showSplash = signal(true);
 
   /** Indicates whether the current viewport uses the mobile layout. */
-  readonly isMobile =
-    signal(false);
+  readonly isMobile = signal(false);
 
   /** Identifier of the pending splash-screen timer. */
-  private splashTimer?:
-    ReturnType<typeof window.setTimeout>;
+  private splashTimer?: ReturnType<typeof window.setTimeout>;
 
   /** Updates the mobile viewport state after a resize. */
   private readonly onResize = (): void => {
-    this.isMobile.set(
-      window.innerWidth <= 768,
-    );
+    this.isMobile.set(window.innerWidth <= 768);
   };
 
   /** Reactive form containing the email login credentials. */
-  readonly loginForm =
-    this.formBuilder.group({
-      email: [
-        '',
-        [
-          Validators.required,
-          Validators.email,
-        ],
-      ],
-      password: [
-        '',
-        Validators.required,
-      ],
-    });
+  readonly loginForm = this.formBuilder.group({
+    email: ["", [Validators.required, strictEmailValidator]],
+    password: ["", Validators.required],
+  });
 
   /**
    * Initializes authentication errors, viewport tracking and splash state.
@@ -108,10 +127,7 @@ export class Login implements OnDestroy {
     this.authService.clearError();
     this.onResize();
 
-    window.addEventListener(
-      'resize',
-      this.onResize,
-    );
+    window.addEventListener("resize", this.onResize);
 
     if (Login.hasShownSplash) {
       this.showSplash.set(false);
@@ -120,10 +136,9 @@ export class Login implements OnDestroy {
 
     Login.hasShownSplash = true;
 
-    this.splashTimer =
-      window.setTimeout(() => {
-        this.showSplash.set(false);
-      }, 2400);
+    this.splashTimer = window.setTimeout(() => {
+      this.showSplash.set(false);
+    }, 2400);
   }
 
   /**
@@ -131,15 +146,10 @@ export class Login implements OnDestroy {
    */
   ngOnDestroy(): void {
     if (this.splashTimer) {
-      window.clearTimeout(
-        this.splashTimer,
-      );
+      window.clearTimeout(this.splashTimer);
     }
 
-    window.removeEventListener(
-      'resize',
-      this.onResize,
-    );
+    window.removeEventListener("resize", this.onResize);
   }
 
   /**
@@ -164,18 +174,14 @@ export class Login implements OnDestroy {
    * @returns A promise that resolves after the guest login attempt.
    */
   async onGuestLogin(): Promise<void> {
-    this.activeLogin.set('guest');
+    this.activeLogin.set("guest");
 
-    const success =
-      await this.authService
-        .signInAsGuest();
+    const success = await this.authService.signInAsGuest();
 
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary(
-        'guest',
-      );
+      await this.navigateToSummary("guest");
     }
   }
 
@@ -183,9 +189,7 @@ export class Login implements OnDestroy {
    * Clears an outdated authentication error after form changes.
    */
   onFormChange(): void {
-    if (
-      this.authService.errorMessage()
-    ) {
+    if (this.authService.errorMessage()) {
       this.authService.clearError();
     }
   }
@@ -196,20 +200,10 @@ export class Login implements OnDestroy {
    * @param controlName - Name of the control to inspect.
    * @returns True when the control is invalid and should show an error.
    */
-  isControlInvalid(
-    controlName: LoginControlName,
-  ): boolean {
-    const control =
-      this.loginForm
-        .controls[controlName];
+  isControlInvalid(controlName: LoginControlName): boolean {
+    const control = this.loginForm.controls[controlName];
 
-    return (
-      control.invalid &&
-      (
-        control.touched ||
-        this.submitted()
-      )
-    );
+    return control.invalid && (control.touched || this.submitted());
   }
 
   /**
@@ -218,19 +212,14 @@ export class Login implements OnDestroy {
    * @returns A promise that resolves after authentication and navigation.
    */
   private async performLogin(): Promise<void> {
-    this.activeLogin.set('user');
+    this.activeLogin.set("user");
 
-    const success =
-      await this.authService.signIn(
-        this.buildCredentials(),
-      );
+    const success = await this.authService.signIn(this.buildCredentials());
 
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary(
-        'user',
-      );
+      await this.navigateToSummary("user");
     }
   }
 
@@ -239,17 +228,11 @@ export class Login implements OnDestroy {
    *
    * @returns Credentials accepted by the authentication service.
    */
-  private buildCredentials():
-    LoginCredentials
-  {
-    const formValue =
-      this.loginForm.getRawValue();
+  private buildCredentials(): LoginCredentials {
+    const formValue = this.loginForm.getRawValue();
 
     return {
-      email:
-        formValue.email
-          .trim()
-          .toLowerCase(),
+      email: formValue.email.trim().toLowerCase(),
       password: formValue.password,
     };
   }
@@ -260,14 +243,9 @@ export class Login implements OnDestroy {
    * @param mode - Successful user or guest login mode.
    * @returns A promise containing the router navigation result.
    */
-  private navigateToSummary(
-    mode: Exclude<LoginMode, null>,
-  ): Promise<boolean> {
-    this.authService
-      .queueSummaryGreeting(mode);
+  private navigateToSummary(mode: Exclude<LoginMode, null>): Promise<boolean> {
+    this.authService.queueSummaryGreeting(mode);
 
-    return this.router.navigate([
-      '/summary',
-    ]);
+    return this.router.navigate(["/summary"]);
   }
 }
