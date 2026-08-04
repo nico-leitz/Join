@@ -3,17 +3,21 @@
   max-width: 90rem;
   margin: 0 auto;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   font-family: inherit;
 
   &__content {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100%;
     width: 100%;
   }
 
   &__header {
+    flex-shrink: 0;
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -34,10 +38,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 1.5rem 1rem;
+    padding: 1rem;
+    overflow-y: auto;
   }
 
   &__footer {
+    flex-shrink: 0;
     display: flex;
     justify-content: center;
     gap: 2rem;

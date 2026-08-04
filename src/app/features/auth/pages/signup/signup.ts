@@ -181,6 +181,18 @@ export class Signup {
   /** Indicates whether the signup form was submitted. */
   readonly submitted = signal(false);
 
+  /** Indicates whether the main password field is currently focused. */
+  passwordFocused = false;
+
+  /** Controls the visibility of the text in the main password field. */
+  passwordVisible = false;
+
+  /** Indicates whether the confirmation password field is currently focused. */
+  confirmPasswordFocused = false;
+
+  /** Controls the visibility of the text in the confirmation password field. */
+  confirmPasswordVisible = false;
+
   /** Reactive form containing registration and privacy fields. */
   readonly signupForm = this.formBuilder.group(
     {
@@ -263,6 +275,37 @@ export class Signup {
       this.signupForm.hasError("passwordMismatch") &&
       (confirmation.touched || this.submitted())
     );
+  }
+
+  /**
+   * Toggles the visibility state of the main password input.
+   */
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
+  /**
+   * Toggles the visibility state of the confirmation password input.
+   */
+  toggleConfirmPasswordVisibility(): void {
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
+  }
+
+  /**
+   * Determines the correct icon path based on the current focus and visibility state.
+   *
+   * @param isFocused - Whether the specific input field currently has focus.
+   * @param isVisible - Whether the password text is currently set to visible.
+   * @returns The file path to the corresponding SVG icon.
+   */
+  getIconSrc(isFocused: boolean, isVisible: boolean): string {
+    if (isVisible) {
+      return "assets/sign-up/visibility.svg";
+    }
+    if (isFocused) {
+      return "assets/sign-up/visibility_off.svg";
+    }
+    return "assets/sign-up/lock.svg";
   }
 
   /**
