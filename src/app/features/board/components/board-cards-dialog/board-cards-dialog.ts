@@ -168,6 +168,18 @@ export class BoardCardsDialog
   readonly newSubtaskTitle =
     signal('');
 
+  /** Indicates whether the subtask creator input is focused. */
+  readonly isSubtaskFocused =
+    signal(false);
+
+  /** Index of the subtask currently being edited inline. */
+  readonly editingSubtaskIndex =
+    signal<number | null>(null);
+
+  /** Temporary title of the subtask currently being edited inline. */
+  readonly editingSubtaskTitle =
+    signal('');
+
   /** User-facing message for the latest dialog operation failure. */
   readonly errorMessage =
     signal('');
@@ -355,7 +367,12 @@ export class BoardCardsDialog
     this.initializeEditForm();
     this.initializeContactSelection();
     this.initializeEditableSubtasks();
+    
     this.newSubtaskTitle.set('');
+    this.isSubtaskFocused.set(false);
+    this.editingSubtaskIndex.set(null);
+    this.editingSubtaskTitle.set('');
+    
     this.closeContactsMenu();
     this.errorMessage.set('');
     this.isEditing.set(true);
@@ -371,6 +388,9 @@ export class BoardCardsDialog
 
     this.closeContactsMenu();
     this.newSubtaskTitle.set('');
+    this.isSubtaskFocused.set(false);
+    this.editingSubtaskIndex.set(null);
+    this.editingSubtaskTitle.set('');
     this.errorMessage.set('');
     this.isEditing.set(false);
   }
@@ -486,6 +506,78 @@ export class BoardCardsDialog
   }
 
   /**
+   * Initializes the inline editing mode for a specific subtask.
+   *
+   * @param index - Index of the subtask to edit.
+   */
+  startEditingSubtask(
+    index: number,
+  ): void {
+    const subtasks =
+      this.editableSubtasks();
+    
+    const subtask = subtasks[index];
+    
+    if (!subtask) {
+      return;
+    }
+
+    this.editingSubtaskTitle.set(
+      subtask.title,
+    );
+
+    this.editingSubtaskIndex.set(
+      index,
+    );
+  }
+
+  /**
+   * Stores the title entered during an inline subtask edit.
+   *
+   * @param event - Input event containing the current title.
+   */
+  updateEditingSubtaskTitle(
+    event: Event,
+  ): void {
+    const input =
+      event.target as HTMLInputElement;
+
+    this.editingSubtaskTitle.set(
+      input.value,
+    );
+  }
+
+  /**
+   * Applies the inline edited title to the subtask and exits edit mode.
+   */
+  saveSubtaskEdit(): void {
+    const index =
+      this.editingSubtaskIndex();
+      
+    const title =
+      this.editingSubtaskTitle().trim();
+
+    if (index === null || !title) {
+      return;
+    }
+
+    this.editableSubtasks.update(
+      (subtasks) => {
+        return subtasks.map(
+          (subtask, currentIndex) => {
+            return currentIndex === index
+              ? { ...subtask, title }
+              : subtask;
+          },
+        );
+      },
+    );
+
+    this.editingSubtaskIndex.set(null);
+    this.editingSubtaskTitle.set('');
+  }
+
+  /**
    * Updates the title of an editable subtask.
    *
    * @param index - Index of the subtask to update.
@@ -539,6 +631,12 @@ export class BoardCardsDialog
         );
       },
     );
+    
+    // Clear inline edit state if the currently edited subtask was removed
+    if (this.editingSubtaskIndex() === index) {
+      this.editingSubtaskIndex.set(null);
+      this.editingSubtaskTitle.set('');
+    }
   }
 
   /**

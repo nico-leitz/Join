@@ -388,49 +388,111 @@
             <div class="board_dialog__subtask_creator">
               <input
                 id="edit_new_subtask"
+                #editSubtaskInput
                 class="board_dialog__input"
                 type="text"
                 maxlength="160"
                 placeholder="Add new subtask"
                 [value]="newSubtaskTitle()"
                 (input)="updateNewSubtaskTitle($event)"
+                (focus)="isSubtaskFocused.set(true)"
+                (blur)="isSubtaskFocused.set(false)"
                 (keydown.enter)="$event.preventDefault(); addSubtask()"
               />
 
-              <button
-                type="button"
-                class="board_dialog__subtask_add"
-                aria-label="Add subtask"
-                [disabled]="!newSubtaskTitle().trim()"
-                (click)="addSubtask()"
-              >
-                +
-              </button>
+              <div class="board_dialog__subtask_actions_creator">
+                @if (isSubtaskFocused() || newSubtaskTitle().trim()) {
+                  <button
+                    type="button"
+                    class="board_dialog__icon_button"
+                    aria-label="Clear input"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="editSubtaskInput.value = ''; newSubtaskTitle.set('')"
+                  >
+                    <img src="assets/add-task/subtasks_icon_x.svg" alt="Clear" />
+                  </button>
+
+                  <div class="board_dialog__subtask_divider"></div>
+
+                  <button
+                    type="button"
+                    class="board_dialog__icon_button"
+                    aria-label="Add subtask"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="addSubtask()"
+                  >
+                    <img src="assets/add-task/subtasks_icon_checkmark.svg" alt="Add" class="board_dialog__icon_dark" />
+                  </button>
+                }
+              </div>
             </div>
 
             @if (editableSubtasks().length > 0) {
               <div class="board_dialog__scroll_wrapper board_dialog__scroll_wrapper--edit-subtasks">
                 <div class="board_dialog__editable_subtasks">
                   @for (subtask of editableSubtasks(); track $index; let index = $index) {
-                    <div class="board_dialog__editable_subtask">
-                      <input
-                        class="board_dialog__input board_dialog__subtask_input"
-                        [class.board_dialog__input--invalid]="!subtask.title.trim()"
-                        type="text"
-                        maxlength="160"
-                        [value]="subtask.title"
-                        (input)="updateEditableSubtaskTitle(index, $event)"
-                      />
+                    
+                    @if (editingSubtaskIndex() === index) {
+                      <div class="board_dialog__subtask_edit">
+                        <input
+                          class="board_dialog__subtask_list_input"
+                          type="text"
+                          maxlength="160"
+                          [value]="editingSubtaskTitle()"
+                          (input)="updateEditingSubtaskTitle($event)"
+                          (keydown.enter)="$event.preventDefault(); saveSubtaskEdit()"
+                        />
 
-                      <button
-                        type="button"
-                        class="board_dialog__subtask_remove"
-                        aria-label="Remove subtask"
-                        (click)="removeEditableSubtask(index)"
-                      >
-                        &times;
-                      </button>
-                    </div>
+                        <div class="board_dialog__subtask_actions">
+                          <button
+                            type="button"
+                            class="board_dialog__icon_button"
+                            aria-label="Delete subtask"
+                            (click)="removeEditableSubtask(index)"
+                          >
+                            <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
+                          </button>
+                          
+                          <div class="board_dialog__subtask_divider"></div>
+
+                          <button
+                            type="button"
+                            class="board_dialog__icon_button"
+                            aria-label="Save subtask"
+                            (click)="saveSubtaskEdit()"
+                          >
+                            <img src="assets/add-task/subtasks_icon_checkmark.svg" alt="Save" class="board_dialog__icon_dark" />
+                          </button>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="board_dialog__subtask_item">
+                        <span class="board_dialog__subtask_bullet">•</span>
+                        <span class="board_dialog__subtask_text">{{ subtask.title }}</span>
+
+                        <div class="board_dialog__subtask_actions">
+                          <button
+                            type="button"
+                            class="board_dialog__icon_button"
+                            aria-label="Edit subtask"
+                            (click)="startEditingSubtask(index)"
+                          >
+                            <img src="assets/icons/icons_edit/edit.svg" alt="Edit" />
+                          </button>
+                          
+                          <div class="board_dialog__subtask_divider"></div>
+
+                          <button
+                            type="button"
+                            class="board_dialog__icon_button"
+                            aria-label="Remove subtask"
+                            (click)="removeEditableSubtask(index)"
+                          >
+                            <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
+                          </button>
+                        </div>
+                      </div>
+                    }
                   }
                 </div>
               </div>
