@@ -9,88 +9,206 @@
                 <h1 class="privacy-policy-page__title">Datenschutzerklärung</h1>
             </section>
 
-            <section class="privacy-policy-page__section">
-                <h2>1. Verantwortliche</h2>
-                <p>
-                    Verantwortlich für die Datenverarbeitung in diesem Schulprojekt JOIN sind:
-                </p>
-                <ul>
-                    <li>Badtin Wollny</li>
-                    <li>Nico Leiz</li>
-                    <li>Oliver D.</li>
-                    <li>Kevin Reihold Triebe</li>
-                </ul>
-                <p>Kontakt-E-Mail: bitte ergänzen</p>
-            </section>
+				<button type="button" class="privacy-policy-page__back" aria-label="Go back" (click)="goBack()">
+					<img ngSrc="assets/contact-details/arrow-left.svg" width="24" height="23" alt=""
+						aria-hidden="true" />
+				</button>
+			</section>
 
-            <section class="privacy-policy-page__section">
-                <h2>2. Zweck der Verarbeitung</h2>
-                <p>
-                    Die Anwendung dient der Verwaltung von Aufgaben, Kontakten und Board-Prozessen im Rahmen eines
-                    nicht-kommerziellen Schulprojekts. Daten werden ausschließlich verarbeitet, um Nutzer-Logins,
-                    Kontakte, Aufgaben, Subtasks und Zuweisungen innerhalb der App bereitzustellen.
-                </p>
-            </section>
+			<section class="privacy-policy-page__section">
+				<h2>1. Privacy at a Glance</h2>
+				<br>
+				<h3>General Information</h3>
+				<p>The following notes provide a simple overview of what happens to your personal data when you visit
+					this website. Personal data is all data with which you can be personally identified. For detailed
+					information on the topic of data protection, please refer to our privacy policy set out below under
+					this text.</p>
+				<br>
+				<h3>Data Collection on This Website</h3>
+				<h4>Who is responsible for data collection on this website?</h4>
+				<p>Data processing on this website is carried out by the website operator. You can find their contact
+					details in the section “Notice concerning the responsible party” in this privacy policy.</p>
+				<h4>How do we collect your data?</h4>
+				<p>On the one hand, your data is collected because you provide it to us. This may include, for example,
+					data that you enter into a contact form.</p>
+				<p>Other data is collected automatically or after you consent when visiting the website through our IT
+					systems. This primarily includes technical data (e.g., your internet browser, operating system, or
+					the time of access to the page). This data is collected automatically as soon as you enter this
+					website.</p>
+				<h4>What do we use your data for?</h4>
+				<p>Some of the data is collected to ensure the website is provided correctly. Other data may be used to
+					analyze your user behavior. If contracts can be concluded or initiated via the website, the
+					transmitted data is also processed for contract offers, orders, or other requests for services.</p>
+				<h4>What rights do you have regarding your data?</h4>
+				<p>You have the right at any time to obtain, free of charge, information about the origin, recipients,
+					and purpose of your stored personal data. You also have the right to request the rectification or
+					deletion of these data. If you have given consent to data processing, you can withdraw that consent
+					at any time for the future. You also have the right, under certain circumstances, to request that
+					the processing of your personal data be restricted. In addition, you have a right to lodge a
+					complaint with the competent supervisory authority.</p>
+				<p>You can contact us at any time regarding this and any further questions on the topic of data
+					protection.</p>
+			</section>
 
-            <section class="privacy-policy-page__section">
-                <h2>3. Welche Daten verarbeitet werden</h2>
-                <p>Je nach Nutzung der Anwendung werden folgende Daten verarbeitet:</p>
-                <ul>
-                    <li>Authentifizierung: E-Mail-Adresse, Passwort (durch Supabase Auth verarbeitet), optional Vollname in den Nutzer-Metadaten</li>
-                    <li>Gastzugang: anonymer Nutzerzugang ohne dauerhafte Profildaten in der App-Oberfläche</li>
-                    <li>Kontakte: Vorname, Nachname, E-Mail, Telefonnummer, Badge-Farbe</li>
-                    <li>Aufgaben: Titel, Beschreibung, Fälligkeitsdatum, Priorität, Kategorie, Status, Sortierung</li>
-                    <li>Subtasks und Zuweisungen: Subtask-Titel, Erledigt-Status sowie Zuordnung zwischen Aufgaben und Kontakten</li>
-                </ul>
-            </section>
+			<section class="privacy-policy-page__section">
+				<h2>2. Hosting</h2>
+				<p>We host the content of our website with the following provider:</p>
+				<br>
+				<h3>External Hosting</h3>
+				<p>This website is hosted externally. The personal data that is collected on this website is stored on
+					the servers of the hoster/the hosters. This may include, among other things, IP addresses, contact
+					requests, metadata and communication data, contract data, contact details, names, website access,
+					and other data generated via a website.</p>
+				<p>External hosting is carried out for the purpose of fulfilling contracts with our potential and
+					existing customers (Art. 6(1)(b) GDPR) and in the interest of a secure, fast, and efficient
+					provision of our online offering by a professional provider (Art. 6(1)(f) GDPR). Where corresponding
+					consent has been requested, processing is carried out exclusively on the basis of Art. 6(1)(a) GDPR
+					and § 25(1) TDDDG to the extent that the consent includes the storage of cookies or access to
+					information on the user’s terminal device (e.g., device fingerprinting) within the meaning of the
+					TDDDG. Consent can be withdrawn at any time.</p>
+				<p>Our hoster(s) will process your data only to the extent required to fulfill its performance
+					obligations and in accordance with our instructions regarding this data.</p>
+				<p>We use the following hoster(s):</p>
+				<p>[Name and full address of the hoster]</p>
+				<h4>Order Processing (Data Processing Agreement)</h4>
+				<p>We have concluded a contract for order processing (AVV) for the use of the service mentioned above.
+					This is a data protection contract required by law, ensuring that this service processes the
+					personal data of visitors to our website only according to our instructions and in compliance with
+					the GDPR.</p>
+			</section>
 
-            <section class="privacy-policy-page__section">
-                <h2>4. Technische Speicherung und Empfänger</h2>
-                <p>
-                    Die Daten werden über den angebundenen Dienst Supabase verarbeitet. Die Anwendung nutzt Supabase für
-                    Authentifizierung und Datenbankzugriffe (u. a. Tabellen für contacts, tasks, subtasks und
-                    task_assignments).
-                </p>
-                <p>
-                    Der Login-Session-Status wird vom Supabase-Client im Browser gespeichert, damit Nutzer nach einem Reload
-                    eingeloggt bleiben können. Darüber hinaus speichert die App nach aktuellem Projektstand keine eigenen
-                    zusätzlichen lokalen Profildaten in localStorage oder sessionStorage.
-                </p>
-            </section>
+			<section class="privacy-policy-page__section">
+				<h2>3. General Information and Mandatory Notices</h2>
+				<br>
+				<h3>Data Protection</h3>
+				<p>The operators of these pages take the protection of your personal data very seriously. We treat your
+					personal data confidentially and in accordance with the statutory data protection regulations and
+					this privacy policy.</p>
+				<p>When you use this website, various personal data is collected. Personal data is data with which you
+					can be personally identified. This privacy policy explains which data we collect and what we use it
+					for. It also explains how and for what purpose this happens.</p>
+				<p>We would like to point out that data transmission over the internet (e.g., when communicating by
+					email) may have security gaps. It is not possible to provide seamless protection of data from access
+					by third parties.</p>
+				<br>
+				<h3>Notice concerning the Responsible Party</h3>
+				<p>The responsible party for data processing on this website is:</p>
+				<p>Nico Leitz, Herzoggraben 16b 84405 Dorfen</p>
+				<p>Phone: [Phone number of the responsible party]<br />
+					Email: join.malt279@simplelogin.com</p>
+				<p>The responsible party is the natural or legal person who alone or jointly with others decides on the
+					purposes and means of processing personal data (e.g., names, email addresses, etc.).</p>
+				<br>
+				<h3>Storage Duration</h3>
+				<p>To the extent that no more specific storage period is stated within this privacy policy, your
+					personal data will remain with us until the purpose for data processing no longer applies. If you
+					assert a legitimate request for deletion or withdraw your consent to data processing, your data will
+					be deleted unless we have other legally permissible grounds for storing your personal data (e.g.,
+					tax or commercial retention periods); in the latter case, deletion occurs after these grounds cease
+					to apply.</p>
+				<br>
+				<h3>General Information on the Legal Bases for Data Processing on This Website</h3>
+				<p>If you have consented to data processing, we process your personal data on the basis of Art. 6(1)(a)
+					GDPR or Art. 9(2)(a) GDPR, provided that special categories of data are processed in accordance with
+					Art. 9(1) GDPR. In the event of explicit consent to the transfer of personal data to third
+					countries, data processing is additionally based on Art. 49(1)(a) GDPR. If you have consented to the
+					storage of cookies or access to information on your end device (e.g., via device fingerprinting),
+					data processing is additionally carried out on the basis of § 25(1) TDDDG. Consent can be withdrawn
+					at any time. If your data is necessary for the performance of a contract or for carrying out
+					pre-contractual measures, we process your data on the basis of Art. 6(1)(b) GDPR. Furthermore, we
+					process your data to the extent it is necessary to fulfill a legal obligation on the basis of Art.
+					6(1)(c) GDPR. Data processing may also be carried out on the basis of our legitimate interests
+					pursuant to Art. 6(1)(f) GDPR. Information about the applicable legal bases in each individual case
+					is provided in the following sections of this privacy policy.</p>
+				<br>
+				<h3>Recipients of Personal Data</h3>
+				<p>As part of our business activities, we work with various external parties. In some cases, it is also
+					necessary to transfer personal data to these external parties. We only share personal data with
+					external parties if this is necessary within the scope of contract performance, if we are legally
+					obliged to do so (e.g., sharing data with tax authorities), if we have a legitimate interest in
+					accordance with Art. 6(1)(f) GDPR in the transfer, or if another legal basis permits the transfer of
+					data. When using commissioned processors, we only pass personal data of our customers on to them on
+					the basis of a valid contract for order processing. In the case of joint processing, a contract for
+					joint processing is concluded.</p>
+				<br>
+				<h3>Withdrawing Your Consent to Data Processing</h3>
+				<p>Many data processing operations are only possible with your express consent. You can withdraw any
+					consent you have already given at any time. The lawfulness of data processing carried out up to the
+					withdrawal remains unaffected.</p>
+				<br>
+				<h3>Right to Object to Data Collection in Special Cases and to Direct Advertising (Art. 21 GDPR)</h3>
+				<p>IF DATA PROCESSING IS CARRIED OUT ON THE BASIS OF ART. 6(1)(E) OR (F) GDPR, YOU HAVE THE RIGHT AT ANY
+					TIME, FOR REASONS ARISING FROM YOUR PARTICULAR SITUATION, TO OBJECT TO THE PROCESSING OF YOUR
+					PERSONAL DATA; THIS ALSO APPLIES TO PROFILING BASED ON THESE PROVISIONS. THE RESPECTIVE LEGAL BASIS
+					ON WHICH THE PROCESSING IS BASED CAN BE FOUND IN THIS PRIVACY POLICY. IF YOU OBJECT, WE WILL NO
+					LONGER PROCESS YOUR AFFECTED PERSONAL DATA, UNLESS WE CAN DEMONSTRATE COMPELLING LEGITIMATE GROUNDS
+					FOR THE PROCESSING THAT OVERRIDE YOUR INTERESTS, RIGHTS, AND FREEDOMS OR THE PROCESSING SERVES TO
+					ESTABLISH, EXERCISE, OR DEFEND LEGAL CLAIMS (OBJECTION PURSUANT TO ART. 21(1) GDPR).</p>
+				<p>IF YOUR PERSONAL DATA IS PROCESSED IN ORDER TO CARRY OUT DIRECT ADVERTISING, YOU HAVE THE RIGHT TO
+					OBJECT AT ANY TIME TO THE PROCESSING OF YOUR PERSONAL DATA FOR THE PURPOSE OF SUCH ADVERTISING; THIS
+					ALSO APPLIES TO PROFILING INSOFAR AS IT IS RELATED TO SUCH DIRECT ADVERTISING. IF YOU OBJECT, YOUR
+					PERSONAL DATA WILL SUBSEQUENTLY NOT BE USED FOR THE PURPOSE OF DIRECT ADVERTISING (OBJECTION
+					PURSUANT TO ART. 21(2) GDPR).</p>
+				<br>
+				<h3>Right to Lodge a Complaint with the Competent Supervisory Authority</h3>
+				<p>In the event of violations of the GDPR, data subjects have the right to lodge a complaint with a
+					supervisory authority, in particular in the Member State of their habitual residence, their place of
+					work, or the place where the alleged infringement occurred. The right to lodge a complaint exists
+					without prejudice to other administrative or judicial remedies.</p>
+				<br>
+				<h3>Right to Data Portability</h3>
+				<p>You have the right to have data that we process automatically based on your consent or in performance
+					of a contract be provided to you or to a third party in a commonly used, machine-readable format.
+					Where you request the direct transfer of the data to another responsible party, this will only be
+					done insofar as it is technically feasible.</p>
+				<br>
+				<h3>Information, Rectification, and Deletion</h3>
+				<p>Within the framework of the applicable statutory provisions, you have the right at any time to
+					receive, free of charge, information about your stored personal data, their origin and recipients,
+					and the purpose of the data processing, and, where applicable, a right to rectification or deletion
+					of these data. You can contact us at any time regarding this and any further questions on the topic
+					of personal data.</p>
+				<br>
+				<h3>Right to Restriction of Processing</h3>
+				<p>You have the right to request restriction of the processing of your personal data. You can contact us
+					at any time regarding this. The right to restriction of processing exists in the following cases:
+				</p>
+				<ul>
+					<li>If you contest the accuracy of your personal data stored by us, we generally need time to verify
+						this. During the period of verification, you have the right to request restriction of the
+						processing of your personal data.</li>
+					<li>If the processing of your personal data was/ is unlawful, you can instead of deletion request
+						restriction of the processing of your personal data.</li>
+					<li>If we no longer need your personal data, but you need it for the establishment, exercise, or
+						defense of legal claims, you have the right to request restriction of the processing of your
+						personal data instead of deletion.</li>
+					<li>If you have lodged an objection pursuant to Art. 21(1) GDPR, a balancing of your interests and
+						our interests must be carried out. While it has not yet been determined whose interests prevail,
+						you have the right to request restriction of the processing of your personal data.</li>
+				</ul>
+				<p>If you have restricted the processing of your personal data, such data—aside from its storage—may
+					only be processed with your consent or for the purpose of establishing, exercising, or defending
+					legal claims, or for the protection of the rights of another natural or legal person, or for reasons
+					of important public interest of the European Union or a Member State.</p>
+			</section>
 
-            <section class="privacy-policy-page__section">
-                <h2>5. Rechtsgrundlagen</h2>
-                <p>
-                    Die Verarbeitung erfolgt zur Bereitstellung der App-Funktionen und auf Basis der Nutzung durch die
-                    Projektteilnehmenden. Bei Registrierung wird zusätzlich die Zustimmung zur Datenschutzerklärung
-                    abgefragt.
-                </p>
-            </section>
-
-            <section class="privacy-policy-page__section">
-                <h2>6. Speicherdauer</h2>
-                <p>
-                    Daten bleiben gespeichert, solange sie für die Nutzung des Projekts erforderlich sind oder bis sie durch
-                    Nutzeraktionen gelöscht bzw. aktualisiert werden (z. B. bei Kontakt- oder Task-Löschung).
-                </p>
-            </section>
-
-            <section class="privacy-policy-page__section">
-                <h2>7. Rechte betroffener Personen</h2>
-                <p>
-                    Betroffene haben im gesetzlichen Rahmen das Recht auf Auskunft, Berichtigung, Löschung,
-                    Einschränkung der Verarbeitung sowie Datenübertragbarkeit. Anfragen können über die oben genannte
-                    Kontaktmöglichkeit gestellt werden.
-                </p>
-            </section>
-
-            <section class="privacy-policy-page__section">
-                <h2>8. Stand der Datenschutzerklärung</h2>
-                <p>
-                    Stand: 30.07.2026. Diese Datenschutzerklärung wird bei funktionalen oder technischen Änderungen des
-                    Projekts aktualisiert.
-                </p>
-            </section>
-        </main>
-    </div>
+			<section class="privacy-policy-page__section">
+				<h2>4. Data Collection on This Website</h2>
+				<br>
+				<h3>Contact Form</h3>
+				<p>If you send us inquiries via the contact form, the details you enter in the inquiry form—including
+					the contact details you provide there—are stored by us for the purpose of processing the inquiry and
+					in case of follow-up questions. We do not share this data without your consent.</p>
+				<p>The processing of this data is carried out on the basis of Art. 6(1)(b) GDPR, insofar as your inquiry
+					is related to the fulfillment of a contract or is required for carrying out pre-contractual
+					measures. In all other cases, processing is based on our legitimate interest in the effective
+					processing of inquiries addressed to us (Art. 6(1)(f) GDPR) or on your consent (Art. 6(1)(a) GDPR),
+					insofar as consent has been requested; consent can be withdrawn at any time.</p>
+				<p>The data you enter in the contact form remains with us until you request that we delete it, withdraw
+					your consent to storage, or the purpose for storing the data no longer applies (e.g., after your
+					inquiry has been processed). Mandatory legal provisions—especially retention periods—remain
+					unaffected.</p>
+			</section>
+		</main>
+	</div>
 </section>
