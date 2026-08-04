@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Logic for the login component.
+ * Handles user authentication, guest login, splash screen timing, and password visibility.
+ */
+
 import { Component, inject, OnDestroy, signal } from "@angular/core";
 import {
   AbstractControl,
@@ -70,10 +75,10 @@ function strictEmailValidator(
 }
 
 /**
- * Provides email and anonymous guest authentication.
+ * @description Provides email and anonymous guest authentication.
  *
- * Manages form validation, authentication requests, splash visibility
- * and navigation to the protected summary page.
+ * Manages form validation, authentication requests, splash visibility,
+ * password visibility toggling, and navigation to the protected summary page.
  */
 @Component({
   selector: "app-login",
@@ -105,6 +110,12 @@ export class Login implements OnDestroy {
 
   /** Indicates whether the current viewport uses the mobile layout. */
   readonly isMobile = signal(false);
+
+  /** Indicates whether the password text is currently visible. */
+  passwordVisible = false;
+
+  /** Indicates whether the password input field currently holds focus. */
+  passwordFocused = false;
 
   /** Identifier of the pending splash-screen timer. */
   private splashTimer?: ReturnType<typeof window.setTimeout>;
@@ -150,6 +161,29 @@ export class Login implements OnDestroy {
     }
 
     window.removeEventListener("resize", this.onResize);
+  }
+
+  /**
+   * Determines the appropriate icon path for password fields.
+   *
+   * @param isFocused - Indicates whether the input field currently holds focus.
+   * @param isVisible - Indicates whether the password text is currently unmasked.
+   * @returns The relative path to the correct SVG asset.
+   */
+  getIconSrc(isFocused: boolean, isVisible: boolean): string {
+    if (!isFocused && !isVisible) {
+      return "assets/sign-up/lock.svg";
+    }
+    return isVisible
+      ? "assets/sign-up/visibility.svg"
+      : "assets/sign-up/visibility_off.svg";
+  }
+
+  /**
+   * Toggles the visibility state of the password input field.
+   */
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
   }
 
   /**
