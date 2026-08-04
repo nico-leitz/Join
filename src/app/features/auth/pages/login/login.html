@@ -1,21 +1,21 @@
 <div class="login-page">
   @if (showSplash()) {
-    <div
-      class="login-splash"
-      [class.login-splash--mobile]="isMobile()"
-      aria-hidden="true"
-    >
-      <img
-        class="login-splash__logo"
-        [class.login-splash__logo--mobile]="isMobile()"
-        [src]="
+  <div
+    class="login-splash"
+    [class.login-splash--mobile]="isMobile()"
+    aria-hidden="true"
+  >
+    <img
+      class="login-splash__logo"
+      [class.login-splash__logo--mobile]="isMobile()"
+      [src]="
           isMobile()
             ? 'assets/sidebar/icons/join-logo.svg'
             : 'assets/log-in/join-logo-blue.svg'
         "
-        alt=""
-      />
-    </div>
+      alt=""
+    />
+  </div>
   }
 
   <div class="login-page__content">
@@ -83,11 +83,11 @@
                 isControlInvalid('email')
               "
             >
-              @if (loginForm.controls.email.hasError('required')) {
-                Please enter your email address.
-              } @else if (loginForm.controls.email.hasError('email')) {
-                Please enter a valid email address.
-              }
+              @if (loginForm.controls.email.hasError('required')) { Please enter
+              your email address. } @else if
+              (loginForm.controls.email.hasError('strictEmail')) { Enter an
+              address like name&#64;provider.com with an ending of at least 2
+              letters. }
             </p>
           </div>
 
@@ -123,9 +123,7 @@
                 isControlInvalid('password')
               "
             >
-              @if (isControlInvalid('password')) {
-                Please enter your password.
-              }
+              @if (isControlInvalid('password')) { Please enter your password. }
             </p>
           </div>
 
@@ -146,11 +144,7 @@
               class="login-card__btn login-card__btn--primary"
               [disabled]="authService.isLoading()"
             >
-              @if (activeLogin() === 'user') {
-                Logging in...
-              } @else {
-                Log in
-              }
+              @if (activeLogin() === 'user') { Logging in... } @else { Log in }
             </button>
 
             <button
@@ -159,11 +153,8 @@
               [disabled]="authService.isLoading()"
               (click)="onGuestLogin()"
             >
-              @if (activeLogin() === 'guest') {
-                Logging in...
-              } @else {
-                Guest Log in
-              }
+              @if (activeLogin() === 'guest') { Logging in... } @else { Guest
+              Log in }
             </button>
           </div>
         </form>
