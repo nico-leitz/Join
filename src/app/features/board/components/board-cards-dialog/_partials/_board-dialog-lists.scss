@@ -101,75 +101,160 @@
     align-items: center;
 
     .board_dialog__input {
-      padding-right: 48px;
+      width: 100%;
+      min-width: 0;
+      height: 48px;
+      padding: 11px 80px 11px 16px;
+      border: 1px solid var(--color-border-input, #d1d1d1);
+      border-radius: var(--radius-md, 10px);
+      background-color: var(--color-bg-light, #ffffff);
+      color: var(--color-text-main, #000000);
+      font-family: inherit;
+      font-size: var(--font-size-sm, 16px);
+      line-height: var(--line-height-base, 1.2);
+      outline: none;
+      transition:
+        border-color var(--transition-fast, 0.1s),
+        box-shadow var(--transition-fast, 0.1s);
+
+      &::placeholder {
+        color: #a8a8a8;
+        opacity: 1;
+      }
+
+      &:focus {
+        border-color: #124658;
+      }
+
+      &--invalid,
+      &--invalid:focus {
+        border-color: var(--color-error, #ff8190);
+      }
     }
   }
 
-  &__subtask_add {
+  &__subtask_actions_creator {
     position: absolute;
-    right: 8px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__icon_button {
     display: inline-flex;
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     align-items: center;
     justify-content: center;
     padding: 0;
     border: none;
-    border-radius: 8px;
+    border-radius: 50%;
     background: transparent;
-    color: #2a3647;
-    font-size: 24px;
-    line-height: 1;
     cursor: pointer;
+    transition: background-color var(--transition-fast, 0.1s);
 
-    &:hover:not(:disabled),
-    &:focus-visible:not(:disabled) {
-      background-color: #eeeeee;
-      outline: none;
+    &:hover:not(:disabled) {
+      background-color: #e0e0e0;
     }
+
     &:disabled {
       cursor: not-allowed;
       opacity: 0.4;
     }
+
+    img {
+      width: 1.2rem;
+      height: 1.2rem;
+      object-fit: contain;
+    }
+  }
+
+  &__icon_dark {
+    filter: brightness(0);
+  }
+
+  &__subtask_divider {
+    width: 1px;
+    height: 24px;
+    background-color: #d1d1d1;
+    margin: 0 4px;
   }
 
   &__editable_subtasks {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
+    margin-top: 8px;
   }
 
-  &__editable_subtask {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+  &__subtask_item {
+    display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    padding: 4px 16px;
+    border-radius: 10px;
+    background-color: transparent;
+    min-height: 36px;
+    transition: background-color var(--transition-fast, 0.1s);
+
+    .board_dialog__subtask_actions {
+      display: none;
+    }
+
+    &:hover {
+      background-color: #eeeeee;
+
+      .board_dialog__subtask_actions {
+        display: flex;
+      }
+    }
   }
 
-  &__subtask_input {
+  &__subtask_text {
+    flex: 1;
+    color: #000000;
+    font-size: 16px;
+    line-height: 1.2;
     min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  &__subtask_remove {
-    display: inline-flex;
-    width: 36px;
-    height: 36px;
+  &__subtask_bullet {
+    color: #000000;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  &__subtask_edit {
+    display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 12px;
+    padding: 4px 16px;
+    min-height: 36px;
+    background-color: transparent;
+    border-bottom: 1px solid #124658;
+  }
+
+  &__subtask_list_input {
+    flex: 1;
+    min-width: 0;
+    height: 28px;
     padding: 0;
     border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #2a3647;
-    font-size: 24px;
-    line-height: 1;
-    cursor: pointer;
+    background-color: transparent;
+    color: #000000;
+    font-family: inherit;
+    font-size: var(--font-size-sm, 16px);
+    outline: none;
+  }
 
-    &:hover,
-    &:focus-visible {
-      background-color: #eeeeee;
-      color: #b00020;
-      outline: none;
-    }
+  &__subtask_actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
   }
 }
