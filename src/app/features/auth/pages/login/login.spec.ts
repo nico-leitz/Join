@@ -77,8 +77,32 @@ describe("Login Component", () => {
     control.setValue("invalid-email-format");
 
     expect(control.invalid).toBe(true);
-    expect(control.hasError("email")).toBe(true);
+    expect(control.hasError("strictEmail")).toBe(true);
     expect(component.isControlInvalid("email")).toBe(true);
+  });
+
+  /**
+   * @test Verifies that an address without a dot and top-level domain is rejected.
+   */
+  it("should invalidate an email without a top-level domain", () => {
+    const control = component.loginForm.controls.email;
+    control.markAsTouched();
+    control.setValue("tester@provider");
+
+    expect(control.invalid).toBe(true);
+    expect(control.hasError("strictEmail")).toBe(true);
+    expect(component.isControlInvalid("email")).toBe(true);
+  });
+
+  /**
+   * @test Verifies that a complete address with a valid top-level domain is accepted.
+   */
+  it("should accept an email with a complete provider domain", () => {
+    const control = component.loginForm.controls.email;
+    control.setValue("tester@provider.de");
+
+    expect(control.valid).toBe(true);
+    expect(control.hasError("strictEmail")).toBe(false);
   });
 
   /**

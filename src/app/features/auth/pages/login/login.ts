@@ -1,5 +1,11 @@
 import { Component, inject, OnDestroy, signal } from "@angular/core";
-import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 import { LoginCredentials } from "../../../../core/models/auth.model";
 import { AuthService } from "../../../../core/services/auth.service";
@@ -9,6 +15,59 @@ type LoginControlName = "email" | "password";
 
 /** Identifies the active login request or an idle state. */
 type LoginMode = "user" | "guest" | null;
+
+/** Permits the RFC-compatible characters supported in the local email part. */
+const EMAIL_LOCAL_PART_PATTERN =
+  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*$/;
+
+/** Permits valid provider and subdomain labels. */
+const EMAIL_DOMAIN_LABEL_PATTERN =
+  /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/;
+
+/** Requires an alphabetic top-level domain containing at least two letters. */
+const EMAIL_TOP_LEVEL_DOMAIN_PATTERN = /^[A-Za-z]{2,63}$/;
+
+/**
+ * Validates the complete syntactic structure of an email address.
+ *
+ * @param control - Email control to validate.
+ * @returns A strict email error or null when the structure is valid.
+ */
+function strictEmailValidator(
+  control: AbstractControl,
+): ValidationErrors | null {
+  const email = String(control.value ?? "").trim();
+
+  if (!email) {
+    return null;
+  }
+
+  const parts = email.split("@");
+
+  if (parts.length !== 2) {
+    return { strictEmail: true };
+  }
+
+  const [localPart, domain] = parts;
+  const domainLabels = domain.split(".");
+  const topLevelDomain = domainLabels.at(-1) ?? "";
+  const providerLabels = domainLabels.slice(0, -1);
+
+  const hasValidLength = email.length <= 254 && localPart.length <= 64;
+  const hasValidLocalPart = EMAIL_LOCAL_PART_PATTERN.test(localPart);
+  const hasValidDomain =
+    providerLabels.length > 0 &&
+    providerLabels.every((label) => EMAIL_DOMAIN_LABEL_PATTERN.test(label));
+  const hasValidTopLevelDomain =
+    EMAIL_TOP_LEVEL_DOMAIN_PATTERN.test(topLevelDomain);
+
+  return hasValidLength &&
+    hasValidLocalPart &&
+    hasValidDomain &&
+    hasValidTopLevelDomain
+    ? null
+    : { strictEmail: true };
+}
 
 /**
  * Provides email and anonymous guest authentication.
@@ -57,7 +116,7 @@ export class Login implements OnDestroy {
 
   /** Reactive form containing the email login credentials. */
   readonly loginForm = this.formBuilder.group({
-    email: ["", [Validators.required, Validators.email]],
+    email: ["", [Validators.required, strictEmailValidator]],
     password: ["", Validators.required],
   });
 

@@ -85,8 +85,9 @@
             >
               @if (loginForm.controls.email.hasError('required')) { Please enter
               your email address. } @else if
-              (loginForm.controls.email.hasError('email')) { Please enter a
-              valid email address. }
+              (loginForm.controls.email.hasError('strictEmail')) { Enter an
+              address like name&#64;provider.com with an ending of at least 2
+              letters. }
             </p>
           </div>
 
