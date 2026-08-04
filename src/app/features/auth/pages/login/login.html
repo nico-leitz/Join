@@ -11,7 +11,7 @@
       [src]="
           isMobile()
             ? 'assets/sidebar/icons/join-logo.svg'
-            : 'assets/log-in/join-logo-blue.svg'
+            : 'assets/sign-up/join-logo-blue.svg'
         "
       alt=""
     />
@@ -21,7 +21,7 @@
   <div class="login-page__content">
     <header class="login-page__header">
       <div class="login-page__logo">
-        <img src="assets/log-in/join-logo-blue.svg" alt="Join Logo" />
+        <img src="assets/sign-up/join-logo-blue.svg" alt="Join Logo" />
       </div>
 
       <div class="login-page__signup login-page__signup--desktop">
@@ -65,23 +65,19 @@
                 placeholder="Email"
                 autocomplete="email"
                 aria-describedby="login-email-error"
-                [class.login-card__input--error]="
-                  isControlInvalid('email')
-                "
+                [class.login-card__input--error]="isControlInvalid('email')"
                 [attr.aria-invalid]="isControlInvalid('email')"
               />
 
               <span class="login-card__icon" aria-hidden="true">
-                <img src="assets/log-in/mail.svg" alt="" />
+                <img src="assets/sign-up/mail.svg" alt="" />
               </span>
             </div>
 
             <p
               id="login-email-error"
               class="login-card__error"
-              [class.login-card__error--visible]="
-                isControlInvalid('email')
-              "
+              [class.login-card__error--visible]="isControlInvalid('email')"
             >
               @if (loginForm.controls.email.hasError('required')) { Please enter
               your email address. } @else if
@@ -99,29 +95,36 @@
 
               <input
                 id="login-password"
-                type="password"
+                [type]="passwordVisible ? 'text' : 'password'"
                 class="login-card__input"
                 formControlName="password"
                 placeholder="Password"
                 autocomplete="current-password"
                 aria-describedby="login-password-error"
-                [class.login-card__input--error]="
-                  isControlInvalid('password')
-                "
+                [class.login-card__input--error]="isControlInvalid('password')"
                 [attr.aria-invalid]="isControlInvalid('password')"
+                (focus)="passwordFocused = true"
+                (blur)="passwordFocused = false"
               />
 
-              <span class="login-card__icon" aria-hidden="true">
-                <img src="assets/log-in/lock.svg" alt="" />
+              <span
+                class="login-card__icon"
+                aria-hidden="true"
+                style="cursor: pointer; pointer-events: auto;"
+                (click)="togglePasswordVisibility()"
+                (mousedown)="$event.preventDefault()"
+              >
+                <img
+                  [src]="getIconSrc(passwordFocused, passwordVisible)"
+                  alt="Toggle password visibility"
+                />
               </span>
             </div>
 
             <p
               id="login-password-error"
               class="login-card__error"
-              [class.login-card__error--visible]="
-                isControlInvalid('password')
-              "
+              [class.login-card__error--visible]="isControlInvalid('password')"
             >
               @if (isControlInvalid('password')) { Please enter your password. }
             </p>
@@ -131,9 +134,7 @@
             class="login-card__form-message"
             role="alert"
             aria-live="polite"
-            [class.login-card__form-message--visible]="
-              authService.errorMessage()
-            "
+            [class.login-card__form-message--visible]="authService.errorMessage()"
           >
             {{ authService.errorMessage() || '' }}
           </p>
