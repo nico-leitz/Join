@@ -1,237 +1,265 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/common';
 import { signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
-import { Contacts } from './contacts';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Contact, CreateContact, UpdateContact } from '../../../../core/models/contact.model';
 import { ContactService } from '../../../../core/services/contact.service';
-import { Contact } from '../../../../core/models/contact.model';
+import { ContactList } from '../../components/contact-list/contact-list';
+import { Contacts } from './contacts';
+
+/** Contact-service surface required by the contacts-page tests. */
+type ContactServiceMock = Pick<
+  ContactService,
+  | 'selectedContact'
+  | 'allContacts'
+  | 'createContact'
+  | 'updateContact'
+  | 'deleteContact'
+  | 'getContacts'
+  | 'getInitials'
+>;
+
+let component: Contacts;
+let fixture: ComponentFixture<Contacts>;
+let mockContactService: ContactServiceMock;
+let mockDocument: Document;
+let mockContactList: ContactList;
+
+/** Contacts used to exercise the page workflows. */
+const mockContacts: Contact[] = [
+  {
+    id: '1',
+    authUserId: 'user-001',
+    firstName: 'Alice',
+    lastName: 'Smith',
+    email: 'alice.smith@example.com',
+    phone: '123-456-7890',
+    badgeColor: '#ff0000',
+    createdAt: '2023-01-01T10:00:00Z',
+    updatedAt: '2023-01-01T10:00:00Z',
+  },
+  {
+    id: '2',
+    authUserId: 'user-002',
+    firstName: 'Bob',
+    lastName: 'Johnson',
+    email: 'bob.j@example.com',
+    phone: null,
+    badgeColor: '#00ff00',
+    createdAt: '2023-02-15T09:30:00Z',
+    updatedAt: '2023-02-15T09:30:00Z',
+  },
+  {
+    id: '3',
+    authUserId: 'user-003',
+    firstName: 'Charlie',
+    lastName: 'Brown',
+    email: 'charlie.b@example.com',
+    phone: '555-0192',
+    badgeColor: '#0000ff',
+    createdAt: '2023-03-20T14:15:00Z',
+    updatedAt: '2023-03-20T14:15:00Z',
+  },
+  {
+    id: '4',
+    authUserId: 'user-004',
+    firstName: 'Diana',
+    lastName: 'Prince',
+    email: 'diana@amazon.com',
+    phone: '987-654-3210',
+    badgeColor: '#ff00ff',
+    createdAt: '2023-04-10T11:00:00Z',
+    updatedAt: '2023-04-10T11:00:00Z',
+  },
+  {
+    id: '5',
+    authUserId: 'user-005',
+    firstName: 'Evan',
+    lastName: 'Wright',
+    email: 'evan.wright@test.org',
+    phone: null,
+    badgeColor: '#ffff00',
+    createdAt: '2023-05-05T08:45:00Z',
+    updatedAt: '2023-05-05T08:45:00Z',
+  },
+];
 
 /**
- * @description Unit tests for the Contacts page component.
- * This suite verifies dialog states, service integration for CRUD operations, 
- * success message timeouts, and document body scroll locking.
+ * Creates the contact-service test double.
+ * @returns A contact-service mock with writable contact signals.
  */
-describe('Contacts Component', () => {
-  let component: Contacts;
-  let fixture: ComponentFixture<Contacts>;
-  let mockContactService: any;
-  let mockDocument: any;
-  let mockContactList: any;
+function createContactServiceMock(): ContactServiceMock {
+  return {
+    selectedContact: signal<Contact | null>(null),
+    allContacts: signal<Contact[]>(mockContacts),
+    createContact: vi.fn(async () => mockContacts[0]),
+    updateContact: vi.fn(async () => mockContacts[0]),
+    deleteContact: vi.fn(async () => undefined),
+    getContacts: vi.fn(async () => mockContacts),
+    getInitials: vi.fn(() => 'AB'),
+  };
+}
 
-  /** 
-   * Array of 5 mock contacts to simulate the data coming from the service. 
-   */
-  const MOCK_CONTACTS: Contact[] = [
-    {
-      id: '1',
-      authUserId: 'user-001',
-      firstName: 'Alice',
-      lastName: 'Smith',
-      email: 'alice.smith@example.com',
-      phone: '123-456-7890',
-      badgeColor: '#ff0000',
-      createdAt: '2023-01-01T10:00:00Z',
-      updatedAt: '2023-01-01T10:00:00Z',
-    },
-    {
-      id: '2',
-      authUserId: 'user-002',
-      firstName: 'Bob',
-      lastName: 'Johnson',
-      email: 'bob.j@example.com',
-      phone: null,
-      badgeColor: '#00ff00',
-      createdAt: '2023-02-15T09:30:00Z',
-      updatedAt: '2023-02-15T09:30:00Z',
-    },
-    {
-      id: '3',
-      authUserId: 'user-003',
-      firstName: 'Charlie',
-      lastName: 'Brown',
-      email: 'charlie.b@example.com',
-      phone: '555-0192',
-      badgeColor: '#0000ff',
-      createdAt: '2023-03-20T14:15:00Z',
-      updatedAt: '2023-03-20T14:15:00Z',
-    },
-    {
-      id: '4',
-      authUserId: 'user-004',
-      firstName: 'Diana',
-      lastName: 'Prince',
-      email: 'diana@amazon.com',
-      phone: '987-654-3210',
-      badgeColor: '#ff00ff',
-      createdAt: '2023-04-10T11:00:00Z',
-      updatedAt: '2023-04-10T11:00:00Z',
-    },
-    {
-      id: '5',
-      authUserId: 'user-005',
-      firstName: 'Evan',
-      lastName: 'Wright',
-      email: 'evan.wright@test.org',
-      phone: null,
-      badgeColor: '#ffff00',
-      createdAt: '2023-05-05T08:45:00Z',
-      updatedAt: '2023-05-05T08:45:00Z',
-    }
-  ];
+/** Configures the standalone contacts-page testing module. */
+async function configureTestBed(): Promise<void> {
+  await TestBed.configureTestingModule({
+    imports: [Contacts],
+    providers: [{ provide: ContactService, useValue: mockContactService }, provideRouter([])],
+  }).compileComponents();
+}
 
-  beforeEach(async () => {
-    mockContactService = {
-      selectedContact: signal<Contact | null>(null),
-      allContacts: signal<Contact[]>(MOCK_CONTACTS),
-      createContact: vi.fn().mockResolvedValue(MOCK_CONTACTS[0]),
-      updateContact: vi.fn().mockResolvedValue(undefined),
-      deleteContact: vi.fn().mockResolvedValue(undefined),
-      getInitials: vi.fn().mockReturnValue('AB')
-    };
+/**
+ * Gets the rendered contact-list child component.
+ * @returns The contact-list instance rendered by the page fixture.
+ */
+function getContactList(): ContactList {
+  return fixture.debugElement.query(By.directive(ContactList)).componentInstance as ContactList;
+}
 
-    await TestBed.configureTestingModule({
-      imports: [Contacts],
-      providers: [
-        { provide: ContactService, useValue: mockContactService },
-        provideRouter([])
-      ]
-    }).compileComponents();
+/** Creates a rendered contacts-page fixture and its spies. */
+async function setupComponent(): Promise<void> {
+  mockContactService = createContactServiceMock();
+  await configureTestBed();
+  mockDocument = TestBed.inject(DOCUMENT);
+  vi.spyOn(mockDocument.body.classList, 'add');
+  vi.spyOn(mockDocument.body.classList, 'remove');
+  fixture = TestBed.createComponent(Contacts);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+  mockContactList = getContactList();
+  vi.spyOn(mockContactList, 'loadContacts').mockResolvedValue(undefined);
+  vi.useFakeTimers();
+}
 
-    mockDocument = TestBed.inject(DOCUMENT);
-    vi.spyOn(mockDocument.body.classList, 'add');
-    vi.spyOn(mockDocument.body.classList, 'remove');
+/** Restores timers and spies after each test. */
+function cleanUpComponent(): void {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+}
 
-    fixture = TestBed.createComponent(Contacts);
-    component = fixture.componentInstance;
+/** Verifies successful component creation. */
+function shouldCreateComponent(): void {
+  expect(component).toBeTruthy();
+}
 
-    fixture.detectChanges(); 
+/** Verifies opening the create dialog and locking page scroll. */
+function shouldOpenCreateDialog(): void {
+  component.openCreateDialog();
+  expect(component.isCreateDialogOpen()).toBe(true);
+  expect(mockDocument.body.classList.add).toHaveBeenCalledWith('dialog-open');
+}
 
-    mockContactList = (component as any).contactList;
-    vi.spyOn(mockContactList, 'loadContacts').mockResolvedValue(undefined);
+/** Verifies closing the create dialog and unlocking page scroll. */
+function shouldCloseCreateDialog(): void {
+  component.isCreateDialogOpen.set(true);
+  component.closeCreateDialog();
+  expect(component.isCreateDialogOpen()).toBe(false);
+  expect(mockDocument.body.classList.remove).toHaveBeenCalledWith('dialog-open');
+}
 
-    vi.useFakeTimers();
-  });
+/** Verifies selecting a contact and opening the edit dialog. */
+function shouldOpenEditDialog(): void {
+  const contactToEdit = mockContacts[1];
+  component.openEditDialog(contactToEdit);
+  expect(component.selectedContact()).toEqual(contactToEdit);
+  expect(component.isEditDialogOpen()).toBe(true);
+  expect(mockDocument.body.classList.add).toHaveBeenCalledWith('dialog-open');
+}
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+/** Verifies the complete contact-creation workflow. */
+async function shouldCreateContact(): Promise<void> {
+  const contact: CreateContact = {
+    firstName: 'Alice',
+    lastName: 'Smith',
+    email: 'test@test.com',
+  };
+  await component.createContact(contact);
+  expect(mockContactService.createContact).toHaveBeenCalledWith(contact);
+  expect(component.isCreateDialogOpen()).toBe(false);
+  expect(mockContactList.loadContacts).toHaveBeenCalled();
+  expect(component.successMessage()).toBe('Contact successfully created');
+}
 
-  /**
-   * @test Ensures the smart component initializes correctly.
-   */
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
+/** Verifies that updating stops without a selected contact. */
+async function shouldNotUpdateWithoutSelection(): Promise<void> {
+  const changes: UpdateContact = { firstName: 'Changed' };
+  component.selectedContact.set(null);
+  await component.updateContact(changes);
+  expect(mockContactService.updateContact).not.toHaveBeenCalled();
+}
 
-  /**
-   * @test Verifies that opening the create dialog sets the signal and locks page scroll.
-   */
-  it('should open create dialog and lock page scroll', () => {
-    component.openCreateDialog();
+/** Verifies the complete contact-update workflow. */
+async function shouldUpdateContact(): Promise<void> {
+  const activeContact = mockContacts[2];
+  const changes: UpdateContact = { firstName: 'Updated Name' };
+  component.selectedContact.set(activeContact);
+  await component.updateContact(changes);
+  expect(mockContactService.updateContact).toHaveBeenCalledWith(activeContact.id, changes);
+  expect(component.isEditDialogOpen()).toBe(false);
+  expect(mockContactList.loadContacts).toHaveBeenCalled();
+  expect(component.successMessage()).toBe('Contact successfully updated');
+}
 
-    expect(component.isCreateDialogOpen()).toBe(true);
-    expect(mockDocument.body.classList.add).toHaveBeenCalledWith('dialog-open');
-  });
+/** Verifies the complete contact-deletion workflow. */
+async function shouldDeleteContact(): Promise<void> {
+  await component.deleteContact('123');
+  expect(mockContactService.deleteContact).toHaveBeenCalledWith('123');
+  expect(component.isEditDialogOpen()).toBe(false);
+  expect(mockContactList.loadContacts).toHaveBeenCalled();
+  expect(component.successMessage()).toBe('Contact successfully deleted');
+}
 
-  /**
-   * @test Verifies that closing the create dialog updates the signal and unlocks scroll.
-   */
-  it('should close create dialog and unlock page scroll', () => {
-    component.isCreateDialogOpen.set(true);
-    
-    component.closeCreateDialog();
+/** Verifies automatic removal of the success message. */
+async function shouldHideSuccessMessage(): Promise<void> {
+  const contact: CreateContact = {
+    firstName: 'Test',
+    lastName: 'Contact',
+    email: 'test@example.com',
+  };
+  component.openCreateDialog();
+  await component.createContact(contact);
+  expect(component.successMessage()).toBeTruthy();
+  vi.advanceTimersByTime(2500);
+  expect(component.successMessage()).toBe('');
+}
 
-    expect(component.isCreateDialogOpen()).toBe(false);
-    expect(mockDocument.body.classList.remove).toHaveBeenCalledWith('dialog-open');
-  });
+/** Verifies page-scroll restoration when the component is destroyed. */
+function shouldUnlockScrollOnDestroy(): void {
+  component.ngOnDestroy();
+  expect(mockDocument.body.classList.remove).toHaveBeenCalledWith('dialog-open');
+}
 
-  /**
-   * @test Ensures that opening the edit dialog sets the selected contact and locks scroll.
-   */
-  it('should open edit dialog, set selected contact, and lock scroll', () => {
-    const contactToEdit = MOCK_CONTACTS[1];
-    
-    component.openEditDialog(contactToEdit);
+/** Registers contacts-page dialog tests. */
+function registerDialogTests(): void {
+  it('should create the component', shouldCreateComponent);
+  it('should open create dialog and lock page scroll', shouldOpenCreateDialog);
+  it('should close create dialog and unlock page scroll', shouldCloseCreateDialog);
+  it('should open edit dialog, set selected contact, and lock scroll', shouldOpenEditDialog);
+}
 
-    expect(component.selectedContact()).toEqual(contactToEdit);
-    expect(component.isEditDialogOpen()).toBe(true);
-    expect(mockDocument.body.classList.add).toHaveBeenCalledWith('dialog-open');
-  });
+/** Registers contacts-page persistence tests. */
+function registerPersistenceTests(): void {
+  it('should create a contact, reload the list, and show success', shouldCreateContact);
+  it('should not update when no contact is selected', shouldNotUpdateWithoutSelection);
+  it('should update the selected contact and show success', shouldUpdateContact);
+  it('should delete a contact, reload the list, and show success', shouldDeleteContact);
+}
 
-  /**
-   * @test Checks the full workflow of creating a contact.
-   */
-  it('should create a contact, close dialog, reload list, and show success message', async () => {
-    const newContactData = { firstName: 'Alice', lastName: 'Smith', email: 'test@test.com' };
-    
-    await component.createContact(newContactData as any);
+/** Registers contacts-page feedback and cleanup tests. */
+function registerLifecycleTests(): void {
+  it('should hide the success message after 2500ms', shouldHideSuccessMessage);
+  it('should unlock page scroll when destroyed', shouldUnlockScrollOnDestroy);
+}
 
-    expect(mockContactService.createContact).toHaveBeenCalledWith(newContactData);
-    expect(component.isCreateDialogOpen()).toBe(false);
-    expect(mockContactList.loadContacts).toHaveBeenCalled();
-    expect(component.successMessage()).toBe('Contact successfully created');
-  });
+/** Registers all contacts-page component tests. */
+function registerContactsTests(): void {
+  beforeEach(setupComponent);
+  afterEach(cleanUpComponent);
+  registerDialogTests();
+  registerPersistenceTests();
+  registerLifecycleTests();
+}
 
-  /**
-   * @test Verifies that the update process aborts if no contact is currently selected.
-   */
-  it('should not update contact if no contact is selected', async () => {
-    component.selectedContact.set(null);
-    
-    await component.updateContact({ firstName: 'Changed' } as any);
-
-    expect(mockContactService.updateContact).not.toHaveBeenCalled();
-  });
-
-  /**
-   * @test Checks the full workflow of updating an existing contact.
-   */
-  it('should update the selected contact, close dialog, reload list, and show success', async () => {
-    const activeContact = MOCK_CONTACTS[2];
-    component.selectedContact.set(activeContact);
-    
-    const updateData = { firstName: 'Updated Name' };
-    await component.updateContact(updateData as any);
-
-    expect(mockContactService.updateContact).toHaveBeenCalledWith(activeContact.id, updateData);
-    expect(component.isEditDialogOpen()).toBe(false);
-    expect(mockContactList.loadContacts).toHaveBeenCalled();
-    expect(component.successMessage()).toBe('Contact successfully updated');
-  });
-
-  /**
-   * @test Tests the deletion workflow including service call and list reload.
-   */
-  it('should delete contact, close dialog, reload list, and show success', async () => {
-    await component.deleteContact('123');
-
-    expect(mockContactService.deleteContact).toHaveBeenCalledWith('123');
-    expect(component.isEditDialogOpen()).toBe(false);
-    expect(mockContactList.loadContacts).toHaveBeenCalled();
-    expect(component.successMessage()).toBe('Contact successfully deleted');
-  });
-
-  /**
-   * @test Ensures that the success message disappears automatically after 2.5 seconds.
-   */
-  it('should hide success message after 2500ms', async () => {
-    component.openCreateDialog();
-    await component.createContact({ firstName: 'Test' } as any); 
-    
-    expect(component.successMessage()).toBeTruthy();
-
-    vi.advanceTimersByTime(2500);
-
-    expect(component.successMessage()).toBe('');
-  });
-
-  /**
-   * @test Checks that ngOnDestroy properly unlocks the page scroll to prevent bugs when leaving the page.
-   */
-  it('should unlock page scroll when component is destroyed', () => {
-    component.ngOnDestroy();
-    
-    expect(mockDocument.body.classList.remove).toHaveBeenCalledWith('dialog-open');
-  });
-});
+describe('Contacts Component', registerContactsTests);
