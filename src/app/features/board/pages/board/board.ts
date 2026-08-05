@@ -1,23 +1,9 @@
-import {
-  CdkDrag,
-  CdkDragDrop,
-  CdkDropList,
-  CdkDropListGroup,
-} from '@angular/cdk/drag-drop';
-import {
-  Component,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Contact } from '../../../../core/models/contact.model';
 import { Subtask } from '../../../../core/models/subtask.model';
-import {
-  Task,
-  TaskStatus,
-} from '../../../../core/models/task.model';
+import { Task, TaskStatus } from '../../../../core/models/task.model';
 import { TaskService } from '../../../../core/services/task.service';
 import { Header } from '../../../../layout/header/header';
 import { Sidebar } from '../../../../layout/sidebar/sidebar';
@@ -62,159 +48,108 @@ import { BoardTaskPositionService } from '../../services/board-task-position.ser
   templateUrl: './board.html',
   styleUrl: './board.scss',
   host: {
-    '(window:resize)':
-      'horizontalScroll.updateViewport()',
-    '(pointerdown)':
-      'horizontalScroll.start($event, isDragging())',
-    '(pointermove)':
-      'horizontalScroll.move($event)',
-    '(pointerup)':
-      'horizontalScroll.end($event)',
-    '(pointercancel)':
-      'horizontalScroll.end($event)',
+    '(window:resize)': 'horizontalScroll.updateViewport()',
+    '(pointerdown)': 'horizontalScroll.start($event, isDragging())',
+    '(pointermove)': 'horizontalScroll.move($event)',
+    '(pointerup)': 'horizontalScroll.end($event)',
+    '(pointercancel)': 'horizontalScroll.end($event)',
   },
 })
-export class Board
-  implements OnInit
-{
+export class Board implements OnInit {
   /** Service exposing the complete application task collection. */
-  private readonly taskService =
-    inject(TaskService);
+  private readonly taskService = inject(TaskService);
 
   /** Board-specific task, relation and search state. */
-  private readonly boardData =
-    inject(
-      BoardDataStateService,
-    );
+  private readonly boardData = inject(BoardDataStateService);
 
   /** State of the task detail dialog and its current selection. */
-  private readonly dialogState =
-    inject(
-      BoardDialogStateService,
-    );
+  private readonly dialogState = inject(BoardDialogStateService);
 
   /** Pointer-based horizontal board scrolling behavior. */
-  protected readonly horizontalScroll =
-    inject(
-      BoardHorizontalScrollService,
-    );
+  protected readonly horizontalScroll = inject(BoardHorizontalScrollService);
 
   /** Board query parameter and requested scroll behavior. */
-  private readonly boardRoute =
-    inject(BoardRouteService);
+  private readonly boardRoute = inject(BoardRouteService);
 
   /** Task drag-and-drop and mobile move behavior. */
-  private readonly taskPosition =
-    inject(
-      BoardTaskPositionService,
-    );
+  private readonly taskPosition = inject(BoardTaskPositionService);
 
   /** Router used to open the standalone mobile task page. */
-  private readonly router =
-    inject(Router);
+  private readonly router = inject(Router);
 
   /** Indicates whether the task detail dialog is open. */
-  readonly isDialogOpen =
-    this.dialogState.isOpen;
+  readonly isDialogOpen = this.dialogState.isOpen;
 
   /** Indicates whether the desktop add-task dialog is open. */
-  readonly isAddTaskDialogOpen =
-    signal(false);
+  readonly isAddTaskDialogOpen = signal(false);
 
   /** Initial status supplied to the add-task dialog or page. */
-  readonly addTaskStatus =
-    signal<TaskStatus>('todo');
+  readonly addTaskStatus = signal<TaskStatus>('todo');
 
   /** Indicates whether the complete board is being loaded. */
-  readonly isBoardLoading =
-    signal(false);
+  readonly isBoardLoading = signal(false);
 
   /** Indicates whether task positions are being persisted. */
-  readonly isBoardUpdating =
-    this.taskPosition.isUpdating;
+  readonly isBoardUpdating = this.taskPosition.isUpdating;
 
   /** Indicates whether a CDK task drag is active. */
-  readonly isDragging =
-    signal(false);
+  readonly isDragging = signal(false);
 
   /** User-facing message describing the latest board failure. */
-  readonly boardError =
-    signal('');
+  readonly boardError = signal('');
 
   /** Current task search term. */
-  readonly searchTerm =
-    this.boardData.searchTerm;
+  readonly searchTerm = this.boardData.searchTerm;
 
   /** Complete subtask collection used by task cards. */
-  readonly allSubtasks =
-    this.boardData.allSubtasks;
+  readonly allSubtasks = this.boardData.allSubtasks;
 
   /** Complete assignment row collection used by task cards. */
-  readonly allAssignments =
-    this.boardData.allAssignments;
+  readonly allAssignments = this.boardData.allAssignments;
 
   /** Complete contact collection available to the board. */
-  readonly allContacts =
-    this.boardData.allContacts;
+  readonly allContacts = this.boardData.allContacts;
 
   /** Task currently displayed by the detail dialog. */
-  readonly dialogTask =
-    this.dialogState.task;
+  readonly dialogTask = this.dialogState.task;
 
   /** Subtasks displayed by the detail dialog. */
-  readonly dialogSubtasks =
-    this.dialogState.subtasks;
+  readonly dialogSubtasks = this.dialogState.subtasks;
 
   /** Contacts displayed by the detail dialog. */
-  readonly dialogContacts =
-    this.dialogState.contacts;
+  readonly dialogContacts = this.dialogState.contacts;
 
   /** Indicates whether the mobile board layout is active. */
-  protected readonly isMobileViewport =
-    this.horizontalScroll
-      .isMobileViewport;
+  protected readonly isMobileViewport = this.horizontalScroll.isMobileViewport;
 
   /** Orientation supplied to the CDK drop lists. */
-  protected readonly dropListOrientation =
-    this.horizontalScroll
-      .dropListOrientation;
+  protected readonly dropListOrientation = this.horizontalScroll.dropListOrientation;
 
   /** Tasks matching the current search term. */
-  readonly filteredTasks =
-    this.boardData.filteredTasks;
+  readonly filteredTasks = this.boardData.filteredTasks;
 
   /** Filtered tasks in the to-do column. */
-  readonly todo =
-    this.boardData.todo;
+  readonly todo = this.boardData.todo;
 
   /** Filtered tasks in the in-progress column. */
-  readonly inProgress =
-    this.boardData.inProgress;
+  readonly inProgress = this.boardData.inProgress;
 
   /** Filtered tasks in the awaiting-feedback column. */
-  readonly awaitFeedback =
-    this.boardData.awaitFeedback;
+  readonly awaitFeedback = this.boardData.awaitFeedback;
 
   /** Filtered tasks in the done column. */
-  readonly done =
-    this.boardData.done;
+  readonly done = this.boardData.done;
 
   /** Indicates whether a non-empty board search is active. */
-  readonly isSearchActive =
-    this.boardData.isSearchActive;
+  readonly isSearchActive = this.boardData.isSearchActive;
 
   /** Indicates whether drag-and-drop must currently be disabled. */
-  readonly isDragDisabled =
-    computed(() => {
-      return (
-        this.isSearchActive() ||
-        this.isBoardUpdating()
-      );
-    });
+  readonly isDragDisabled = computed(() => {
+    return this.isSearchActive() || this.isBoardUpdating();
+  });
 
   /**
    * Loads the initial board state.
-   *
    * @returns A promise that resolves after initialization.
    */
   async ngOnInit(): Promise<void> {
@@ -223,7 +158,6 @@ export class Board
 
   /**
    * Loads tasks, relations and contacts and handles route requests.
-   *
    * @returns A promise that resolves after the load attempt.
    */
   async loadBoard(): Promise<void> {
@@ -235,163 +169,101 @@ export class Board
 
       this.openRequestedTaskDialog();
     } catch (error) {
-      console.error(
-        'Board data could not be loaded.',
-        error,
-      );
+      console.error('Board data could not be loaded.', error);
 
-      this.boardError.set(
-        'Board data could not be loaded.',
-      );
+      this.boardError.set('Board data could not be loaded.');
     } finally {
-      this.isBoardLoading.set(
-        false,
-      );
+      this.isBoardLoading.set(false);
 
-      this.boardRoute
-        .scheduleRequestedStatusScroll();
+      this.boardRoute.scheduleRequestedStatusScroll();
     }
   }
 
   /**
    * Applies the current search input value to board state.
-   *
    * @param event - Search input event containing the current value.
    */
-  updateSearchTerm(
-    event: Event,
-  ): void {
-    const input =
-      event.target as HTMLInputElement;
+  updateSearchTerm(event: Event): void {
+    const input = event.target as HTMLInputElement;
 
-    this.searchTerm.set(
-      input.value,
-    );
+    this.searchTerm.set(input.value);
   }
 
   /**
    * Returns the subtasks belonging to a task.
-   *
    * @param taskId - Identifier of the requested task.
    * @returns Subtasks belonging to the task.
    */
-  getSubtasksForTask(
-    taskId: string,
-  ): Subtask[] {
-    return this.boardData
-      .getSubtasks(taskId);
+  getSubtasksForTask(taskId: string): Subtask[] {
+    return this.boardData.getSubtasks(taskId);
   }
 
   /**
    * Returns the contacts assigned to a task.
-   *
    * @param taskId - Identifier of the requested task.
    * @returns Contacts assigned to the task.
    */
-  getContactsForTask(
-    taskId: string,
-  ): Contact[] {
-    return this.boardData
-      .getContacts(taskId);
+  getContactsForTask(taskId: string): Contact[] {
+    return this.boardData.getContacts(taskId);
   }
 
   /**
    * Opens task creation in the layout-appropriate UI.
-   *
    * @param status - Initial status of the task to create.
    */
-  openAddTaskDialog(
-    status: TaskStatus = 'todo',
-  ): void {
+  openAddTaskDialog(status: TaskStatus = 'todo'): void {
     if (this.isBoardUpdating()) {
       return;
     }
 
     if (this.isMobileViewport()) {
-      void this.router.navigate(
-        ['/add-task'],
-        {
-          queryParams: {
-            status,
-          },
-        },
-      );
+      void this.router.navigate(['/add-task'], { queryParams: { status } });
 
       return;
     }
 
-    this.addTaskStatus.set(
-      status,
-    );
+    this.addTaskStatus.set(status);
 
-    this.isAddTaskDialogOpen.set(
-      true,
-    );
+    this.isAddTaskDialogOpen.set(true);
   }
 
   /**
    * Closes task creation and clears shared task selection state.
    */
   closeAddTaskDialog(): void {
-    this.isAddTaskDialogOpen.set(
-      false,
-    );
+    this.isAddTaskDialogOpen.set(false);
 
-    this.dialogState
-      .clearSelection();
+    this.dialogState.clearSelection();
   }
 
   /**
    * Closes task creation and refreshes board relations after creation.
-   *
    * @returns A promise that resolves after the refresh attempt.
    */
-  async handleTaskCreated():
-    Promise<void>
-  {
-    this.isAddTaskDialogOpen.set(
-      false,
-    );
+  async handleTaskCreated(): Promise<void> {
+    this.isAddTaskDialogOpen.set(false);
 
     this.boardError.set('');
 
     try {
-      await this.boardData
-        .refreshRelations();
+      await this.boardData.refreshRelations();
     } catch {
-      this.boardError.set(
-        'Task was created, but the board could not be refreshed completely.',
-      );
+      this.boardError.set('Task was created, but the board could not be refreshed completely.');
     } finally {
-      this.dialogState
-        .clearSelection();
+      this.dialogState.clearSelection();
     }
   }
 
   /**
    * Opens a task unless the click belongs to horizontal mouse scrolling.
-   *
    * @param task - Task selected by the user.
    */
-  openDialog(
-    task: Task,
-  ): void {
-    if (
-      this.horizontalScroll
-        .consumeSuppressedCardClick()
-    ) {
+  openDialog(task: Task): void {
+    if (this.horizontalScroll.consumeSuppressedCardClick()) {
       return;
     }
 
-    this.dialogState.open(
-      task,
-      this.getSubtasksForTask(
-        task.id,
-      ),
-      this.getContactsForTask(
-        task.id,
-      ),
-    );
+    this.dialogState.open(task, this.getSubtasksForTask(task.id), this.getContactsForTask(task.id));
   }
 
   /**
@@ -400,65 +272,41 @@ export class Board
   closeDialog(): void {
     this.dialogState.close();
 
-    this.boardRoute
-      .clearRequestedTask();
+    this.boardRoute.clearRequestedTask();
   }
 
   /**
    * Synchronizes a changed subtask with board and dialog state.
-   *
    * @param updatedSubtask - Persisted subtask containing the new state.
    */
-  handleSubtaskUpdated(
-    updatedSubtask: Subtask,
-  ): void {
-    this.boardData.updateSubtask(
-      updatedSubtask,
-    );
+  handleSubtaskUpdated(updatedSubtask: Subtask): void {
+    this.boardData.updateSubtask(updatedSubtask);
 
-    this.dialogState.updateSubtask(
-      updatedSubtask,
-    );
+    this.dialogState.updateSubtask(updatedSubtask);
   }
 
   /**
    * Removes local relation state belonging to a deleted task.
-   *
    * @param taskId - Identifier of the deleted task.
    */
-  handleTaskDeleted(
-    taskId: string,
-  ): void {
-    this.boardData
-      .removeTaskRelations(
-        taskId,
-      );
+  handleTaskDeleted(taskId: string): void {
+    this.boardData.removeTaskRelations(taskId);
   }
 
   /**
    * Synchronizes the dialog and reloads board relations after a task update.
-   *
    * @param update - Complete task and relation state emitted by the dialog.
    * @returns A promise that resolves after the refresh attempt.
    */
-  async handleTaskUpdated(
-    update: TaskDialogUpdate,
-  ): Promise<void> {
-    this.dialogState.update(
-      update.task,
-      update.subtasks,
-      update.assignedContacts,
-    );
+  async handleTaskUpdated(update: TaskDialogUpdate): Promise<void> {
+    this.dialogState.update(update.task, update.subtasks, update.assignedContacts);
 
     this.boardError.set('');
 
     try {
-      await this.boardData
-        .refreshRelations();
+      await this.boardData.refreshRelations();
     } catch (error) {
-      this.handleRelationRefreshError(
-        error,
-      );
+      this.handleRelationRefreshError(error);
     }
   }
 
@@ -478,45 +326,31 @@ export class Board
 
   /**
    * Moves a task to the selected status through the mobile move menu.
-   *
    * @param task - Task to move.
    * @param targetStatus - Status of the target board column.
    * @returns A promise that resolves after the persistence attempt.
    */
-  protected async moveTaskToStatus(
-    task: Task,
-    targetStatus: TaskStatus,
-  ): Promise<void> {
+  protected async moveTaskToStatus(task: Task, targetStatus: TaskStatus): Promise<void> {
     this.boardError.set('');
 
-    const error =
-      await this.taskPosition
-        .moveToStatus(
-          task,
-          targetStatus,
-        );
+    const error = await this.taskPosition.moveToStatus(task, targetStatus);
 
     this.boardError.set(error);
   }
 
   /**
    * Persists a task position produced by CDK drag-and-drop.
-   *
    * @param event - Drop event containing source and target positions.
    * @returns A promise that resolves after the persistence attempt.
    */
-  async drop(
-    event: CdkDragDrop<Task[]>,
-  ): Promise<void> {
+  async drop(event: CdkDragDrop<Task[]>): Promise<void> {
     if (this.isDragDisabled()) {
       return;
     }
 
     this.boardError.set('');
 
-    const error =
-      await this.taskPosition
-        .moveFromDrop(event);
+    const error = await this.taskPosition.moveFromDrop(event);
 
     this.boardError.set(error);
   }
@@ -525,27 +359,18 @@ export class Board
    * Opens the task requested through the current route.
    */
   private openRequestedTaskDialog(): void {
-    const taskId =
-      this.boardRoute
-        .getRequestedTaskId();
+    const taskId = this.boardRoute.getRequestedTaskId();
 
     if (!taskId) {
       return;
     }
 
-    const task =
-      this.taskService
-        .allTasks()
-        .find((item) => {
-          return (
-            item.id === taskId
-          );
-        });
+    const task = this.taskService.allTasks().find((item) => {
+      return item.id === taskId;
+    });
 
     if (!task) {
-      this.boardError.set(
-        'Requested task could not be found.',
-      );
+      this.boardError.set('Requested task could not be found.');
 
       return;
     }
@@ -555,19 +380,11 @@ export class Board
 
   /**
    * Logs and exposes a relation refresh failure after a successful save.
-   *
    * @param error - Original relation loading error.
    */
-  private handleRelationRefreshError(
-    error: unknown,
-  ): void {
-    console.error(
-      'Task was saved, but board relations could not be refreshed.',
-      error,
-    );
+  private handleRelationRefreshError(error: unknown): void {
+    console.error('Task was saved, but board relations could not be refreshed.', error);
 
-    this.boardError.set(
-      'Task was saved, but the board could not be refreshed completely.',
-    );
+    this.boardError.set('Task was saved, but the board could not be refreshed completely.');
   }
 }
