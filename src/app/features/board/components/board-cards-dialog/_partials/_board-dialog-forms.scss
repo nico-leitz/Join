@@ -345,7 +345,7 @@
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
       background-color: #eeeeee;
-      color: #29abe2;
+      color: #124658;
       outline: none;
     }
     &:disabled {
@@ -388,20 +388,19 @@
 
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
-      border-color: #29abe2;
-      background-color: #29abe2;
+      border-color: #124658;
+      background-color: #124658;
       outline: none;
     }
+
+    &:active:not(:disabled) {
+      border-color: #091931;
+      background-color: #091931;
+    }
+
     &:disabled {
       cursor: wait;
       opacity: 0.55;
     }
-  }
-
-  &__edit_button_icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    object-fit: contain;
   }
 }
