@@ -228,3 +228,4 @@ const createSubtaskPayload = (subtasks: DraftSubtask[]) =>
 const createStartOfToday = (): Date => {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
