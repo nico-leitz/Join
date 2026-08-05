@@ -1,6 +1,6 @@
 /**
  * @fileoverview Unit tests for the LegalNotice component.
- * Verifies that the correct localized static texts and sections are rendered.
+ * Verifies that the current static title and section headings are rendered.
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -22,7 +22,7 @@ describe('LegalNotice Component', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LegalNotice],
-      providers: [provideRouter([])]
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LegalNotice);
@@ -38,18 +38,31 @@ describe('LegalNotice Component', () => {
   });
 
   /**
-   * @test Verifies that the component renders the localized title "Impressum".
+   * @test Verifies that the component renders the current English title.
    */
   it('should render the Legal Notice title', () => {
-    const titleElement = fixture.debugElement.query(By.css('.legal-notice-page__title')).nativeElement;
-    expect(titleElement.textContent.trim()).toBe('Impressum');
+    const titleElement = fixture.debugElement.query(
+      By.css('.legal-notice-page__title'),
+    ).nativeElement;
+
+    expect(titleElement.textContent.trim()).toBe('Imprint');
   });
 
   /**
-   * @test Checks if the correct number of sections (3) is displayed in the template.
+   * @test Verifies the current legal notice section headings.
    */
-  it('should display the correct number of sections', () => {
-    const sectionHeaders = fixture.debugElement.queryAll(By.css('.legal-notice-page__section h2'));
-    expect(sectionHeaders.length).toBe(3);
+  it('should render all legal notice section headings', () => {
+    const sectionHeaders = fixture.debugElement.queryAll(
+      By.css('.legal-notice-page__section h2'),
+    );
+    const headings = sectionHeaders.map(({ nativeElement }) =>
+      nativeElement.textContent.trim(),
+    );
+
+    expect(headings).toEqual([
+      'Information in accordance with Section 5 TMG',
+      'Contact',
+      'Project Notice',
+    ]);
   });
 });
