@@ -1,367 +1,328 @@
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { signal } from "@angular/core";
-import { FormControl } from "@angular/forms";
-import { describe, expect, it, beforeEach, vi, afterEach } from "vitest";
-import { AddTaskContent, dateNotInPastValidator } from "./add-task-content";
-import { TaskService } from "../../../../core/services/task.service";
-import { ContactService } from "../../../../core/services/contact.service";
-import { Contact } from "../../../../core/models/contact.model";
-import { Task } from "../../../../core/models/task.model";
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormControl } from '@angular/forms';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { TaskCategory, TaskPriority } from '../../../../core/models/task.model';
+import { ContactService } from '../../../../core/services/contact.service';
+import { TaskService } from '../../../../core/services/task.service';
+import {
+  ContactServiceMock,
+  MOCK_CONTACTS,
+  TaskServiceMock,
+  createContactServiceMock,
+  createExpectedInput,
+  createTaskServiceMock,
+} from './add-task-content-test.utils';
+import { AddTaskContent, dateNotInPastValidator } from './add-task-content';
+
+let component: AddTaskContent;
+let fixture: ComponentFixture<AddTaskContent>;
+let mockTaskService: TaskServiceMock;
+let mockContactService: ContactServiceMock;
+
+/** Configures the component testing module. */
+async function configureTestBed(): Promise<void> {
+  await TestBed.configureTestingModule({
+    imports: [AddTaskContent],
+    providers: [
+      { provide: TaskService, useValue: mockTaskService },
+      { provide: ContactService, useValue: mockContactService },
+    ],
+  }).compileComponents();
+}
+
+/** Creates a fresh component fixture and its service mocks. */
+async function setupComponent(): Promise<void> {
+  mockTaskService = createTaskServiceMock();
+  mockContactService = createContactServiceMock();
+  await configureTestBed();
+  fixture = TestBed.createComponent(AddTaskContent);
+  component = fixture.componentInstance;
+  vi.spyOn(component.cancelled, 'emit');
+  vi.spyOn(component.taskCreated, 'emit');
+  vi.useFakeTimers();
+  fixture.detectChanges();
+}
+
+/** Restores real timers after each component test. */
+function restoreTimers(): void {
+  vi.useRealTimers();
+}
 
 /**
- * @description Unit tests for the AddTaskContent component.
- * This suite verifies form validation, signal state management, subtask drafting,
- * contact selection, API payload generation, and UI state resets.
+ * Creates a date input value relative to the current day.
+ * @param daysFromToday - Number of days to add to the current date.
+ * @returns Date formatted for the task form.
  */
-describe("AddTaskContent Component", () => {
-  let component: AddTaskContent;
-  let fixture: ComponentFixture<AddTaskContent>;
-  let mockTaskService: any;
-  let mockContactService: any;
+function createFutureDateInputValue(daysFromToday: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromToday);
+  return date.toISOString().split('T')[0];
+}
 
-  /**
-   * Mock data array representing contacts loaded from the server.
-   */
-  const MOCK_CONTACTS: Contact[] = [
-    {
-      id: "c1",
-      authUserId: "u1",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john@example.com",
-      phone: "123",
-      badgeColor: "#ff0000",
-      createdAt: "",
-      updatedAt: "",
-    },
-    {
-      id: "c2",
-      authUserId: "u2",
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane@example.com",
-      phone: "456",
-      badgeColor: "#00ff00",
-      createdAt: "",
-      updatedAt: "",
-    },
-  ];
+/**
+ * Creates today's local date input value.
+ * @returns Current date formatted for the validator.
+ */
+function createTodayInputValue(): string {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
-  /**
-   * Mock data array representing existing tasks.
-   */
-  const MOCK_TASKS: Task[] = [
-    {
-      id: "t1",
-      title: "Existing Task",
-      description: "",
-      category: "technical_task",
-      priority: "medium",
-      status: "todo",
-      dueDate: "2050-01-01",
-      sortOrder: 0,
-      createdAt: "",
-      updatedAt: "",
-    },
-  ];
+/**
+ * Updates the component mode input.
+ * @param mode - Page or dialog mode to activate.
+ */
+function setMode(mode: 'page' | 'dialog'): void {
+  fixture.componentRef.setInput('mode', mode);
+  fixture.detectChanges();
+}
 
-  beforeEach(async () => {
-    mockTaskService = {
-      allTasks: signal<Task[]>(MOCK_TASKS),
-      getTasks: vi.fn().mockResolvedValue(MOCK_TASKS),
-      createTaskWithRelations: vi
-        .fn()
-        .mockResolvedValue({ id: "t2", title: "New Task" }),
-    };
+/**
+ * Adds a draft subtask through the component API.
+ * @param title - Title assigned to the draft subtask.
+ */
+function addDraftSubtask(title: string): void {
+  component.newSubtaskTitle.set(title);
+  component.addSubtask();
+}
 
-    mockContactService = {
-      allContacts: signal<Contact[]>([]),
-      getContacts: vi.fn().mockResolvedValue(MOCK_CONTACTS),
-    };
+/**
+ * Edits an existing draft subtask through the component API.
+ * @param index - Index of the subtask to edit.
+ * @param title - Replacement subtask title.
+ */
+function editDraftSubtask(index: number, title: string): void {
+  component.startEditingSubtask(index);
+  component.editingSubtaskTitle.set(title);
+  component.saveSubtaskEdit();
+}
 
-    await TestBed.configureTestingModule({
-      imports: [AddTaskContent],
-      providers: [
-        { provide: TaskService, useValue: mockTaskService },
-        { provide: ContactService, useValue: mockContactService },
-      ],
-    }).compileComponents();
+/**
+ * Queries an element inside the component fixture.
+ * @param selector - CSS selector used for the lookup.
+ * @returns Matching element or null.
+ */
+function queryElement<T extends Element>(selector: string): T | null {
+  return fixture.nativeElement.querySelector(selector) as T | null;
+}
 
-    fixture = TestBed.createComponent(AddTaskContent);
-    component = fixture.componentInstance;
-
-    vi.spyOn(component.cancelled, "emit");
-    vi.spyOn(component.taskCreated, "emit");
-
-    vi.useFakeTimers();
-    fixture.detectChanges();
+/**
+ * Populates every task field used by the submission test.
+ * @param dueDate - Due date assigned to the form.
+ */
+function setCompleteTaskForm(dueDate: string): void {
+  component.taskForm.patchValue({
+    title: 'Integration Test Task',
+    description: 'Test description',
+    dueDate,
+    priority: 'low',
+    category: 'user_story',
   });
+}
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+/**
+ * Populates the required task form fields.
+ * @param dueDate - Due date assigned to the form.
+ * @param priority - Priority assigned to the form.
+ * @param category - Category assigned to the form.
+ */
+function setRequiredTaskForm(
+  dueDate: string,
+  priority: TaskPriority,
+  category: TaskCategory,
+): void {
+  component.taskForm.patchValue({ title: 'Valid Task', dueDate, priority, category });
+}
 
-  /**
-   * @test Ensures the component initializes correctly and handles caching logic.
-   */
-  it("should create the component and load initial data", async () => {
-    await vi.advanceTimersByTimeAsync(0);
+/** Verifies initial data loading and task cache reuse. */
+async function shouldLoadInitialData(): Promise<void> {
+  await vi.advanceTimersByTimeAsync(0);
+  expect(component).toBeTruthy();
+  expect(mockContactService.getContacts).toHaveBeenCalled();
+  expect(mockTaskService.getTasks).not.toHaveBeenCalled();
+  expect(component.allContacts()).toEqual(MOCK_CONTACTS);
+}
 
-    expect(component).toBeTruthy();
+/** Verifies required-field validation messages. */
+function shouldShowRequiredFieldErrors(): void {
+  component.taskForm.controls.title.markAsTouched();
+  component.taskForm.controls.dueDate.markAsTouched();
+  expect(component.hasTitleError()).toBe(true);
+  expect(component.getTitleErrorMessage()).toBe('This field is required');
+  expect(component.hasDueDateError()).toBe(true);
+  expect(component.getDueDateErrorMessage()).toBe('This field is required');
+}
 
-    // Contacts start empty in the mock, so the fetch method must be called.
-    expect(mockContactService.getContacts).toHaveBeenCalled();
+/** Verifies rejection of past due dates. */
+function shouldInvalidatePastDueDates(): void {
+  component.taskForm.controls.dueDate.setValue('2000-01-01');
+  component.taskForm.controls.dueDate.markAsTouched();
+  expect(component.hasDueDateError()).toBe(true);
+  expect(component.getDueDateErrorMessage()).toBe('Due date cannot be in the past');
+}
 
-    // Tasks start already populated in the mock, so the component's cache logic correctly prevents a fetch.
-    expect(mockTaskService.getTasks).not.toHaveBeenCalled();
+/** Verifies task priority selection. */
+function shouldUpdatePriority(): void {
+  component.setPriority('urgent');
+  expect(component.taskForm.controls.priority.value).toBe('urgent');
+  expect(component.taskForm.controls.priority.dirty).toBe(true);
+}
 
-    expect(component.allContacts()).toEqual(MOCK_CONTACTS);
-  });
+/** Verifies contact selection and deselection. */
+function shouldToggleContactSelection(): void {
+  component.toggleContactSelection('c1');
+  expect(component.isContactSelected('c1')).toBe(true);
+  expect(component.selectedContactIds()).toContain('c1');
+  expect(component.selectedContacts()).toHaveLength(1);
+  expect(component.selectedContacts()[0].firstName).toBe('John');
+  component.toggleContactSelection('c1');
+  expect(component.isContactSelected('c1')).toBe(false);
+  expect(component.selectedContactIds()).not.toContain('c1');
+}
 
-  /**
-   * @test Verifies that the form correctly identifies invalid states for required fields.
-   */
-  it("should show validation errors for invalid title and due date", () => {
-    component.taskForm.controls.title.markAsTouched();
-    component.taskForm.controls.dueDate.markAsTouched();
+/** Verifies draft subtask creation, editing, and removal. */
+function shouldManageSubtasks(): void {
+  addDraftSubtask('Draft Subtask');
+  expect(component.draftSubtasks()).toEqual([{ title: 'Draft Subtask' }]);
+  expect(component.newSubtaskTitle()).toBe('');
+  editDraftSubtask(0, 'Edited Subtask');
+  expect(component.draftSubtasks()[0].title).toBe('Edited Subtask');
+  expect(component.editingSubtaskIndex()).toBeNull();
+  component.removeSubtask(0);
+  expect(component.draftSubtasks()).toHaveLength(0);
+}
 
-    expect(component.hasTitleError()).toBe(true);
-    expect(component.getTitleErrorMessage()).toBe("This field is required");
-    expect(component.hasDueDateError()).toBe(true);
-    expect(component.getDueDateErrorMessage()).toBe("This field is required");
-  });
+/** Verifies opening the inline subtask editor from the template. */
+function shouldOpenSubtaskEditor(): void {
+  component.draftSubtasks.set([{ title: 'Clickable Subtask' }]);
+  fixture.detectChanges();
+  const titleButton = queryElement<HTMLButtonElement>('.add-task__subtask-title');
+  expect(titleButton).not.toBeNull();
+  titleButton!.click();
+  fixture.detectChanges();
+  expect(component.editingSubtaskIndex()).toBe(0);
+  expect(component.editingSubtaskTitle()).toBe('Clickable Subtask');
+  expect(queryElement('.add-task__subtask-edit-input')).not.toBeNull();
+}
 
-  /**
-   * @test Ensures the custom date validator blocks past dates.
-   */
-  it("should invalidate past due dates", () => {
-    component.taskForm.controls.dueDate.setValue("2000-01-01");
-    component.taskForm.controls.dueDate.markAsTouched();
+/** Verifies category selection and menu closure. */
+function shouldSelectCategory(): void {
+  component.toggleCategoryMenu();
+  expect(component.categoryMenuOpen()).toBe(true);
+  component.selectCategory('technical_task');
+  expect(component.taskForm.controls.category.value).toBe('technical_task');
+  expect(component.getCategoryLabel()).toBe('Technical Task');
+  expect(component.categoryMenuOpen()).toBe(false);
+}
 
-    expect(component.hasDueDateError()).toBe(true);
-    expect(component.getDueDateErrorMessage()).toBe(
-      "Due date cannot be in the past",
-    );
-  });
+/** Verifies task submission, payload mapping, and success state. */
+async function shouldSubmitTask(): Promise<void> {
+  const dueDate = createFutureDateInputValue(5);
+  setCompleteTaskForm(dueDate);
+  component.toggleContactSelection('c2');
+  addDraftSubtask('Subtask 1');
+  await component.submitTask();
+  expect(mockTaskService.createTaskWithRelations).toHaveBeenCalledWith(
+    createExpectedInput(dueDate),
+  );
+  expect(component.taskCreated.emit).toHaveBeenCalled();
+  expect(component.successMessage()).toBe('Task successfully created');
+}
 
-  /**
-   * @test Verifies the priority selection updates the form control appropriately.
-   */
-  it("should update priority when setPriority is called", () => {
-    component.setPriority("urgent");
+/** Verifies automatic removal of the task success message. */
+async function shouldHideSuccessMessage(): Promise<void> {
+  const dueDate = createFutureDateInputValue(1);
+  setRequiredTaskForm(dueDate, 'medium', 'technical_task');
+  await component.submitTask();
+  expect(component.successMessage()).toBe('Task successfully created');
+  vi.advanceTimersByTime(2200);
+  expect(component.successMessage()).toBe('');
+}
 
-    expect(component.taskForm.controls.priority.value).toBe("urgent");
-    expect(component.taskForm.controls.priority.dirty).toBe(true);
-  });
+/** Verifies cancellation through the dialog secondary action. */
+function shouldCancelDialog(): void {
+  setMode('dialog');
+  component.handleSecondaryAction();
+  expect(component.cancelled.emit).toHaveBeenCalled();
+}
 
-  /**
-   * @test Tests the contact selection logic and its computed signal.
-   */
-  it("should toggle contact selection and update selected contacts", () => {
-    component.toggleContactSelection("c1");
+/** Prepares modified task state for the page reset test. */
+function preparePageDraft(): void {
+  component.taskForm.patchValue({ title: 'Draft title' });
+  component.toggleContactSelection('c1');
+  addDraftSubtask('Draft subtask');
+}
 
-    expect(component.isContactSelected("c1")).toBe(true);
-    expect(component.selectedContactIds()).toContain("c1");
-    expect(component.selectedContacts().length).toBe(1);
-    expect(component.selectedContacts()[0].firstName).toBe("John");
+/** Verifies complete form reset through the page secondary action. */
+function shouldClearPageForm(): void {
+  setMode('page');
+  preparePageDraft();
+  component.handleSecondaryAction();
+  expect(component.taskForm.controls.title.value).toBe('');
+  expect(component.selectedContactIds()).toHaveLength(0);
+  expect(component.draftSubtasks()).toHaveLength(0);
+}
 
-    component.toggleContactSelection("c1");
+/** Verifies document clicks close every open selection menu. */
+function shouldCloseMenus(): void {
+  component.toggleContactsMenu();
+  component.toggleCategoryMenu();
+  document.dispatchEvent(new MouseEvent('click'));
+  expect(component.contactsMenuOpen()).toBe(false);
+  expect(component.categoryMenuOpen()).toBe(false);
+}
 
-    expect(component.isContactSelected("c1")).toBe(false);
-    expect(component.selectedContactIds()).not.toContain("c1");
-  });
+/** Verifies the date validator accepts the current day. */
+function shouldAcceptToday(): void {
+  const validator = dateNotInPastValidator();
+  const control = new FormControl(createTodayInputValue());
+  expect(validator(control)).toBeNull();
+}
 
-  /**
-   * @test Tests the full lifecycle of drafting, editing, and deleting a subtask.
-   */
-  it("should manage subtask creation, editing, and deletion", () => {
-    component.newSubtaskTitle.set("Draft Subtask");
-    component.addSubtask();
+/** Verifies the date validator rejects a past day. */
+function shouldRejectPastDate(): void {
+  const validator = dateNotInPastValidator();
+  const control = new FormControl('1999-12-31');
+  expect(validator(control)).toEqual({ dateInPast: true });
+}
 
-    expect(component.draftSubtasks().length).toBe(1);
-    expect(component.draftSubtasks()[0].title).toBe("Draft Subtask");
-    expect(component.newSubtaskTitle()).toBe("");
+/** Registers component form and validation tests. */
+function registerFormTests(): void {
+  it('should create the component and load initial data', shouldLoadInitialData);
+  it('should show validation errors for invalid title and due date', shouldShowRequiredFieldErrors);
+  it('should invalidate past due dates', shouldInvalidatePastDueDates);
+  it('should update priority when setPriority is called', shouldUpdatePriority);
+  it('should select a category and close the category menu', shouldSelectCategory);
+}
 
-    component.startEditingSubtask(0);
-    expect(component.editingSubtaskIndex()).toBe(0);
+/** Registers component interaction tests. */
+function registerInteractionTests(): void {
+  it('should toggle contact selection and update selected contacts', shouldToggleContactSelection);
+  it('should manage subtask creation, editing, and deletion', shouldManageSubtasks);
+  it('should start editing when the subtask title is clicked', shouldOpenSubtaskEditor);
+  it('should emit cancelled event on secondary action when in dialog mode', shouldCancelDialog);
+  it('should clear the form on secondary action when in page mode', shouldClearPageForm);
+  it('should close menus on document click', shouldCloseMenus);
+}
 
-    component.editingSubtaskTitle.set("Edited Subtask");
-    component.saveSubtaskEdit();
+/** Registers component submission tests. */
+function registerSubmissionTests(): void {
+  it('should successfully submit the form and emit creation event', shouldSubmitTask);
+  it('should hide the success message after 2200ms', shouldHideSuccessMessage);
+}
 
-    expect(component.draftSubtasks()[0].title).toBe("Edited Subtask");
-    expect(component.editingSubtaskIndex()).toBeNull();
-
-    component.removeSubtask(0);
-    expect(component.draftSubtasks().length).toBe(0);
-  });
-
-  /**
-   * @test Verifies that clicking a subtask title opens its inline editor.
-   */
-  it("should start editing when the subtask title is clicked", () => {
-    component.draftSubtasks.set([{ title: "Clickable Subtask" }]);
-    fixture.detectChanges();
-
-    const titleButton = fixture.nativeElement.querySelector(
-      ".add-task__subtask-title",
-    ) as HTMLButtonElement;
-
-    titleButton.click();
-    fixture.detectChanges();
-
-    expect(component.editingSubtaskIndex()).toBe(0);
-    expect(component.editingSubtaskTitle()).toBe("Clickable Subtask");
-    expect(
-      fixture.nativeElement.querySelector(".add-task__subtask-edit-input"),
-    ).toBeTruthy();
-  });
-
-  /**
-   * @test Verifies that selecting a category updates the form and closes the dropdown menu.
-   */
-  it("should select a category and close the category menu", () => {
-    component.toggleCategoryMenu();
-    expect(component.categoryMenuOpen()).toBe(true);
-
-    component.selectCategory("technical_task");
-
-    expect(component.taskForm.controls.category.value).toBe("technical_task");
-    expect(component.getCategoryLabel()).toBe("Technical Task");
-    expect(component.categoryMenuOpen()).toBe(false);
-  });
-
-  /**
-   * @test Checks the complete task creation workflow including payload formatting and success events.
-   */
-  it("should successfully submit the form and emit creation event", async () => {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 5);
-    const validDateString = futureDate.toISOString().split("T")[0];
-
-    component.taskForm.patchValue({
-      title: "Integration Test Task",
-      description: "Test description",
-      dueDate: validDateString,
-      priority: "low",
-      category: "user_story",
-    });
-
-    component.toggleContactSelection("c2");
-
-    component.newSubtaskTitle.set("Subtask 1");
-    component.addSubtask();
-
-    await component.submitTask();
-
-    expect(mockTaskService.createTaskWithRelations).toHaveBeenCalledWith({
-      task: {
-        title: "Integration Test Task",
-        description: "Test description",
-        dueDate: validDateString,
-        priority: "low",
-        category: "user_story",
-        status: "todo",
-        sortOrder: 1,
-      },
-      subtasks: [{ title: "Subtask 1", sortOrder: 0 }],
-      contactIds: ["c2"],
-    });
-
-    expect(component.taskCreated.emit).toHaveBeenCalled();
-    expect(component.successMessage()).toBe("Task successfully created");
-  });
-
-  /**
-   * @test Ensures the success message is cleared automatically after the specified timer.
-   */
-  it("should hide the success message after 2200ms", async () => {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 1);
-
-    component.taskForm.patchValue({
-      title: "Valid Task",
-      dueDate: futureDate.toISOString().split("T")[0],
-      priority: "medium",
-      category: "technical_task",
-    });
-
-    await component.submitTask();
-    expect(component.successMessage()).toBe("Task successfully created");
-
-    vi.advanceTimersByTime(2200);
-
-    expect(component.successMessage()).toBe("");
-  });
-
-  /**
-   * @test Checks that secondary action emits cancellation when operating in dialog mode.
-   */
-  it("should emit cancelled event on secondary action when in dialog mode", () => {
-    fixture.componentRef.setInput("mode", "dialog");
-    fixture.detectChanges();
-
-    component.handleSecondaryAction();
-
-    expect(component.cancelled.emit).toHaveBeenCalled();
-  });
-
-  /**
-   * @test Checks that secondary action resets the form completely when operating in page mode.
-   */
-  it("should clear the form on secondary action when in page mode", () => {
-    fixture.componentRef.setInput("mode", "page");
-    fixture.detectChanges();
-
-    component.taskForm.patchValue({ title: "Draft title" });
-    component.toggleContactSelection("c1");
-    component.newSubtaskTitle.set("Draft subtask");
-    component.addSubtask();
-
-    component.handleSecondaryAction();
-
-    expect(component.taskForm.controls.title.value).toBe("");
-    expect(component.selectedContactIds().length).toBe(0);
-    expect(component.draftSubtasks().length).toBe(0);
-  });
-
-  /**
-   * @test Verifies the host listener closes active dropdown menus when a click occurs outside.
-   */
-  it("should close menus on document click", () => {
-    component.toggleContactsMenu();
-    component.toggleCategoryMenu();
-
-    document.dispatchEvent(new MouseEvent("click"));
-
-    expect(component.contactsMenuOpen()).toBe(false);
-    expect(component.categoryMenuOpen()).toBe(false);
-  });
+describe('AddTaskContent Component', () => {
+  beforeEach(setupComponent);
+  afterEach(restoreTimers);
+  registerFormTests();
+  registerInteractionTests();
+  registerSubmissionTests();
 });
 
-/**
- * @description Unit tests for the isolated custom date validator.
- */
-describe("dateNotInPastValidator", () => {
-  /**
-   * @test Ensures the validator allows today's date.
-   */
-  it("should return null for today or future dates", () => {
-    const validator = dateNotInPastValidator();
-
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
-    const control = new FormControl(todayStr);
-    expect(validator(control)).toBeNull();
-  });
-
-  /**
-   * @test Ensures the validator returns an error object for past dates.
-   */
-  it("should return error object for past dates", () => {
-    const validator = dateNotInPastValidator();
-    const control = new FormControl("1999-12-31");
-
-    expect(validator(control)).toEqual({ dateInPast: true });
-  });
+describe('dateNotInPastValidator', () => {
+  it("should return null for today's date", shouldAcceptToday);
+  it('should return error object for past dates', shouldRejectPastDate);
 });
