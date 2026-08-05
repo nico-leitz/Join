@@ -1,23 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  AuthChangeEvent,
-  Session,
-  User,
-} from '@supabase/supabase-js';
+import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { createAuthUserMetadata } from '../mappers/auth.mapper';
-import {
-  LoginCredentials,
-  SignUpCredentials,
-} from '../models/auth.model';
+import { LoginCredentials, SignUpCredentials } from '../models/auth.model';
 import { SupabaseService } from '../supabase/supabase';
 
 /**
  * Contains the registration fields accepted by the repository.
  */
-type SignUpPayload = Pick<
-  SignUpCredentials,
-  'fullName' | 'email' | 'password'
->;
+type SignUpPayload = Pick<SignUpCredentials, 'fullName' | 'email' | 'password'>;
 
 /**
  * Contains the user and session returned by an authentication request.
@@ -42,14 +32,10 @@ export interface AuthSubscription {
 
 /**
  * Handles a Supabase authentication state change.
- *
  * @param event - Authentication event emitted by Supabase.
  * @param session - Current session or null when no session is active.
  */
-export type AuthStateChangeCallback = (
-  event: AuthChangeEvent,
-  session: Session | null
-) => void;
+export type AuthStateChangeCallback = (event: AuthChangeEvent, session: Session | null) => void;
 
 /**
  * Provides direct access to Supabase authentication operations.
@@ -63,7 +49,6 @@ export class AuthRepository {
 
   /**
    * Registers a permanent Supabase user with normalized metadata.
-   *
    * @param credentials - Registration credentials.
    * @returns Registered user and the resulting session state.
    * @throws The authentication error returned by Supabase.
@@ -84,20 +69,16 @@ export class AuthRepository {
 
   /**
    * Signs in a permanent user with an email address and password.
-   *
    * @param credentials - User login credentials.
    * @returns Authenticated user and active session.
    * @throws The authentication error returned by Supabase.
    * @throws An error when the response does not contain a user.
    */
-  async signIn(
-    credentials: LoginCredentials
-  ): Promise<AuthSessionData> {
-    const { data, error } =
-      await this.supabase.auth.signInWithPassword({
-        email: credentials.email.trim(),
-        password: credentials.password,
-      });
+  async signIn(credentials: LoginCredentials): Promise<AuthSessionData> {
+    const { data, error } = await this.supabase.auth.signInWithPassword({
+      email: credentials.email.trim(),
+      password: credentials.password,
+    });
 
     this.throwIfError(error);
 
@@ -106,14 +87,12 @@ export class AuthRepository {
 
   /**
    * Creates and signs in an anonymous guest user.
-   *
    * @returns Anonymous user and active session.
    * @throws The authentication error returned by Supabase.
    * @throws An error when the response does not contain a user.
    */
   async signInAnonymously(): Promise<AuthSessionData> {
-    const { data, error } =
-      await this.supabase.auth.signInAnonymously();
+    const { data, error } = await this.supabase.auth.signInAnonymously();
 
     this.throwIfError(error);
 
@@ -122,7 +101,6 @@ export class AuthRepository {
 
   /**
    * Retrieves the locally persisted Supabase session.
-   *
    * @returns Persisted session or null when no session exists.
    * @throws The authentication error returned by Supabase.
    */
@@ -136,20 +114,15 @@ export class AuthRepository {
 
   /**
    * Subscribes to Supabase authentication state changes.
-   *
    * @param callback - Function invoked for each authentication change.
    * @returns Subscription used to stop receiving changes.
    */
-  onAuthStateChange(
-    callback: AuthStateChangeCallback
-  ): AuthSubscription {
-    return this.supabase.auth.onAuthStateChange(callback)
-      .data.subscription;
+  onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription {
+    return this.supabase.auth.onAuthStateChange(callback).data.subscription;
   }
 
   /**
    * Signs out the active Supabase session.
-   *
    * @returns A promise that resolves after the session is removed.
    * @throws The authentication error returned by Supabase.
    */
@@ -161,7 +134,6 @@ export class AuthRepository {
 
   /**
    * Throws a Supabase authentication error when one is present.
-   *
    * @param error - Authentication error or null for a successful request.
    * @throws The provided error when it is not null.
    */
@@ -173,16 +145,12 @@ export class AuthRepository {
 
   /**
    * Ensures that a successful authentication response contains a user.
-   *
    * @param user - User returned by Supabase.
    * @param session - Session returned by Supabase.
    * @returns Validated authentication response data.
    * @throws An error when the response does not contain a user.
    */
-  private requireUser(
-    user: User | null,
-    session: Session | null
-  ): AuthSessionData {
+  private requireUser(user: User | null, session: Session | null): AuthSessionData {
     if (!user) {
       throw new Error('Authentication response did not contain a user.');
     }
