@@ -2,17 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { mapSubtaskRow, mapSubtaskRows } from '../mappers/task.mapper';
 import { Contact } from '../models/contact.model';
 import { CreateSubtask, Subtask, UpdateSubtask } from '../models/subtask.model';
-import {
-  CreateTaskSubtaskInput,
-  UpdateTaskSubtaskInput,
-} from '../models/task-persistence.model';
+import { CreateTaskSubtaskInput, UpdateTaskSubtaskInput } from '../models/task-persistence.model';
 import { BoardRelationsData } from '../models/task-relations.model';
 import { TaskRepository } from '../repositories/task.repository';
-import {
-  getMissingIds,
-  getUniqueIds,
-  sortSubtasks,
-} from '../utils/task-state.utils';
+import { getMissingIds, getUniqueIds, sortSubtasks } from '../utils/task-state.utils';
 
 /**
  * Coordinates persistence operations for task subtasks and assignments.
@@ -26,7 +19,6 @@ export class TaskRelationsService {
 
   /**
    * Retrieves all relation data required to populate the task board.
-   *
    * @returns Mapped subtasks and persisted task assignment rows.
    * @throws The database error returned by the repository.
    */
@@ -44,7 +36,6 @@ export class TaskRelationsService {
 
   /**
    * Retrieves all subtasks belonging to a task.
-   *
    * @param taskId - Identifier of the parent task.
    * @returns Mapped subtasks belonging to the task.
    * @throws The database error returned by the repository.
@@ -56,7 +47,6 @@ export class TaskRelationsService {
 
   /**
    * Retrieves all contacts assigned to a task.
-   *
    * @param taskId - Identifier of the task.
    * @returns Contacts assigned to the task.
    * @throws The database error returned by the repository.
@@ -67,7 +57,6 @@ export class TaskRelationsService {
 
   /**
    * Creates and maps a subtask.
-   *
    * @param subtask - Subtask data to persist.
    * @returns Created application subtask.
    * @throws The database error returned by the repository.
@@ -79,7 +68,6 @@ export class TaskRelationsService {
 
   /**
    * Updates and maps a subtask.
-   *
    * @param id - Identifier of the subtask to update.
    * @param subtask - Subtask fields to persist.
    * @returns Updated application subtask.
@@ -92,7 +80,6 @@ export class TaskRelationsService {
 
   /**
    * Deletes a subtask.
-   *
    * @param id - Identifier of the subtask to delete.
    * @returns A promise that resolves after deletion.
    * @throws The database error returned by the repository.
@@ -103,7 +90,6 @@ export class TaskRelationsService {
 
   /**
    * Creates the submitted subtasks for a newly persisted task.
-   *
    * @param taskId - Identifier of the parent task.
    * @param subtasks - Subtasks to create.
    * @returns Created subtasks in their resolved sort order.
@@ -116,9 +102,7 @@ export class TaskRelationsService {
     const createdSubtasks: Subtask[] = [];
 
     for (const [index, subtask] of subtasks.entries()) {
-      createdSubtasks.push(
-        await this.createRelatedSubtask(taskId, subtask, index),
-      );
+      createdSubtasks.push(await this.createRelatedSubtask(taskId, subtask, index));
     }
 
     return sortSubtasks(createdSubtasks);
@@ -126,39 +110,30 @@ export class TaskRelationsService {
 
   /**
    * Replaces the complete persisted subtask state of a task.
-   *
    * @param taskId - Identifier of the parent task.
    * @param subtasks - Complete submitted subtask state.
    * @returns Persisted subtasks after synchronization.
    * @throws An error when submitted identifiers are invalid.
    * @throws The database error returned by the repository.
    */
-  async replaceSubtasks(
-    taskId: string,
-    subtasks: UpdateTaskSubtaskInput[],
-  ): Promise<Subtask[]> {
+  async replaceSubtasks(taskId: string, subtasks: UpdateTaskSubtaskInput[]): Promise<Subtask[]> {
     await this.synchronizeSubtasks(taskId, subtasks);
     return this.getSubtasks(taskId);
   }
 
   /**
    * Creates unique task assignments for the provided contacts.
-   *
    * @param taskId - Identifier of the task.
    * @param contactIds - Identifiers of the contacts to assign.
    * @returns A promise that resolves after assignment creation.
    * @throws The database error returned by the repository.
    */
   async createAssignments(taskId: string, contactIds: string[]): Promise<void> {
-    await this.repository.createTaskAssignments(
-      taskId,
-      getUniqueIds(contactIds),
-    );
+    await this.repository.createTaskAssignments(taskId, getUniqueIds(contactIds));
   }
 
   /**
    * Assigns a contact and returns the refreshed task assignments.
-   *
    * @param taskId - Identifier of the task.
    * @param contactId - Identifier of the contact to assign.
    * @returns Complete assigned contact collection after creation.
@@ -171,7 +146,6 @@ export class TaskRelationsService {
 
   /**
    * Removes a contact assignment and returns the refreshed assignments.
-   *
    * @param taskId - Identifier of the task.
    * @param contactId - Identifier of the contact to unassign.
    * @returns Complete assigned contact collection after removal.
@@ -184,23 +158,18 @@ export class TaskRelationsService {
 
   /**
    * Replaces the complete persisted assignment state of a task.
-   *
    * @param taskId - Identifier of the task.
    * @param contactIds - Complete submitted contact identifier state.
    * @returns Complete assigned contact collection after synchronization.
    * @throws The database error returned by the repository.
    */
-  async replaceAssignments(
-    taskId: string,
-    contactIds: string[],
-  ): Promise<Contact[]> {
+  async replaceAssignments(taskId: string, contactIds: string[]): Promise<Contact[]> {
     await this.synchronizeAssignments(taskId, contactIds);
     return this.getAssignedContacts(taskId);
   }
 
   /**
    * Synchronizes subtasks only when relation data was submitted.
-   *
    * @param taskId - Identifier of the parent task.
    * @param subtasks - Submitted subtask state or undefined when unchanged.
    * @returns Updated subtasks or undefined when no update was requested.
@@ -211,14 +180,11 @@ export class TaskRelationsService {
     taskId: string,
     subtasks?: UpdateTaskSubtaskInput[],
   ): Promise<Subtask[] | undefined> {
-    return subtasks === undefined
-      ? undefined
-      : this.replaceSubtasks(taskId, subtasks);
+    return subtasks === undefined ? undefined : this.replaceSubtasks(taskId, subtasks);
   }
 
   /**
    * Synchronizes assignments only when relation data was submitted.
-   *
    * @param taskId - Identifier of the task.
    * @param contactIds - Submitted contact identifiers or undefined when unchanged.
    * @returns Updated contacts or undefined when no update was requested.
@@ -228,14 +194,11 @@ export class TaskRelationsService {
     taskId: string,
     contactIds?: string[],
   ): Promise<Contact[] | undefined> {
-    return contactIds === undefined
-      ? undefined
-      : this.replaceAssignments(taskId, contactIds);
+    return contactIds === undefined ? undefined : this.replaceAssignments(taskId, contactIds);
   }
 
   /**
    * Persists the submitted subtask state and removes omitted subtasks.
-   *
    * @param taskId - Identifier of the parent task.
    * @param subtasks - Complete submitted subtask state.
    * @returns A promise that resolves after synchronization.
@@ -253,24 +216,17 @@ export class TaskRelationsService {
     this.validateRequestedSubtaskIds(currentIds, requestedIds);
     await this.persistSubtasks(taskId, subtasks);
 
-    await this.repository.deleteTaskSubtasks(
-      taskId,
-      getMissingIds(currentIds, requestedIds),
-    );
+    await this.repository.deleteTaskSubtasks(taskId, getMissingIds(currentIds, requestedIds));
   }
 
   /**
    * Creates or updates every submitted subtask in sequence.
-   *
    * @param taskId - Identifier of the parent task.
    * @param subtasks - Subtasks to persist.
    * @returns A promise that resolves after all subtasks are persisted.
    * @throws The database error returned by the repository.
    */
-  private async persistSubtasks(
-    taskId: string,
-    subtasks: UpdateTaskSubtaskInput[],
-  ): Promise<void> {
+  private async persistSubtasks(taskId: string, subtasks: UpdateTaskSubtaskInput[]): Promise<void> {
     for (const [index, subtask] of subtasks.entries()) {
       await this.persistSubtask(taskId, subtask, index);
     }
@@ -278,7 +234,6 @@ export class TaskRelationsService {
 
   /**
    * Creates a new subtask or updates an identified existing subtask.
-   *
    * @param taskId - Identifier of the parent task.
    * @param subtask - Submitted subtask data.
    * @param index - Submitted position used as the default sort order.
@@ -291,32 +246,22 @@ export class TaskRelationsService {
     index: number,
   ): Promise<void> {
     if (subtask.id) {
-      await this.repository.updateTaskSubtask(
-        taskId,
-        subtask.id,
-        this.createSubtaskUpdate(subtask, index),
-      );
+      const update = this.createSubtaskUpdate(subtask, index);
+      await this.repository.updateTaskSubtask(taskId, subtask.id, update);
       return;
     }
 
-    await this.repository.createSubtask({
-      taskId,
-      title: subtask.title,
-      sortOrder: subtask.sortOrder ?? index,
-    });
+    const sortOrder = subtask.sortOrder ?? index;
+    await this.repository.createSubtask({ taskId, title: subtask.title, sortOrder });
   }
 
   /**
    * Creates an update payload from submitted subtask data.
-   *
    * @param subtask - Submitted subtask data.
    * @param index - Submitted position used as the default sort order.
    * @returns Subtask update payload.
    */
-  private createSubtaskUpdate(
-    subtask: UpdateTaskSubtaskInput,
-    index: number,
-  ): UpdateSubtask {
+  private createSubtaskUpdate(subtask: UpdateTaskSubtaskInput, index: number): UpdateSubtask {
     return {
       title: subtask.title,
       sortOrder: subtask.sortOrder ?? index,
@@ -328,7 +273,6 @@ export class TaskRelationsService {
 
   /**
    * Creates a subtask associated with the provided task.
-   *
    * @param taskId - Identifier of the parent task.
    * @param subtask - Subtask data submitted with task creation.
    * @param index - Submitted position used as the default sort order.
@@ -349,7 +293,6 @@ export class TaskRelationsService {
 
   /**
    * Extracts the identifiers of submitted existing subtasks.
-   *
    * @param subtasks - Submitted subtask state.
    * @returns Identifiers present in the submitted subtask state.
    */
@@ -359,15 +302,11 @@ export class TaskRelationsService {
 
   /**
    * Validates uniqueness and ownership of submitted subtask identifiers.
-   *
    * @param currentIds - Identifiers currently belonging to the task.
    * @param requestedIds - Existing identifiers included in the submission.
    * @throws An error when identifiers are duplicated or belong to another task.
    */
-  private validateRequestedSubtaskIds(
-    currentIds: string[],
-    requestedIds: string[],
-  ): void {
+  private validateRequestedSubtaskIds(currentIds: string[], requestedIds: string[]): void {
     const uniqueIds = getUniqueIds(requestedIds);
 
     if (uniqueIds.length !== requestedIds.length) {
@@ -381,26 +320,18 @@ export class TaskRelationsService {
 
   /**
    * Persists only the assignment differences between current and requested state.
-   *
    * @param taskId - Identifier of the task.
    * @param contactIds - Complete submitted contact identifier state.
    * @returns A promise that resolves after assignment synchronization.
    * @throws The database error returned by the repository.
    */
-  private async synchronizeAssignments(
-    taskId: string,
-    contactIds: string[],
-  ): Promise<void> {
+  private async synchronizeAssignments(taskId: string, contactIds: string[]): Promise<void> {
     const currentIds = await this.repository.getAssignedContactIds(taskId);
     const requestedIds = getUniqueIds(contactIds);
+    const removedIds = getMissingIds(currentIds, requestedIds);
+    const addedIds = getMissingIds(requestedIds, currentIds);
 
-    await this.repository.deleteTaskAssignments(
-      taskId,
-      getMissingIds(currentIds, requestedIds),
-    );
-    await this.repository.createTaskAssignments(
-      taskId,
-      getMissingIds(requestedIds, currentIds),
-    );
+    await this.repository.deleteTaskAssignments(taskId, removedIds);
+    await this.repository.createTaskAssignments(taskId, addedIds);
   }
 }
