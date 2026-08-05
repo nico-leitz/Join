@@ -61,3 +61,70 @@
     }
   }
 }
+
+.signup-success {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  overflow: hidden;
+  pointer-events: auto;
+
+  &__message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.625rem;
+    max-width: calc(100vw - 2rem);
+    margin: 0;
+    padding: 1rem 1.5rem;
+    border-radius: 1.25rem;
+    background-color: var(--color-text-dark);
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    font-size: 1.25rem;
+    line-height: 1.4;
+    text-align: center;
+    animation: signup-success-message 2.4s both;
+    will-change: opacity, transform;
+  }
+}
+
+@keyframes signup-success-message {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, calc(50vh + 100%), 0);
+  }
+
+  22%,
+  80% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, calc(50vh + 100%), 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signup-success__message {
+    animation-name: signup-success-fade;
+  }
+}
+
+@keyframes signup-success-fade {
+  0%,
+  10%,
+  100% {
+    opacity: 0;
+  }
+
+  18%,
+  80% {
+    opacity: 1;
+  }
+}

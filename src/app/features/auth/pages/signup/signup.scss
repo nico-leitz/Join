@@ -1,7 +1,7 @@
-@use 'abstracts/breakpoints' as bp;
-@use 'abstracts/mixins' as mx;
+@use "abstracts/breakpoints" as bp;
+@use "abstracts/mixins" as mx;
 
-@use '_partials/signup-variables';
-@use '_partials/signup-page-layout';
-@use '_partials/signup-card';
-@use '_partials/signup-responsive';
+@use "_partials/signup-variables";
+@use "_partials/signup-page-layout";
+@use "_partials/signup-card";
+@use "_partials/signup-responsive";

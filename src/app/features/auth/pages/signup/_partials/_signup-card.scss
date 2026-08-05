@@ -158,18 +158,70 @@
     cursor: pointer;
 
     &--error {
-      .signup-card__checkbox {
+      .signup-card__checkbox-icon {
         outline: 0.0625rem solid var(--color-error);
         outline-offset: 0.125rem;
+        border-radius: 0.25rem;
       }
     }
   }
 
   &__checkbox {
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-    accent-color: var(--color-text-dark);
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    padding: 0;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &__checkbox-icon {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: 0 0 1.5rem;
+    border-radius: 50%;
+    transition: background-color 150ms ease-in-out;
+
+    &::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+      background: center / contain no-repeat
+        url("/assets/icons/icons_dropdown/check_button_default.svg");
+    }
+  }
+
+  &__checkbox-group:hover &__checkbox-icon {
+    background-color: var(--color-background-hover, #eeeeee);
+    box-shadow: 0 0 0 0.25rem var(--color-background-hover, #eeeeee);
+
+    &::before {
+      background-image: url("/assets/icons/icons_dropdown/check_button_default_hover.svg");
+    }
+  }
+
+  &__checkbox:checked + &__checkbox-icon::before {
+    background: var(--color-text-dark, #2a3647);
+    mask: center / contain no-repeat
+      url("/assets/icons/icons_dropdown/check_button_checked.svg");
+    -webkit-mask: center / contain no-repeat
+      url("/assets/icons/icons_dropdown/check_button_checked.svg");
+  }
+
+  &__checkbox-group:hover &__checkbox:checked + &__checkbox-icon::before {
+    mask-image: url("/assets/icons/icons_dropdown/check_button_checked_hover.svg");
+    -webkit-mask-image: url("/assets/icons/icons_dropdown/check_button_checked_hover.svg");
+  }
+
+  &__checkbox:focus-visible + &__checkbox-icon {
+    outline: 0.125rem solid var(--color-cyan);
+    outline-offset: 0.125rem;
+    border-radius: 0.25rem;
   }
 
   &__checkbox-text {

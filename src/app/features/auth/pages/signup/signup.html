@@ -62,9 +62,13 @@
           >
             @if (signupForm.controls.fullName.hasError('required')) {
               Please enter your name.
-            } @else if (signupForm.controls.fullName.hasError('invalidNameCharacters')) {
+            } @else if (
+              signupForm.controls.fullName.hasError('invalidNameCharacters')
+            ) {
               Use letters, spaces, hyphens, or apostrophes only.
-            } @else if (signupForm.controls.fullName.hasError('minLetters')) {
+            } @else if (
+              signupForm.controls.fullName.hasError('minLetters')
+            ) {
               Your name must contain at least 6 letters.
             }
           </p>
@@ -101,7 +105,7 @@
             @if (signupForm.controls.email.hasError('required')) {
               Please enter your email address.
             } @else if (signupForm.controls.email.hasError('strictEmail')) {
-              Enter an address like name&#64;provider.com with an ending of at least 2 letters.
+              Enter a valid email address.
             }
           </p>
         </div>
@@ -128,13 +132,16 @@
               (blur)="passwordFocused = false"
             />
 
-            <span 
-              class="signup-card__icon" 
-              aria-hidden="true" 
+            <span
+              class="signup-card__icon"
+              aria-hidden="true"
               (click)="togglePasswordVisibility()"
               (mousedown)="$event.preventDefault()"
             >
-              <img [src]="getIconSrc(passwordFocused, passwordVisible)" alt="Toggle password visibility" />
+              <img
+                [src]="getIconSrc(passwordFocused, passwordVisible)"
+                alt="Toggle password visibility"
+              />
             </span>
           </div>
 
@@ -152,9 +159,13 @@
               signupForm.controls.password.hasError('missingNumber')
             ) {
               Include at least one uppercase letter and one number.
-            } @else if (signupForm.controls.password.hasError('missingUppercase')) {
+            } @else if (
+              signupForm.controls.password.hasError('missingUppercase')
+            ) {
               Include at least one uppercase letter.
-            } @else if (signupForm.controls.password.hasError('missingNumber')) {
+            } @else if (
+              signupForm.controls.password.hasError('missingNumber')
+            ) {
               Include at least one number.
             }
           </p>
@@ -177,26 +188,40 @@
               placeholder="Confirm Password"
               autocomplete="new-password"
               aria-describedby="signup-confirmation-error"
-              [class.signup-card__input--error]="isControlInvalid('confirmPassword') || hasPasswordMismatch()"
-              [attr.aria-invalid]="isControlInvalid('confirmPassword') || hasPasswordMismatch()"
+              [class.signup-card__input--error]="
+                isControlInvalid('confirmPassword') || hasPasswordMismatch()
+              "
+              [attr.aria-invalid]="
+                isControlInvalid('confirmPassword') || hasPasswordMismatch()
+              "
               (focus)="confirmPasswordFocused = true"
               (blur)="confirmPasswordFocused = false"
             />
 
-            <span 
-              class="signup-card__icon" 
-              aria-hidden="true" 
+            <span
+              class="signup-card__icon"
+              aria-hidden="true"
               (click)="toggleConfirmPasswordVisibility()"
               (mousedown)="$event.preventDefault()"
             >
-              <img [src]="getIconSrc(confirmPasswordFocused, confirmPasswordVisible)" alt="Toggle password visibility" />
+              <img
+                [src]="
+                  getIconSrc(
+                    confirmPasswordFocused,
+                    confirmPasswordVisible
+                  )
+                "
+                alt="Toggle password visibility"
+              />
             </span>
           </div>
 
           <p
             id="signup-confirmation-error"
             class="signup-card__error"
-            [class.signup-card__error--visible]="isControlInvalid('confirmPassword') || hasPasswordMismatch()"
+            [class.signup-card__error--visible]="
+              isControlInvalid('confirmPassword') || hasPasswordMismatch()
+            "
           >
             @if (signupForm.controls.confirmPassword.hasError('required')) {
               Please confirm your password.
@@ -209,15 +234,23 @@
         <div class="signup-card__privacy">
           <label
             class="signup-card__checkbox-group"
-            [class.signup-card__checkbox-group--error]="isControlInvalid('privacyAccepted')"
+            [class.signup-card__checkbox-group--error]="
+              isControlInvalid('privacyAccepted')
+            "
           >
             <input
+              id="signup-privacy"
               type="checkbox"
               class="signup-card__checkbox"
               formControlName="privacyAccepted"
               aria-describedby="signup-privacy-error"
               [attr.aria-invalid]="isControlInvalid('privacyAccepted')"
             />
+
+            <span
+              class="signup-card__checkbox-icon"
+              aria-hidden="true"
+            ></span>
 
             <span class="signup-card__checkbox-text">
               I accept the
@@ -234,7 +267,9 @@
           <p
             id="signup-privacy-error"
             class="signup-card__error signup-card__error--center"
-            [class.signup-card__error--visible]="isControlInvalid('privacyAccepted')"
+            [class.signup-card__error--visible]="
+              isControlInvalid('privacyAccepted')
+            "
           >
             @if (isControlInvalid('privacyAccepted')) {
               Please accept the Privacy Policy.
@@ -246,7 +281,9 @@
           class="signup-card__form-message"
           role="alert"
           aria-live="polite"
-          [class.signup-card__form-message--visible]="authService.errorMessage()"
+          [class.signup-card__form-message--visible]="
+            authService.errorMessage()
+          "
         >
           {{ authService.errorMessage() || '' }}
         </p>
@@ -255,7 +292,11 @@
           <button
             type="submit"
             class="signup-card__btn signup-card__btn--primary"
-            [disabled]="signupForm.invalid || authService.isLoading()"
+            [disabled]="
+              signupForm.invalid ||
+              authService.isLoading() ||
+              showSuccessMessage()
+            "
           >
             @if (authService.isLoading()) {
               Signing up...
@@ -277,4 +318,15 @@
       Legal notice
     </a>
   </footer>
+
+  @if (showSuccessMessage()) {
+    <div
+      class="signup-success"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <p class="signup-success__message">You Signed Up successfully</p>
+    </div>
+  }
 </div>
