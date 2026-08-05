@@ -17,7 +17,7 @@ import { ContactService } from '../../../../core/services/contact.service';
 export class ContactDetail {
   /** Duration of the mobile menu closing animation in milliseconds. */
   private readonly mobileMenuAnimationMs = 180;
-  
+
   /** Identifier of the pending mobile menu close timer. */
   private mobileMenuCloseTimeoutId: number | null = null;
 
@@ -44,7 +44,6 @@ export class ContactDetail {
 
   /**
    * Creates the initials displayed in a contact badge.
-   *
    * @param firstName - The first name of the contact.
    * @param lastName - The last name of the contact.
    * @returns The contact's initials.
@@ -55,7 +54,6 @@ export class ContactDetail {
 
   /**
    * Requests editing for the selected contact.
-   *
    * @param contact - Contact that should be edited.
    */
   openEditDialog(contact: Contact): void {
@@ -104,7 +102,6 @@ export class ContactDetail {
 
   /**
    * Closes the mobile menu and requests editing for a contact.
-   *
    * @param contact - The contact to edit.
    */
   editFromMobileMenu(contact: Contact): void {
@@ -114,7 +111,6 @@ export class ContactDetail {
 
   /**
    * Closes the mobile menu and deletes the selected contact.
-   *
    * @param contactId - Identifier of the contact to delete.
    * @returns A promise that resolves after deletion and navigation.
    * @throws The contact deletion error returned by the contact service.
@@ -126,7 +122,6 @@ export class ContactDetail {
 
   /**
    * Deletes a contact and returns to the contact list.
-   *
    * @param contactId - Identifier of the contact to delete.
    * @returns A promise that resolves after deletion and navigation.
    * @throws The contact deletion error returned by the contact service.
