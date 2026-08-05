@@ -1,4 +1,4 @@
-@keyframes splash-logo-desktop {
+@keyframes splash-logo-to-header {
   0% {
     top: 50%;
     left: 50%;
@@ -6,40 +6,30 @@
     opacity: 1;
   }
 
-  70% {
+  35% {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
 
+  85%,
   100% {
-    top: 3rem;
-    left: 5rem;
-    transform: translate(0, 0) scale(0.7);
-    opacity: 0;
+    top: var(--splash-target-top);
+    left: var(--splash-target-left);
+    width: var(--splash-target-width);
+    transform: translate(0, 0);
+    opacity: 1;
   }
 }
 
-@keyframes splash-logo-mobile {
-  0% {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-
-  70% {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1);
+@keyframes splash-overlay-to-page {
+  0%,
+  85% {
     opacity: 1;
   }
 
   100% {
-    top: 1rem;
-    left: 0.75rem;
-    transform: translate(0, 0) scale(0.7);
     opacity: 0;
   }
 }
