@@ -24,13 +24,13 @@ import { CreateContact } from '../../../../core/models/contact.model';
 export class ContactCreateDialog {
   /** Duration of the dialog closing animation in milliseconds. */
   private readonly closeAnimationMs = 200;
-  
+
   /** Last name used when the user enters only one name. */
   private readonly fallbackLastName = 'Unknown';
-  
+
   /** Pattern allowing supported letters and name separators. */
   private readonly namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿÄÖÜäöüß' -]+$/;
-  
+
   /** Pattern allowing digits, spaces and one optional leading plus sign. */
   private readonly phonePattern = /^\+?[0-9 ]+$/;
 
@@ -100,7 +100,6 @@ export class ContactCreateDialog {
 
   /**
    * Checks whether the touched full-name field is invalid.
-   *
    * @returns True when the full-name field should display an error.
    */
   hasNameError(): boolean {
@@ -109,7 +108,6 @@ export class ContactCreateDialog {
 
   /**
    * Checks whether the touched email field is invalid.
-   *
    * @returns True when the email field should display an error.
    */
   hasEmailError(): boolean {
@@ -118,7 +116,6 @@ export class ContactCreateDialog {
 
   /**
    * Checks whether the touched phone field is invalid.
-   *
    * @returns True when the phone field should display an error.
    */
   hasPhoneError(): boolean {
@@ -127,7 +124,6 @@ export class ContactCreateDialog {
 
   /**
    * Resolves the current full-name validation message.
-   *
    * @returns A user-facing validation message or an empty string.
    */
   getNameErrorMessage(): string {
@@ -143,7 +139,6 @@ export class ContactCreateDialog {
 
   /**
    * Resolves the current email validation message.
-   *
    * @returns A user-facing validation message or an empty string.
    */
   getEmailErrorMessage(): string {
@@ -158,7 +153,6 @@ export class ContactCreateDialog {
 
   /**
    * Resolves the current phone validation message.
-   *
    * @returns A user-facing validation message or an empty string.
    */
   getPhoneErrorMessage(): string {
@@ -173,7 +167,6 @@ export class ContactCreateDialog {
 
   /**
    * Validates the supported characters of a non-empty full name.
-   *
    * @param control - Full-name form control to validate.
    * @returns A matching validation error or null for a valid value.
    */
@@ -189,7 +182,6 @@ export class ContactCreateDialog {
 
   /**
    * Checks whether a form control was touched and remains invalid.
-   *
    * @param control - Form control whose state should be inspected.
    * @returns True when the control is touched and invalid.
    */
@@ -199,7 +191,6 @@ export class ContactCreateDialog {
 
   /**
    * Maps the normalized form values to a contact creation payload.
-   *
    * @returns Contact data ready for persistence.
    */
   private createContactPayload(): CreateContact {
@@ -216,7 +207,6 @@ export class ContactCreateDialog {
 
   /**
    * Removes unsupported phone characters and collapses repeated spaces.
-   *
    * @param phone - Raw phone value entered by the user.
    * @returns Sanitized phone value.
    */
@@ -227,7 +217,6 @@ export class ContactCreateDialog {
 
   /**
    * Keeps one leading plus sign and removes every other plus sign.
-   *
    * @param phone - Phone value whose plus signs should be normalized.
    * @returns Phone value containing at most one leading plus sign.
    */
