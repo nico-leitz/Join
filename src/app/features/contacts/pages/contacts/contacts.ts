@@ -6,14 +6,9 @@ import { ContactEditDialog } from '../../components/contact-edit-dialog/contact-
 import { ContactSuccessOverlay } from '../../components/contact-success-overlay/contact-success-overlay';
 import { ContactService } from '../../../../core/services/contact.service';
 import { ContactDetail } from '../../components/contact-detail/contact-detail';
-import {
-  Contact,
-  CreateContact,
-  UpdateContact,
-} from '../../../../core/models/contact.model';
+import { Contact, CreateContact, UpdateContact } from '../../../../core/models/contact.model';
 import { Sidebar } from '../../../../layout/sidebar/sidebar';
 import { Header } from '../../../../layout/header/header';
-import { MobileNav } from "../../../../layout/mobile-nav/mobile-nav";
 
 /**
  * Coordinates the contact list, detail view and contact dialogs.
@@ -42,6 +37,9 @@ export class Contacts implements OnDestroy {
   /** Document whose body receives the dialog scroll-lock class. */
   private readonly document = inject(DOCUMENT);
 
+  /** Service used for contact state and persistence. */
+  private readonly contactService = inject(ContactService);
+
   /** Indicates whether the contact creation dialog is open. */
   isCreateDialogOpen = signal(false);
 
@@ -53,13 +51,6 @@ export class Contacts implements OnDestroy {
 
   /** Success message currently displayed by the feedback overlay. */
   successMessage = signal('');
-
-  /**
-   * Creates the contacts page coordinator.
-   *
-   * @param contactService - Service used for contact state and persistence.
-   */
-  constructor(private readonly contactService: ContactService) {}
 
   /**
    * Restores page scrolling when the contacts page is destroyed.
@@ -86,7 +77,6 @@ export class Contacts implements OnDestroy {
 
   /**
    * Selects a contact, opens the edit dialog and locks page scrolling.
-   *
    * @param contact - Contact selected for editing.
    */
   openEditDialog(contact: Contact): void {
@@ -106,7 +96,6 @@ export class Contacts implements OnDestroy {
 
   /**
    * Creates a contact and refreshes the visible contact state.
-   *
    * @param contact - Contact data to persist.
    * @returns A promise that resolves after creation and list synchronization.
    * @throws The contact creation error returned by the contact service.
@@ -122,7 +111,6 @@ export class Contacts implements OnDestroy {
 
   /**
    * Updates the selected contact and refreshes the visible contact state.
-   *
    * @param contact - Contact changes to persist.
    * @returns A promise that resolves after the update attempt.
    * @throws The contact update error returned by the contact service.
@@ -142,7 +130,6 @@ export class Contacts implements OnDestroy {
 
   /**
    * Deletes a contact and refreshes the visible contact state.
-   *
    * @param contactId - Identifier of the contact to delete.
    * @returns A promise that resolves after deletion and list synchronization.
    * @throws The contact deletion error returned by the contact service.
@@ -163,7 +150,6 @@ export class Contacts implements OnDestroy {
 
   /**
    * Selects the newly created contact using the refreshed list instance.
-   *
    * @param createdContact - Contact returned by the creation request.
    */
   private selectCreatedContact(createdContact: Contact): void {
@@ -173,7 +159,6 @@ export class Contacts implements OnDestroy {
 
   /**
    * Finds a loaded contact by its identifier.
-   *
    * @param contactId - Identifier of the requested contact.
    * @returns The matching contact or undefined when it is not loaded.
    */
@@ -185,7 +170,6 @@ export class Contacts implements OnDestroy {
 
   /**
    * Displays success feedback and schedules its automatic removal.
-   *
    * @param message - Success text to display.
    */
   private showSuccessMessage(message: string): void {
