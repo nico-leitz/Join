@@ -8,7 +8,7 @@ import { AuthService } from "../../../../core/services/auth.service";
 /**
  * @description Unit tests for the Signup component.
  * This suite verifies reactive form validation, cross-field password matching,
- * input normalization, direct post-signup navigation, and error state management.
+ * input normalization, delayed login navigation, and error state management.
  */
 describe("Signup Component", () => {
   let component: Signup;
@@ -22,6 +22,7 @@ describe("Signup Component", () => {
       errorMessage: signal(""),
       clearError: vi.fn(),
       signUp: vi.fn(),
+      signOut: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -42,6 +43,7 @@ describe("Signup Component", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
@@ -246,10 +248,12 @@ describe("Signup Component", () => {
   });
 
   /**
-   * @test Verifies that successful demo registration normalizes credentials and redirects directly to summary.
+   * @test Verifies normalized registration, sign-out, success feedback and delayed login navigation.
    */
-  it("should normalize credentials and navigate to summary after signup", async () => {
+  it("should show success feedback and navigate to login after signup", async () => {
+    vi.useFakeTimers();
     mockAuthService.signUp.mockResolvedValue(true);
+    mockAuthService.signOut.mockResolvedValue(true);
 
     component.signupForm.patchValue({
       fullName: "  Jane Doe  ",
@@ -259,7 +263,10 @@ describe("Signup Component", () => {
       privacyAccepted: true,
     });
 
-    await component.onSubmit();
+    const submitPromise = component.onSubmit();
+
+    await Promise.resolve();
+    await Promise.resolve();
 
     expect(mockAuthService.signUp).toHaveBeenCalledWith({
       fullName: "Jane Doe",
@@ -267,7 +274,15 @@ describe("Signup Component", () => {
       password: "SecurePassword123",
       privacyAccepted: true,
     });
-    expect(router.navigate).toHaveBeenCalledWith(["/summary"]);
+    expect(mockAuthService.signOut).toHaveBeenCalledOnce();
+    expect(component.showSuccessMessage()).toBe(true);
+    expect(router.navigate).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(2600);
+    await submitPromise;
+
+    expect(component.showSuccessMessage()).toBe(false);
+    expect(router.navigate).toHaveBeenCalledWith(["/login"]);
   });
 
   /**
@@ -287,6 +302,28 @@ describe("Signup Component", () => {
     await component.onSubmit();
 
     expect(mockAuthService.signUp).toHaveBeenCalled();
+    expect(mockAuthService.signOut).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  /**
+   * @test Ensures login navigation is blocked if the temporary signup session cannot be ended.
+   */
+  it("should not show success feedback or navigate if sign-out fails", async () => {
+    mockAuthService.signUp.mockResolvedValue(true);
+    mockAuthService.signOut.mockResolvedValue(false);
+
+    component.signupForm.patchValue({
+      fullName: "John Doe",
+      email: "john@example.com",
+      password: "Password123",
+      confirmPassword: "Password123",
+      privacyAccepted: true,
+    });
+
+    await component.onSubmit();
+
+    expect(component.showSuccessMessage()).toBe(false);
     expect(router.navigate).not.toHaveBeenCalled();
   });
 

@@ -28,13 +28,13 @@
           autocomplete="off"
         />
 
-        <p class="add-task__field-error">
-          {{ getTitleErrorMessage() }}
-        </p>
+        <p class="add-task__field-error">{{ getTitleErrorMessage() }}</p>
       </div>
 
       <div class="add-task__field">
-        <label class="add-task__label" for="add_task_description">Description</label>
+        <label class="add-task__label" for="add_task_description"
+          >Description</label
+        >
 
         <textarea
           id="add_task_description"
@@ -66,9 +66,7 @@
 
         <span class="add-task__calendar_icon"></span>
 
-        <p class="add-task__field-error">
-          {{ getDueDateErrorMessage() }}
-        </p>
+        <p class="add-task__field-error">{{ getDueDateErrorMessage() }}</p>
       </div>
     </section>
 
@@ -86,7 +84,12 @@
             (click)="setPriority('urgent')"
           >
             <span>Urgent</span>
-            <img src="assets/board/board-card/urgent.svg" alt="" aria-hidden="true" />
+
+            <img
+              src="assets/board/board-card/urgent.svg"
+              alt=""
+              aria-hidden="true"
+            />
           </button>
 
           <button
@@ -96,7 +99,12 @@
             (click)="setPriority('medium')"
           >
             <span>Medium</span>
-            <img src="assets/board/board-card/medium.svg" alt="" aria-hidden="true" />
+
+            <img
+              src="assets/board/board-card/medium.svg"
+              alt=""
+              aria-hidden="true"
+            />
           </button>
 
           <button
@@ -106,7 +114,12 @@
             (click)="setPriority('low')"
           >
             <span>Low</span>
-            <img src="assets/board/board-card/low.svg" alt="" aria-hidden="true" />
+
+            <img
+              src="assets/board/board-card/low.svg"
+              alt=""
+              aria-hidden="true"
+            />
           </button>
         </div>
 
@@ -114,9 +127,14 @@
       </fieldset>
 
       <div class="add-task__field">
-        <label class="add-task__label" for="add_task_contact_search">Assigned to</label>
+        <label class="add-task__label" for="add_task_contact_search"
+          >Assigned to</label
+        >
 
-        <div class="add-task__contact-select dropdown-wrapper" [class.is-open]="contactsMenuOpen()">
+        <div
+          class="add-task__contact-select dropdown-wrapper"
+          [class.is-open]="contactsMenuOpen()"
+        >
           <div class="add-task__input add-task__select-control">
             <input
               id="add_task_contact_search"
@@ -146,75 +164,77 @@
           </div>
 
           @if (contactsMenuOpen()) {
-            <div
-              class="add-task__contact-menu"
-              role="listbox"
-              aria-label="Available contacts"
-              aria-multiselectable="true"
+          <div
+            class="add-task__contact-menu"
+            role="listbox"
+            aria-label="Available contacts"
+            aria-multiselectable="true"
+          >
+            @if (filteredContacts().length === 0) {
+            <p class="add-task__empty-option">No contacts found.</p>
+            } @else { @for (contact of filteredContacts(); track contact.id) {
+            <label
+              class="add-task__contact-option"
+              [class.add-task__contact-option--selected]="isContactSelected(contact.id)"
+              [attr.aria-selected]="isContactSelected(contact.id)"
+              role="option"
             >
-              @if (filteredContacts().length === 0) {
-                <p class="add-task__empty-option">No contacts found.</p>
-              } @else {
-                @for (contact of filteredContacts(); track contact.id) {
-                  <label
-                    class="add-task__contact-option"
-                    [class.add-task__contact-option--selected]="isContactSelected(contact.id)"
-                    [attr.aria-selected]="isContactSelected(contact.id)"
-                    role="option"
-                  >
-                    <span
-                      class="add-task__contact-badge"
-                      [style.background-color]="contact.badgeColor"
-                    >
-                      {{ getInitials(contact) }}
-                    </span>
+              <span
+                class="add-task__contact-badge"
+                [style.background-color]="contact.badgeColor"
+              >
+                {{ getInitials(contact) }}
+              </span>
 
-                    <span class="add-task__contact-name">
-                      {{ contact.firstName }} {{ contact.lastName }}
-                    </span>
+              <span class="add-task__contact-name">
+                {{ contact.firstName }} {{ contact.lastName }}
+              </span>
 
-                    <input
-                      class="add-task__contact-checkbox"
-                      type="checkbox"
-                      [checked]="isContactSelected(contact.id)"
-                      (change)="toggleContactSelection(contact.id)"
-                    />
+              <input
+                class="add-task__contact-checkbox"
+                type="checkbox"
+                [checked]="isContactSelected(contact.id)"
+                (change)="toggleContactSelection(contact.id)"
+              />
 
-                    <span class="add-task__contact-check" aria-hidden="true"></span>
-                  </label>
-                }
-              }
-            </div>
+              <span class="add-task__contact-check" aria-hidden="true"></span>
+            </label>
+            } }
+          </div>
           }
         </div>
 
         @if (selectedContacts().length > 0) {
-          <div class="add-task__selected-contacts" aria-label="Selected contacts">
-            @for (contact of selectedContacts() | slice: 0 : 3; track contact.id) {
-              <span
-                class="add-task__contact-badge"
-                [style.background-color]="contact.badgeColor"
-                [attr.title]="contact.firstName + ' ' + contact.lastName"
-              >
-                {{ getInitials(contact) }}
-              </span>
-            }
-
-            @if (selectedContacts().length > 3) {
-              <div class="add-task__badge add-task__badge--more">
-                +{{ selectedContacts().length - 3 }}
-              </div>
-            }
+        <div class="add-task__selected-contacts" aria-label="Selected contacts">
+          @for (contact of selectedContacts() | slice: 0 : 3; track contact.id)
+          {
+          <span
+            class="add-task__contact-badge"
+            [style.background-color]="contact.badgeColor"
+            [attr.title]="contact.firstName + ' ' + contact.lastName"
+          >
+            {{ getInitials(contact) }}
+          </span>
+          } @if (selectedContacts().length > 3) {
+          <div class="add-task__badge add-task__badge--more">
+            +{{ selectedContacts().length - 3 }}
           </div>
+          }
+        </div>
         }
 
         <p class="add-task__field-error"></p>
       </div>
 
       <div class="add-task__field">
-        <span class="add-task__label">Category<span aria-hidden="true">*</span></span>
+        <span class="add-task__label"
+          >Category<span aria-hidden="true">*</span></span
+        >
 
-        <div class="add-task__category-select dropdown-wrapper" [class.is-open]="categoryMenuOpen()">
+        <div
+          class="add-task__category-select dropdown-wrapper"
+          [class.is-open]="categoryMenuOpen()"
+        >
           <button
             type="button"
             class="add-task__input add-task__category-toggle"
@@ -234,23 +254,21 @@
           </button>
 
           @if (categoryMenuOpen()) {
-            <div class="add-task__category-menu">
-              @for (option of categoryOptions; track option.value) {
-                <button
-                  type="button"
-                  class="add-task__category-option"
-                  (click)="selectCategory(option.value)"
-                >
-                  {{ option.label }}
-                </button>
-              }
-            </div>
+          <div class="add-task__category-menu">
+            @for (option of categoryOptions; track option.value) {
+            <button
+              type="button"
+              class="add-task__category-option"
+              (click)="selectCategory(option.value)"
+            >
+              {{ option.label }}
+            </button>
+            }
+          </div>
           }
         </div>
 
-        <p class="add-task__field-error">
-          {{ getCategoryErrorMessage() }}
-        </p>
+        <p class="add-task__field-error">{{ getCategoryErrorMessage() }}</p>
       </div>
 
       <div class="add-task__field">
@@ -272,95 +290,107 @@
 
           <div class="add-task__subtask-add">
             @if (isSubtaskFocused() || newSubtaskTitle().trim()) {
+            <button
+              type="button"
+              class="add-task__icon-button"
+              (mousedown)="$event.preventDefault()"
+              (click)="clearInput(subtaskInput)"
+            >
+              <img
+                src="assets/add-task/subtasks_icon_x.svg"
+                alt="Clear input"
+              />
+            </button>
+
+            <div class="add-task__subtask-divider"></div>
+
+            <button
+              type="button"
+              class="add-task__icon-button"
+              (mousedown)="$event.preventDefault()"
+              (click)="addSubtask()"
+            >
+              <img
+                src="assets/add-task/subtasks_icon_checkmark.svg"
+                alt="Add subtask"
+              />
+            </button>
+            }
+          </div>
+        </div>
+
+        @if (draftSubtasks().length > 0) {
+        <ul class="add-task__subtask-list">
+          @for (subtask of draftSubtasks(); track $index; let index = $index) {
+          @if (editingSubtaskIndex() === index) {
+          <li class="add-task__subtask-edit">
+            <input
+              type="text"
+              class="add-task__input add-task__subtask-edit-input"
+              maxlength="160"
+              [value]="editingSubtaskTitle()"
+              (input)="updateEditingSubtaskTitle($event)"
+              (keydown.enter)="$event.preventDefault(); saveSubtaskEdit()"
+            />
+
+            <div class="add-task__subtask-actions">
               <button
                 type="button"
-                class="add-task__icon-button"
-                (mousedown)="$event.preventDefault()"
-                (click)="clearInput(subtaskInput)"
+                class="add-task__subtask-action"
+                aria-label="Delete subtask"
+                (click)="removeSubtask(index)"
               >
-                <img src="assets/add-task/subtasks_icon_x.svg" alt="Clear input" />
+                <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
               </button>
 
               <div class="add-task__subtask-divider"></div>
 
               <button
                 type="button"
-                class="add-task__icon-button"
-                (mousedown)="$event.preventDefault()"
-                (click)="addSubtask()"
+                class="add-task__subtask-action"
+                aria-label="Save subtask"
+                [disabled]="!editingSubtaskTitle().trim()"
+                (click)="saveSubtaskEdit()"
               >
-                <img src="assets/add-task/subtasks_icon_checkmark.svg" alt="Add subtask" />
+                <img src="assets/icons/icons_edit/check (1).svg" alt="Save" />
               </button>
-            }
-          </div>
-        </div>
+            </div>
+          </li>
+          } @else {
+          <li class="add-task__subtask-item">
+            <button
+              type="button"
+              class="add-task__subtask-title"
+              [attr.aria-label]="'Edit subtask: ' + subtask.title"
+              (click)="startEditingSubtask(index)"
+            >
+              {{ subtask.title }}
+            </button>
 
-        @if (draftSubtasks().length > 0) {
-          <ul class="add-task__subtask-list">
-            @for (subtask of draftSubtasks(); track $index; let index = $index) {
-              @if (editingSubtaskIndex() === index) {
-                <li class="add-task__subtask-edit">
-                  <input
-                    type="text"
-                    class="add-task__input add-task__subtask-edit-input"
-                    maxlength="160"
-                    [value]="editingSubtaskTitle()"
-                    (input)="updateEditingSubtaskTitle($event)"
-                    (keydown.enter)="$event.preventDefault(); saveSubtaskEdit()"
-                  />
+            <div class="add-task__subtask-actions">
+              <button
+                type="button"
+                class="add-task__subtask-action"
+                aria-label="Edit subtask"
+                (click)="startEditingSubtask(index)"
+              >
+                <img src="assets/icons/icons_edit/edit.svg" alt="Edit" />
+              </button>
 
-                  <div class="add-task__subtask-actions">
-                    <button
-                      type="button"
-                      class="add-task__subtask-action"
-                      aria-label="Delete subtask"
-                      (click)="removeSubtask(index)"
-                    >
-                      <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
-                    </button>
+              <div class="add-task__subtask-divider"></div>
 
-                    <div class="add-task__subtask-divider"></div>
-
-                    <button
-                      type="button"
-                      class="add-task__subtask-action"
-                      aria-label="Save subtask"
-                      [disabled]="!editingSubtaskTitle().trim()"
-                      (click)="saveSubtaskEdit()"
-                    >
-                      <img src="assets/icons/icons_edit/check (1).svg" alt="Save" />
-                    </button>
-                  </div>
-                </li>
-              } @else {
-                <li class="add-task__subtask-item">
-                  <span class="add-task__subtask-title">{{ subtask.title }}</span>
-
-                  <div class="add-task__subtask-actions">
-                    <button
-                      type="button"
-                      class="add-task__subtask-action"
-                      aria-label="Edit subtask"
-                      (click)="startEditingSubtask(index)"
-                    >
-                      <img src="assets/icons/icons_edit/edit.svg" alt="Edit" />
-                    </button>
-
-                    <div class="add-task__subtask-divider"></div>
-
-                    <button
-                      type="button"
-                      class="add-task__subtask-action"
-                      aria-label="Delete subtask"
-                      (click)="removeSubtask(index)"
-                    >
-                      <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
-                    </button>
-                  </div>
-                </li>
-              }
-            }
-          </ul>
+              <button
+                type="button"
+                class="add-task__subtask-action"
+                aria-label="Delete subtask"
+                (click)="removeSubtask(index)"
+              >
+                <img src="assets/icons/icons_edit/delete.svg" alt="Delete" />
+              </button>
+            </div>
+          </li>
+          } }
+        </ul>
         }
 
         <p class="add-task__field-error"></p>
@@ -369,9 +399,7 @@
   </div>
 
   @if (errorMessage()) {
-    <p class="add-task__form-error" role="alert">
-      {{ errorMessage() }}
-    </p>
+  <p class="add-task__form-error" role="alert">{{ errorMessage() }}</p>
   }
 
   <footer class="add-task__footer">
@@ -387,9 +415,7 @@
         [disabled]="isSubmitting()"
         (click)="handleSecondaryAction()"
       >
-        <span>
-          {{ mode() === 'dialog' ? 'Cancel' : 'Clear' }}
-        </span>
+        <span>{{ mode() === 'dialog' ? 'Cancel' : 'Clear' }}</span>
         <span aria-hidden="true">×</span>
       </button>
 
@@ -399,15 +425,16 @@
         [disabled]="taskForm.invalid || isSubmitting()"
       >
         @if (isSubmitting()) {
-          <span>Creating...</span>
+        <span>Creating...</span>
         } @else {
-          <span>Create Task</span>
-          <img
-            class="add-task__button-icon"
-            src="assets/icons/icons_edit/check (1).svg"
-            alt=""
-            aria-hidden="true"
-          />
+        <span>Create Task</span>
+
+        <img
+          class="add-task__button-icon"
+          src="assets/icons/icons_edit/check (1).svg"
+          alt=""
+          aria-hidden="true"
+        />
         }
       </button>
     </div>
@@ -415,8 +442,13 @@
 </form>
 
 @if (successMessage()) {
-  <div class="add-task__success" role="status">
-    <span>{{ successMessage() }}</span>
-    <img src="assets/sidebar/icons/nav-board-icon.svg" alt="" aria-hidden="true" />
-  </div>
+<div class="add-task__success" role="status">
+  <span>{{ successMessage() }}</span>
+
+  <img
+    src="assets/sidebar/icons/nav-board-icon.svg"
+    alt=""
+    aria-hidden="true"
+  />
+</div>
 }

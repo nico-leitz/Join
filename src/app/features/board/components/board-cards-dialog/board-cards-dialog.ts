@@ -61,10 +61,7 @@ interface EditableSubtask {
 @Component({
   selector: 'app-board-cards-dialog',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    SlicePipe,
-  ],
+  imports: [ReactiveFormsModule, SlicePipe],
   templateUrl: './board-cards-dialog.html',
   styleUrl: './board-cards-dialog.scss',
   host: {
@@ -72,23 +69,18 @@ interface EditableSubtask {
     '(document:keydown.escape)': 'closeContactsMenu()',
   },
 })
-export class BoardCardsDialog
-  implements OnInit, OnDestroy
-{
+export class BoardCardsDialog implements OnInit, OnDestroy {
   /** Duration of the dialog closing animation in milliseconds. */
   private readonly closeAnimationMs = 200;
 
   /** Browser document used to lock the underlying page scroll. */
-  private readonly document =
-    inject(DOCUMENT);
+  private readonly document = inject(DOCUMENT);
 
   /** Service used for task, subtask and assignment persistence. */
-  private readonly taskService =
-    inject(TaskService);
+  private readonly taskService = inject(TaskService);
 
   /** Form builder used to create the non-nullable edit form. */
-  private readonly formBuilder =
-    inject(FormBuilder);
+  private readonly formBuilder = inject(FormBuilder);
 
   /** Previous inline overflow value of the document body. */
   private previousBodyOverflow = '';
@@ -97,217 +89,152 @@ export class BoardCardsDialog
   private previousHtmlOverflow = '';
 
   /** Identifier of the pending dialog close timer. */
-  private closeTimerId:
-    number | undefined;
+  private closeTimerId: number | undefined;
 
   /** Task displayed and edited by the dialog. */
-  readonly task =
-    input.required<Task>();
+  readonly task = input.required<Task>();
 
   /** Subtasks belonging to the displayed task. */
-  readonly subtasks =
-    input<Subtask[]>([]);
+  readonly subtasks = input<Subtask[]>([]);
 
   /** Contacts currently assigned to the displayed task. */
-  readonly assignedContacts =
-    input<Contact[]>([]);
+  readonly assignedContacts = input<Contact[]>([]);
 
   /** Complete contact collection available for assignment. */
-  readonly availableContacts =
-    input<Contact[]>([]);
+  readonly availableContacts = input<Contact[]>([]);
 
   /** Emits after the closing animation has completed. */
-  readonly dialogClosed =
-    output<void>();
+  readonly dialogClosed = output<void>();
 
   /** Emits after a subtask completion state was persisted. */
-  readonly subtaskUpdated =
-    output<Subtask>();
+  readonly subtaskUpdated = output<Subtask>();
 
   /** Emits the identifier of a successfully deleted task. */
-  readonly taskDeleted =
-    output<string>();
+  readonly taskDeleted = output<string>();
 
   /** Emits the complete task state after a successful update. */
-  readonly taskUpdated =
-    output<TaskDialogUpdate>();
+  readonly taskUpdated = output<TaskDialogUpdate>();
 
   /** Indicates whether the dialog closing animation is running. */
-  readonly isClosing =
-    signal(false);
+  readonly isClosing = signal(false);
 
   /** Indicates whether the task deletion request is running. */
-  readonly isDeleting =
-    signal(false);
+  readonly isDeleting = signal(false);
 
   /** Indicates whether the dialog displays its edit form. */
-  readonly isEditing =
-    signal(false);
+  readonly isEditing = signal(false);
 
   /** Indicates whether task changes are being persisted. */
-  readonly isSaving =
-    signal(false);
+  readonly isSaving = signal(false);
 
   /** Indicates whether the contact assignment menu is open. */
-  readonly contactsMenuOpen =
-    signal(false);
+  readonly contactsMenuOpen = signal(false);
 
   /** Identifier of the subtask currently being updated. */
-  readonly updatingSubtaskId =
-    signal<string | null>(null);
+  readonly updatingSubtaskId = signal<string | null>(null);
 
   /** Identifiers selected in the contact assignment menu. */
-  readonly selectedContactIds =
-    signal<string[]>([]);
+  readonly selectedContactIds = signal<string[]>([]);
 
   /** Local editable copy of the current subtasks. */
-  readonly editableSubtasks =
-    signal<EditableSubtask[]>([]);
+  readonly editableSubtasks = signal<EditableSubtask[]>([]);
 
   /** Current title of the new subtask draft. */
-  readonly newSubtaskTitle =
-    signal('');
+  readonly newSubtaskTitle = signal('');
 
   /** Indicates whether the subtask creator input is focused. */
-  readonly isSubtaskFocused =
-    signal(false);
+  readonly isSubtaskFocused = signal(false);
 
   /** Index of the subtask currently being edited inline. */
-  readonly editingSubtaskIndex =
-    signal<number | null>(null);
+  readonly editingSubtaskIndex = signal<number | null>(null);
 
   /** Temporary title of the subtask currently being edited inline. */
-  readonly editingSubtaskTitle =
-    signal('');
+  readonly editingSubtaskTitle = signal('');
 
   /** User-facing message for the latest dialog operation failure. */
-  readonly errorMessage =
-    signal('');
+  readonly errorMessage = signal('');
 
   /** Reactive form containing the editable task fields. */
-  readonly editForm =
-    this.formBuilder.nonNullable.group({
-      title: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern(/\S/),
-          Validators.maxLength(120),
-        ],
-      ],
-      description: [
-        '',
-        Validators.maxLength(1000),
-      ],
-      dueDate: [
-        '',
+  readonly editForm = this.formBuilder.nonNullable.group({
+    title: [
+      '',
+      [
         Validators.required,
+        Validators.pattern(/\S/),
+        Validators.maxLength(120),
       ],
-      priority: [
-        'medium' as TaskPriority,
-        Validators.required,
-      ],
-      category: [
-        'user_story' as TaskCategory,
-        Validators.required,
-      ],
-    });
+    ],
+    description: ['', Validators.maxLength(1000)],
+    dueDate: ['', Validators.required],
+    priority: ['medium' as TaskPriority, Validators.required],
+    category: ['user_story' as TaskCategory, Validators.required],
+  });
 
   /** Human-readable category of the displayed task. */
-  readonly categoryLabel =
-    computed(() => {
-      return this.task().category ===
-        'technical_task'
-        ? 'Technical Task'
-        : 'User Story';
-    });
+  readonly categoryLabel = computed(() => {
+    return this.task().category === 'technical_task'
+      ? 'Technical Task'
+      : 'User Story';
+  });
 
   /** Capitalized priority of the displayed task. */
-  readonly priorityLabel =
-    computed(() => {
-      const priority =
-        this.task().priority;
+  readonly priorityLabel = computed(() => {
+    const priority = this.task().priority;
 
-      return (
-        priority.charAt(0).toUpperCase() +
-        priority.slice(1)
-      );
-    });
+    return priority.charAt(0).toUpperCase() + priority.slice(1);
+  });
 
   /** Due date formatted for display in the task dialog. */
-  readonly formattedDueDate =
-    computed(() => {
-      return formatDueDate(
-        this.task().dueDate,
-      );
-    });
+  readonly formattedDueDate = computed(() => {
+    return formatDueDate(this.task().dueDate);
+  });
 
   /** Contacts resolved from the current selected identifiers. */
-  readonly selectedContacts =
-    computed(() => {
-      const selectedIds =
-        new Set(
-          this.selectedContactIds(),
-        );
+  readonly selectedContacts = computed(() => {
+    const selectedIds = new Set(this.selectedContactIds());
 
-      return this.availableContacts()
-        .filter((contact) => {
-          return selectedIds.has(
-            contact.id,
-          );
-        });
+    return this.availableContacts().filter((contact) => {
+      return selectedIds.has(contact.id);
     });
+  });
 
   /** Summary shown in the contact assignment control. */
-  readonly contactSelectionLabel =
-    computed(() => {
-      const selectedAmount =
-        this.selectedContactIds()
-          .length;
+  readonly contactSelectionLabel = computed(() => {
+    const selectedAmount = this.selectedContactIds().length;
 
-      if (selectedAmount === 0) {
-        return 'Select contacts to assign';
-      }
+    if (selectedAmount === 0) {
+      return 'Select contacts to assign';
+    }
 
-      if (selectedAmount === 1) {
-        return '1 contact selected';
-      }
+    if (selectedAmount === 1) {
+      return '1 contact selected';
+    }
 
-      return `${selectedAmount} contacts selected`;
-    });
+    return `${selectedAmount} contacts selected`;
+  });
 
-  /**
-   * Locks scrolling on the page behind the dialog.
-   */
+  /** Locks scrolling on the page behind the dialog. */
   ngOnInit(): void {
     this.lockPageScroll();
   }
 
-  /**
-   * Clears pending work and restores the previous page scroll state.
-   */
+  /** Clears pending work and restores the previous page scroll state. */
   ngOnDestroy(): void {
     this.clearCloseTimer();
     this.restorePageScroll();
   }
 
-  /**
-   * Starts the dialog closing animation.
-   */
+  /** Starts the dialog closing animation. */
   closeDialog(): void {
-    if (
-      this.isClosing() ||
-      this.isSaving()
-    ) {
+    if (this.isClosing() || this.isSaving()) {
       return;
     }
 
     this.isClosing.set(true);
 
-    this.closeTimerId =
-      window.setTimeout(() => {
-        this.dialogClosed.emit();
-      }, this.closeAnimationMs);
+    this.closeTimerId = window.setTimeout(() => {
+      this.dialogClosed.emit();
+    }, this.closeAnimationMs);
   }
 
   /**
@@ -315,18 +242,14 @@ export class BoardCardsDialog
    *
    * @param event - Mouse event raised inside the dialog.
    */
-  protected handleDialogClick(
-    event: MouseEvent,
-  ): void {
+  protected handleDialogClick(event: MouseEvent): void {
     event.stopPropagation();
 
     if (!this.contactsMenuOpen()) {
       return;
     }
 
-    this.closeContactsMenuForTarget(
-      event.target,
-    );
+    this.closeContactsMenuForTarget(event.target);
   }
 
   /**
@@ -334,63 +257,42 @@ export class BoardCardsDialog
    *
    * @param event - Document click event to inspect.
    */
-  protected onDocumentClick(
-    event: Event,
-  ): void {
+  protected onDocumentClick(event: Event): void {
     if (!this.contactsMenuOpen()) {
       return;
     }
 
-    this.closeContactsMenuForTarget(
-      event.target,
-    );
+    this.closeContactsMenuForTarget(event.target);
   }
 
-  /**
-   * Closes the contact assignment menu.
-   */
+  /** Closes the contact assignment menu. */
   protected closeContactsMenu(): void {
     this.contactsMenuOpen.set(false);
   }
 
-  /**
-   * Initializes editable state and switches the dialog to edit mode.
-   */
+  /** Initializes editable state and switches the dialog to edit mode. */
   startEditing(): void {
-    if (
-      this.isDeleting() ||
-      this.isSaving()
-    ) {
+    if (this.isDeleting() || this.isSaving()) {
       return;
     }
 
     this.initializeEditForm();
     this.initializeContactSelection();
     this.initializeEditableSubtasks();
-    
-    this.newSubtaskTitle.set('');
-    this.isSubtaskFocused.set(false);
-    this.editingSubtaskIndex.set(null);
-    this.editingSubtaskTitle.set('');
-    
+    this.resetSubtaskEditState();
     this.closeContactsMenu();
     this.errorMessage.set('');
     this.isEditing.set(true);
   }
 
-  /**
-   * Discards local editing state and returns to the detail view.
-   */
+  /** Discards local editing state and returns to the detail view. */
   cancelEditing(): void {
     if (this.isSaving()) {
       return;
     }
 
     this.closeContactsMenu();
-    this.newSubtaskTitle.set('');
-    this.isSubtaskFocused.set(false);
-    this.editingSubtaskIndex.set(null);
-    this.editingSubtaskTitle.set('');
+    this.resetSubtaskEditState();
     this.errorMessage.set('');
     this.isEditing.set(false);
   }
@@ -400,27 +302,16 @@ export class BoardCardsDialog
    *
    * @param priority - Priority selected by the user.
    */
-  setPriority(
-    priority: TaskPriority,
-  ): void {
-    const priorityControl =
-      this.editForm.controls
-        .priority;
+  setPriority(priority: TaskPriority): void {
+    const priorityControl = this.editForm.controls.priority;
 
-    priorityControl.setValue(
-      priority,
-    );
-
+    priorityControl.setValue(priority);
     priorityControl.markAsDirty();
   }
 
-  /**
-   * Toggles the contact assignment menu.
-   */
+  /** Toggles the contact assignment menu. */
   toggleContactsMenu(): void {
-    this.contactsMenuOpen.update(
-      (isOpen) => !isOpen,
-    );
+    this.contactsMenuOpen.update((isOpen) => !isOpen);
   }
 
   /**
@@ -429,11 +320,8 @@ export class BoardCardsDialog
    * @param contactId - Identifier of the contact to inspect.
    * @returns True when the contact is selected.
    */
-  isContactSelected(
-    contactId: string,
-  ): boolean {
-    return this.selectedContactIds()
-      .includes(contactId);
+  isContactSelected(contactId: string): boolean {
+    return this.selectedContactIds().includes(contactId);
   }
 
   /**
@@ -441,27 +329,14 @@ export class BoardCardsDialog
    *
    * @param contactId - Identifier of the contact to toggle.
    */
-  toggleContactSelection(
-    contactId: string,
-  ): void {
-    this.selectedContactIds.update(
-      (contactIds) => {
-        if (
-          contactIds.includes(
-            contactId,
-          )
-        ) {
-          return contactIds.filter(
-            (id) => id !== contactId,
-          );
-        }
+  toggleContactSelection(contactId: string): void {
+    this.selectedContactIds.update((contactIds) => {
+      if (contactIds.includes(contactId)) {
+        return contactIds.filter((id) => id !== contactId);
+      }
 
-        return [
-          ...contactIds,
-          contactId,
-        ];
-      },
-    );
+      return [...contactIds, contactId];
+    });
   }
 
   /**
@@ -469,38 +344,26 @@ export class BoardCardsDialog
    *
    * @param event - Input event containing the current title.
    */
-  updateNewSubtaskTitle(
-    event: Event,
-  ): void {
-    const input =
-      event.target as HTMLInputElement;
-
-    this.newSubtaskTitle.set(
-      input.value,
-    );
+  updateNewSubtaskTitle(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.newSubtaskTitle.set(input.value);
   }
 
-  /**
-   * Adds a non-empty subtask draft to the editable collection.
-   */
+  /** Adds a non-empty subtask draft to the editable collection. */
   addSubtask(): void {
-    const title =
-      this.newSubtaskTitle()
-        .trim();
+    const title = this.newSubtaskTitle().trim();
 
     if (!title) {
       return;
     }
 
-    this.editableSubtasks.update(
-      (subtasks) => [
-        ...subtasks,
-        {
-          title,
-          isCompleted: false,
-        },
-      ],
-    );
+    this.editableSubtasks.update((subtasks) => [
+      ...subtasks,
+      {
+        title,
+        isCompleted: false,
+      },
+    ]);
 
     this.newSubtaskTitle.set('');
   }
@@ -510,25 +373,15 @@ export class BoardCardsDialog
    *
    * @param index - Index of the subtask to edit.
    */
-  startEditingSubtask(
-    index: number,
-  ): void {
-    const subtasks =
-      this.editableSubtasks();
-    
-    const subtask = subtasks[index];
-    
+  startEditingSubtask(index: number): void {
+    const subtask = this.editableSubtasks()[index];
+
     if (!subtask) {
       return;
     }
 
-    this.editingSubtaskTitle.set(
-      subtask.title,
-    );
-
-    this.editingSubtaskIndex.set(
-      index,
-    );
+    this.editingSubtaskTitle.set(subtask.title);
+    this.editingSubtaskIndex.set(index);
   }
 
   /**
@@ -536,78 +389,29 @@ export class BoardCardsDialog
    *
    * @param event - Input event containing the current title.
    */
-  updateEditingSubtaskTitle(
-    event: Event,
-  ): void {
-    const input =
-      event.target as HTMLInputElement;
-
-    this.editingSubtaskTitle.set(
-      input.value,
-    );
+  updateEditingSubtaskTitle(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.editingSubtaskTitle.set(input.value);
   }
 
-  /**
-   * Applies the inline edited title to the subtask and exits edit mode.
-   */
+  /** Applies the inline edited title and exits edit mode. */
   saveSubtaskEdit(): void {
-    const index =
-      this.editingSubtaskIndex();
-      
-    const title =
-      this.editingSubtaskTitle().trim();
+    const index = this.editingSubtaskIndex();
+    const title = this.editingSubtaskTitle().trim();
 
     if (index === null || !title) {
       return;
     }
 
-    this.editableSubtasks.update(
-      (subtasks) => {
-        return subtasks.map(
-          (subtask, currentIndex) => {
-            return currentIndex === index
-              ? { ...subtask, title }
-              : subtask;
-          },
-        );
-      },
-    );
+    this.editableSubtasks.update((subtasks) => {
+      return subtasks.map((subtask, currentIndex) => {
+        return currentIndex === index
+          ? { ...subtask, title }
+          : subtask;
+      });
+    });
 
-    this.editingSubtaskIndex.set(null);
-    this.editingSubtaskTitle.set('');
-  }
-
-  /**
-   * Updates the title of an editable subtask.
-   *
-   * @param index - Index of the subtask to update.
-   * @param event - Input event containing the current title.
-   */
-  updateEditableSubtaskTitle(
-    index: number,
-    event: Event,
-  ): void {
-    const input =
-      event.target as HTMLInputElement;
-
-    this.editableSubtasks.update(
-      (subtasks) => {
-        return subtasks.map(
-          (
-            subtask,
-            currentIndex,
-          ) => {
-            return currentIndex ===
-              index
-              ? {
-                  ...subtask,
-                  title: input.value,
-                }
-              : subtask;
-          },
-        );
-      },
-    );
+    this.clearInlineSubtaskEdit();
   }
 
   /**
@@ -615,27 +419,22 @@ export class BoardCardsDialog
    *
    * @param index - Index of the subtask to remove.
    */
-  removeEditableSubtask(
-    index: number,
-  ): void {
-    this.editableSubtasks.update(
-      (subtasks) => {
-        return subtasks.filter(
-          (
-            _,
-            currentIndex,
-          ) => {
-            return currentIndex !==
-              index;
-          },
-        );
-      },
-    );
-    
-    // Clear inline edit state if the currently edited subtask was removed
-    if (this.editingSubtaskIndex() === index) {
-      this.editingSubtaskIndex.set(null);
-      this.editingSubtaskTitle.set('');
+  removeEditableSubtask(index: number): void {
+    this.editableSubtasks.update((subtasks) => {
+      return subtasks.filter((_, currentIndex) => {
+        return currentIndex !== index;
+      });
+    });
+
+    const editingIndex = this.editingSubtaskIndex();
+
+    if (editingIndex === index) {
+      this.clearInlineSubtaskEdit();
+      return;
+    }
+
+    if (editingIndex !== null && editingIndex > index) {
+      this.editingSubtaskIndex.set(editingIndex - 1);
     }
   }
 
@@ -645,13 +444,9 @@ export class BoardCardsDialog
    * @returns True when at least one subtask title is invalid.
    */
   hasInvalidSubtask(): boolean {
-    return this.editableSubtasks()
-      .some((subtask) => {
-        return (
-          subtask.title.trim()
-            .length === 0
-        );
-      });
+    return this.editableSubtasks().some((subtask) => {
+      return subtask.title.trim().length === 0;
+    });
   }
 
   /**
@@ -664,15 +459,10 @@ export class BoardCardsDialog
       return;
     }
 
-    this.editForm
-      .markAllAsTouched();
-
+    this.editForm.markAllAsTouched();
     this.errorMessage.set('');
 
-    if (
-      this.editForm.invalid ||
-      this.hasInvalidSubtask()
-    ) {
+    if (this.editForm.invalid || this.hasInvalidSubtask()) {
       this.errorMessage.set(
         'Please complete all required fields.',
       );
@@ -694,29 +484,21 @@ export class BoardCardsDialog
     subtask: Subtask,
     event: Event,
   ): Promise<void> {
-    const checkbox =
-      event.target as HTMLInputElement;
+    const checkbox = event.target as HTMLInputElement;
 
-    this.updatingSubtaskId.set(
-      subtask.id,
-    );
-
+    this.updatingSubtaskId.set(subtask.id);
     this.errorMessage.set('');
 
     try {
       const updatedSubtask =
-        await this.taskService
-          .toggleSubtaskCompletion(
-            subtask.id,
-            checkbox.checked,
-          );
+        await this.taskService.toggleSubtaskCompletion(
+          subtask.id,
+          checkbox.checked,
+        );
 
-      this.subtaskUpdated.emit(
-        updatedSubtask,
-      );
+      this.subtaskUpdated.emit(updatedSubtask);
     } catch (error) {
-      checkbox.checked =
-        subtask.isCompleted;
+      checkbox.checked = subtask.isCompleted;
 
       console.error(
         'Subtask could not be updated.',
@@ -727,9 +509,7 @@ export class BoardCardsDialog
         'Subtask could not be updated.',
       );
     } finally {
-      this.updatingSubtaskId.set(
-        null,
-      );
+      this.updatingSubtaskId.set(null);
     }
   }
 
@@ -739,27 +519,19 @@ export class BoardCardsDialog
    * @returns A promise that resolves after the deletion attempt.
    */
   async deleteTask(): Promise<void> {
-    if (
-      this.isDeleting() ||
-      this.isSaving()
-    ) {
+    if (this.isDeleting() || this.isSaving()) {
       return;
     }
 
-    const taskId =
-      this.task().id;
+    const taskId = this.task().id;
 
     this.isDeleting.set(true);
     this.errorMessage.set('');
 
     try {
-      await this.taskService
-        .deleteTask(taskId);
+      await this.taskService.deleteTask(taskId);
 
-      this.taskDeleted.emit(
-        taskId,
-      );
-
+      this.taskDeleted.emit(taskId);
       this.closeDialog();
     } catch (error) {
       console.error(
@@ -781,13 +553,24 @@ export class BoardCardsDialog
    * @param contact - Contact whose initials should be created.
    * @returns Combined first and last name initials.
    */
-  getInitials(
-    contact: Contact,
-  ): string {
+  getInitials(contact: Contact): string {
     return (
       contact.firstName.charAt(0) +
       contact.lastName.charAt(0)
     ).toUpperCase();
+  }
+
+  /** Resets all local subtask creator and editing values. */
+  private resetSubtaskEditState(): void {
+    this.newSubtaskTitle.set('');
+    this.isSubtaskFocused.set(false);
+    this.clearInlineSubtaskEdit();
+  }
+
+  /** Exits the inline subtask editing mode. */
+  private clearInlineSubtaskEdit(): void {
+    this.editingSubtaskIndex.set(null);
+    this.editingSubtaskTitle.set('');
   }
 
   /**
@@ -803,57 +586,45 @@ export class BoardCardsDialog
       return;
     }
 
-    const contactSelect =
-      target.closest(
-        '.board_dialog__contact_select',
-      );
+    const contactSelect = target.closest(
+      '.board_dialog__contact_select',
+    );
 
     if (!contactSelect) {
       this.closeContactsMenu();
     }
   }
 
-  /**
-   * Resets the edit form with the current task values.
-   */
+  /** Resets the edit form with the current task values. */
   private initializeEditForm(): void {
     const task = this.task();
 
     this.editForm.reset({
       title: task.title,
-      description:
-        task.description,
+      description: task.description,
       dueDate: task.dueDate,
       priority: task.priority,
       category: task.category,
     });
   }
 
-  /**
-   * Synchronizes selected identifiers with the assigned contacts.
-   */
+  /** Synchronizes selected identifiers with the assigned contacts. */
   private initializeContactSelection(): void {
     this.selectedContactIds.set(
-      this.assignedContacts()
-        .map((contact) => {
-          return contact.id;
-        }),
+      this.assignedContacts().map((contact) => {
+        return contact.id;
+      }),
     );
   }
 
-  /**
-   * Creates editable copies of the current subtasks.
-   */
+  /** Creates editable copies of the current subtasks. */
   private initializeEditableSubtasks(): void {
     this.editableSubtasks.set(
-      this.subtasks().map(
-        (subtask) => ({
-          id: subtask.id,
-          title: subtask.title,
-          isCompleted:
-            subtask.isCompleted,
-        }),
-      ),
+      this.subtasks().map((subtask) => ({
+        id: subtask.id,
+        title: subtask.title,
+        isCompleted: subtask.isCompleted,
+      })),
     );
   }
 
@@ -866,19 +637,13 @@ export class BoardCardsDialog
     this.isSaving.set(true);
 
     try {
-      const updatedTask =
-        await this.persistTaskChanges();
+      const updatedTask = await this.persistTaskChanges();
 
-      this.emitTaskUpdate(
-        updatedTask,
-      );
-
+      this.emitTaskUpdate(updatedTask);
       this.closeContactsMenu();
       this.isEditing.set(false);
     } catch (error) {
-      this.handleTaskUpdateError(
-        error,
-      );
+      this.handleTaskUpdateError(error);
     } finally {
       this.isSaving.set(false);
     }
@@ -889,9 +654,7 @@ export class BoardCardsDialog
    *
    * @param error - Original persistence error.
    */
-  private handleTaskUpdateError(
-    error: unknown,
-  ): void {
+  private handleTaskUpdateError(error: unknown): void {
     console.error(
       'Task could not be updated.',
       error,
@@ -909,33 +672,22 @@ export class BoardCardsDialog
    * @throws The persistence error returned by the task service.
    */
   private async persistTaskChanges(): Promise<Task> {
-    const formValue =
-      this.editForm.getRawValue();
+    const formValue = this.editForm.getRawValue();
 
-    return this.taskService
-      .updateTaskWithRelations(
-        this.task().id,
-        {
-          task: {
-            title:
-              formValue.title.trim(),
-            description:
-              formValue.description
-                .trim(),
-            dueDate:
-              formValue.dueDate,
-            priority:
-              formValue.priority,
-            category:
-              formValue.category,
-          },
-          subtasks:
-            this.createSubtaskPayload(),
-          contactIds: [
-            ...this.selectedContactIds(),
-          ],
+    return this.taskService.updateTaskWithRelations(
+      this.task().id,
+      {
+        task: {
+          title: formValue.title.trim(),
+          description: formValue.description.trim(),
+          dueDate: formValue.dueDate,
+          priority: formValue.priority,
+          category: formValue.category,
         },
-      );
+        subtasks: this.createSubtaskPayload(),
+        contactIds: [...this.selectedContactIds()],
+      },
+    );
   }
 
   /**
@@ -943,27 +695,15 @@ export class BoardCardsDialog
    *
    * @returns Complete ordered subtask update state.
    */
-  private createSubtaskPayload():
-    UpdateTaskSubtaskInput[]
-  {
-    return this.editableSubtasks()
-      .map(
-        (
-          subtask,
-          index,
-        ) => ({
-          ...(
-            subtask.id && {
-              id: subtask.id,
-            }
-          ),
-          title:
-            subtask.title.trim(),
-          isCompleted:
-            subtask.isCompleted,
-          sortOrder: index,
-        }),
-      );
+  private createSubtaskPayload(): UpdateTaskSubtaskInput[] {
+    return this.editableSubtasks().map((subtask, index) => ({
+      ...(subtask.id && {
+        id: subtask.id,
+      }),
+      title: subtask.title.trim(),
+      isCompleted: subtask.isCompleted,
+      sortOrder: index,
+    }));
   }
 
   /**
@@ -971,69 +711,44 @@ export class BoardCardsDialog
    *
    * @param updatedTask - Persisted task returned by the task service.
    */
-  private emitTaskUpdate(
-    updatedTask: Task,
-  ): void {
+  private emitTaskUpdate(updatedTask: Task): void {
     this.taskUpdated.emit({
       task: updatedTask,
-      subtasks: [
-        ...this.taskService
-          .selectedSubtasks(),
-      ],
+      subtasks: [...this.taskService.selectedSubtasks()],
       assignedContacts: [
-        ...this.taskService
-          .assignedContacts(),
+        ...this.taskService.assignedContacts(),
       ],
     });
   }
 
-  /**
-   * Stores the current overflow values and locks page scrolling.
-   */
+  /** Stores the current overflow values and locks page scrolling. */
   private lockPageScroll(): void {
     this.previousBodyOverflow =
-      this.document.body
-        .style.overflow;
+      this.document.body.style.overflow;
 
     this.previousHtmlOverflow =
-      this.document
-        .documentElement
-        .style.overflow;
+      this.document.documentElement.style.overflow;
 
-    this.document.body
-      .style.overflow = 'hidden';
-
-    this.document.documentElement
-      .style.overflow = 'hidden';
+    this.document.body.style.overflow = 'hidden';
+    this.document.documentElement.style.overflow = 'hidden';
   }
 
-  /**
-   * Restores the page overflow values captured during initialization.
-   */
+  /** Restores the page overflow values captured during initialization. */
   private restorePageScroll(): void {
-    this.document.body
-      .style.overflow =
-        this.previousBodyOverflow;
+    this.document.body.style.overflow =
+      this.previousBodyOverflow;
 
-    this.document.documentElement
-      .style.overflow =
-        this.previousHtmlOverflow;
+    this.document.documentElement.style.overflow =
+      this.previousHtmlOverflow;
   }
 
-  /**
-   * Cancels and clears the pending dialog close timer.
-   */
+  /** Cancels and clears the pending dialog close timer. */
   private clearCloseTimer(): void {
-    if (
-      this.closeTimerId === undefined
-    ) {
+    if (this.closeTimerId === undefined) {
       return;
     }
 
-    window.clearTimeout(
-      this.closeTimerId,
-    );
-
+    window.clearTimeout(this.closeTimerId);
     this.closeTimerId = undefined;
   }
 }
@@ -1044,20 +759,10 @@ export class BoardCardsDialog
  * @param dueDate - Date value expected in YYYY-MM-DD format.
  * @returns Date formatted as DD/MM/YYYY or the original invalid value.
  */
-function formatDueDate(
-  dueDate: string,
-): string {
-  const [
-    year,
-    month,
-    day,
-  ] = dueDate.split('-');
+function formatDueDate(dueDate: string): string {
+  const [year, month, day] = dueDate.split('-');
 
-  if (
-    !year ||
-    !month ||
-    !day
-  ) {
+  if (!year || !month || !day) {
     return dueDate;
   }
 

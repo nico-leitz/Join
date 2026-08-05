@@ -3,6 +3,10 @@
   <div
     class="login-splash"
     [class.login-splash--mobile]="isMobile()"
+    [class.login-splash--animating]="splashAnimating()"
+    [style.--splash-target-top]="splashTarget().top"
+    [style.--splash-target-left]="splashTarget().left"
+    [style.--splash-target-width]="splashTarget().width"
     aria-hidden="true"
   >
     <img
@@ -21,7 +25,12 @@
   <div class="login-page__content">
     <header class="login-page__header">
       <div class="login-page__logo">
-        <img src="assets/sign-up/join-logo-blue.svg" alt="Join Logo" />
+        <img
+          #headerLogo
+          src="assets/sign-up/join-logo-blue.svg"
+          alt="Join Logo"
+          (load)="onHeaderLogoLoad()"
+        />
       </div>
 
       <div class="login-page__signup login-page__signup--desktop">
@@ -81,9 +90,8 @@
             >
               @if (loginForm.controls.email.hasError('required')) { Please enter
               your email address. } @else if
-              (loginForm.controls.email.hasError('strictEmail')) { Enter an
-              address like name&#64;provider.com with an ending of at least 2
-              letters. }
+              (loginForm.controls.email.hasError('strictEmail')) { Enter a valid
+              email address. }
             </p>
           </div>
 
@@ -110,7 +118,7 @@
               <span
                 class="login-card__icon"
                 aria-hidden="true"
-                style="cursor: pointer; pointer-events: auto;"
+                style="cursor: pointer; pointer-events: auto"
                 (click)="togglePasswordVisibility()"
                 (mousedown)="$event.preventDefault()"
               >

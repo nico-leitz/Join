@@ -83,11 +83,12 @@
     margin: 0;
     border: none;
     appearance: none;
-    background: url('/assets/board/task-details/uncheck_button.svg') center / 24px 24px no-repeat;
+    background: url("/assets/board/task-details/uncheck_button.svg") center /
+      24px 24px no-repeat;
     cursor: pointer;
 
     &:checked {
-      background-image: url('/assets/board/task-details/check_button.svg');
+      background-image: url("/assets/board/task-details/check_button.svg");
     }
     &:disabled {
       cursor: wait;
@@ -213,13 +214,25 @@
 
   &__subtask_text {
     flex: 1;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: transparent;
     color: #000000;
+    font-family: inherit;
     font-size: 16px;
     line-height: 1.2;
-    min-width: 0;
-    overflow: hidden;
+    text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
+
+    &:focus-visible {
+      border-radius: 2px;
+      outline: 2px solid #29abe2;
+      outline-offset: 2px;
+    }
   }
 
   &__subtask_bullet {

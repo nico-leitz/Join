@@ -3,7 +3,15 @@
  * Handles user authentication, guest login, splash screen timing, and password visibility.
  */
 
-import { Component, inject, OnDestroy, signal } from "@angular/core";
+import {
+  afterNextRender,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+  signal,
+  viewChild,
+} from "@angular/core";
 import {
   AbstractControl,
   FormBuilder,
@@ -20,6 +28,13 @@ type LoginControlName = "email" | "password";
 
 /** Identifies the active login request or an idle state. */
 type LoginMode = "user" | "guest" | null;
+
+/** Pixel values used as the final splash-logo destination. */
+interface SplashTarget {
+  top: string;
+  left: string;
+  width: string;
+}
 
 /** Permits the RFC-compatible characters supported in the local email part. */
 const EMAIL_LOCAL_PART_PATTERN =
@@ -90,11 +105,21 @@ export class Login implements OnDestroy {
   /** Tracks whether the splash screen was already displayed. */
   private static hasShownSplash = false;
 
+  /** Delay allowing the initial centered logo state to render first. */
+  private static readonly SPLASH_START_DELAY_MS = 80;
+
+  /** Must match the splash animation duration defined in SCSS. */
+  private static readonly SPLASH_ANIMATION_DURATION_MS = 2400;
+
   /** Non-nullable form builder used to construct the login form. */
   private readonly formBuilder = inject(FormBuilder).nonNullable;
 
   /** Router used after successful authentication. */
   private readonly router = inject(Router);
+
+  /** Visible header logo used as the exact splash-animation target. */
+  private readonly headerLogo =
+    viewChild<ElementRef<HTMLImageElement>>("headerLogo");
 
   /** Authentication service exposed to the login template. */
   readonly authService = inject(AuthService);
@@ -108,8 +133,18 @@ export class Login implements OnDestroy {
   /** Controls visibility of the initial splash screen. */
   readonly showSplash = signal(true);
 
+  /** Starts the logo movement only after its destination was measured. */
+  readonly splashAnimating = signal(false);
+
   /** Indicates whether the current viewport uses the mobile layout. */
   readonly isMobile = signal(false);
+
+  /** Exact viewport position and width of the visible header logo. */
+  readonly splashTarget = signal<SplashTarget>({
+    top: "3rem",
+    left: "5rem",
+    width: "5.5rem",
+  });
 
   /** Indicates whether the password text is currently visible. */
   passwordVisible = false;
@@ -117,12 +152,16 @@ export class Login implements OnDestroy {
   /** Indicates whether the password input field currently holds focus. */
   passwordFocused = false;
 
-  /** Identifier of the pending splash-screen timer. */
+  /** Identifier of the timer that starts the splash movement. */
+  private splashStartTimer?: ReturnType<typeof window.setTimeout>;
+
+  /** Identifier of the timer that removes the completed splash screen. */
   private splashTimer?: ReturnType<typeof window.setTimeout>;
 
   /** Updates the mobile viewport state after a resize. */
   private readonly onResize = (): void => {
     this.isMobile.set(window.innerWidth <= 768);
+    this.updateSplashTarget();
   };
 
   /** Reactive form containing the email login credentials. */
@@ -146,16 +185,23 @@ export class Login implements OnDestroy {
     }
 
     Login.hasShownSplash = true;
+    afterNextRender(() => this.queueSplashAnimation());
+  }
 
-    this.splashTimer = window.setTimeout(() => {
-      this.showSplash.set(false);
-    }, 2400);
+  /** Recalculates the target and queues the animation after the asset loaded. */
+  onHeaderLogoLoad(): void {
+    this.updateSplashTarget();
+    this.queueSplashAnimation();
   }
 
   /**
    * Clears the splash timer and removes the resize listener.
    */
   ngOnDestroy(): void {
+    if (this.splashStartTimer !== undefined) {
+      window.clearTimeout(this.splashStartTimer);
+    }
+
     if (this.splashTimer) {
       window.clearTimeout(this.splashTimer);
     }
@@ -269,6 +315,65 @@ export class Login implements OnDestroy {
       email: formValue.email.trim().toLowerCase(),
       password: formValue.password,
     };
+  }
+
+  /** Reads the rendered header-logo bounds for a breakpoint-independent target. */
+  private updateSplashTarget(): void {
+    const bounds = this.headerLogo()?.nativeElement.getBoundingClientRect();
+
+    if (!bounds || bounds.width <= 0) {
+      return;
+    }
+
+    this.splashTarget.set({
+      top: `${bounds.top}px`,
+      left: `${bounds.left}px`,
+      width: `${bounds.width}px`,
+    });
+  }
+
+  /**
+   * Lets the centered state render before activating the movement class.
+   */
+  private queueSplashAnimation(): void {
+    if (!this.canQueueSplashAnimation()) {
+      return;
+    }
+
+    this.updateSplashTarget();
+    this.splashStartTimer = window.setTimeout(
+      () => this.prepareSplashAnimation(),
+      Login.SPLASH_START_DELAY_MS,
+    );
+  }
+
+  /** Returns whether a splash animation can still be scheduled. */
+  private canQueueSplashAnimation(): boolean {
+    return (
+      this.showSplash() &&
+      !this.splashAnimating() &&
+      this.splashStartTimer === undefined
+    );
+  }
+
+  /** Refreshes the destination immediately before starting the movement. */
+  private prepareSplashAnimation(): void {
+    this.splashStartTimer = undefined;
+    this.updateSplashTarget();
+    this.startSplashAnimation();
+  }
+
+  /** Starts the movement and removes the overlay after it has faded out. */
+  private startSplashAnimation(): void {
+    if (!this.showSplash()) {
+      return;
+    }
+
+    this.splashAnimating.set(true);
+    this.splashTimer = window.setTimeout(() => {
+      this.showSplash.set(false);
+      this.splashTimer = undefined;
+    }, Login.SPLASH_ANIMATION_DURATION_MS);
   }
 
   /**

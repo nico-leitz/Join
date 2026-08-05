@@ -33,7 +33,6 @@ export const TASK_STATUS_ORDER: Record<TaskStatus, number> = {
 
 /**
  * Checks whether a string represents a supported task status.
- *
  * @param value - String value to validate.
  * @returns Whether the value is a valid task status.
  */

@@ -17,6 +17,9 @@ describe("Login Component", () => {
   let mockAuthService: any;
 
   beforeEach(async () => {
+    vi.useFakeTimers();
+    Reflect.set(Login, "hasShownSplash", false);
+
     mockAuthService = {
       isLoading: signal(false),
       errorMessage: signal(""),
@@ -44,6 +47,8 @@ describe("Login Component", () => {
   });
 
   afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
@@ -53,6 +58,49 @@ describe("Login Component", () => {
   it("should create the component and clear auth errors in constructor", () => {
     expect(component).toBeTruthy();
     expect(mockAuthService.clearError).toHaveBeenCalled();
+  });
+
+  /**
+   * @test Ensures the splash animation ends at the rendered header logo.
+   */
+  it("should use the rendered header logo as splash target", () => {
+    const logo = fixture.nativeElement.querySelector(
+      ".login-page__logo img",
+    ) as HTMLImageElement;
+
+    vi.spyOn(logo, "getBoundingClientRect").mockReturnValue({
+      top: 24,
+      left: 16,
+      width: 64,
+    } as DOMRect);
+
+    component.onHeaderLogoLoad();
+
+    expect(component.splashTarget()).toEqual({
+      top: "24px",
+      left: "16px",
+      width: "64px",
+    });
+  });
+
+  /**
+   * @test Ensures the initial centered state renders before movement begins.
+   */
+  it("should start and finish the splash animation with separate states", () => {
+    expect(component.splashAnimating()).toBe(false);
+
+    component.onHeaderLogoLoad();
+    vi.advanceTimersByTime(80);
+    fixture.detectChanges();
+
+    const splash = fixture.nativeElement.querySelector(".login-splash");
+
+    expect(component.splashAnimating()).toBe(true);
+    expect(splash.classList.contains("login-splash--animating")).toBe(true);
+
+    vi.advanceTimersByTime(2400);
+
+    expect(component.showSplash()).toBe(false);
   });
 
   /**

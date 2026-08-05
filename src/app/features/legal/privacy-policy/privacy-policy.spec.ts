@@ -1,6 +1,6 @@
 /**
  * @fileoverview Unit tests for the PrivacyPolicy component.
- * Verifies that the correct localized static texts and structural sections are rendered.
+ * Verifies that the current static title and section headings are rendered.
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -22,7 +22,7 @@ describe('PrivacyPolicy Component', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PrivacyPolicy],
-      providers: [provideRouter([])]
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PrivacyPolicy);
@@ -38,18 +38,32 @@ describe('PrivacyPolicy Component', () => {
   });
 
   /**
-   * @test Verifies that the component renders the localized title "Datenschutzerklärung".
+   * @test Verifies that the component renders the current English title.
    */
   it('should render the Privacy Policy title', () => {
-    const titleElement = fixture.debugElement.query(By.css('.privacy-policy-page__title')).nativeElement;
-    expect(titleElement.textContent.trim()).toBe('Datenschutzerklärung');
+    const titleElement = fixture.debugElement.query(
+      By.css('.privacy-policy-page__title'),
+    ).nativeElement;
+
+    expect(titleElement.textContent.trim()).toBe('Privacy Policy');
   });
 
   /**
-   * @test Checks if all eight structural Subtitle sections are displayed correctly.
+   * @test Verifies the current privacy policy section headings.
    */
-  it('should display the correct number of Subtitle sections', () => {
-    const sectionHeaders = fixture.debugElement.queryAll(By.css('.privacy-policy-page__section h2'));
-    expect(sectionHeaders.length).toBe(8);
+  it('should render all privacy policy section headings', () => {
+    const sectionHeaders = fixture.debugElement.queryAll(
+      By.css('.privacy-policy-page__section h2'),
+    );
+    const headings = sectionHeaders.map(({ nativeElement }) =>
+      nativeElement.textContent.trim(),
+    );
+
+    expect(headings).toEqual([
+      '1. Privacy at a Glance',
+      '2. Hosting',
+      '3. General Information and Mandatory Notices',
+      '4. Data Collection on This Website',
+    ]);
   });
 });

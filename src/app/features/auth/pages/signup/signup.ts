@@ -21,6 +21,9 @@ type SignupControlName =
 /** Minimum number of alphabetic characters required in a name. */
 const MINIMUM_NAME_LETTERS = 6;
 
+/** Time the signup success feedback remains visible before login navigation. */
+const SUCCESS_MESSAGE_DURATION_MS = 2600;
+
 /** Permits Unicode letters separated by spaces, hyphens or apostrophes. */
 const FULL_NAME_PATTERN =
   /^\p{L}[\p{L}\p{M}]*(?:[ '\u2019-]\p{L}[\p{L}\p{M}]*)*$/u;
@@ -159,8 +162,8 @@ function passwordsMatchValidator(
 /**
  * Provides account registration through the authentication service.
  *
- * Manages signup validation, credential normalization and navigation
- * after Supabase creates the authenticated demo session.
+ * Manages signup validation, credential normalization and success feedback
+ * before returning newly registered users to the login page.
  */
 @Component({
   selector: "app-signup",
@@ -180,6 +183,9 @@ export class Signup {
 
   /** Indicates whether the signup form was submitted. */
   readonly submitted = signal(false);
+
+  /** Controls the centered signup success feedback. */
+  readonly showSuccessMessage = signal(false);
 
   /** Indicates whether the main password field is currently focused. */
   passwordFocused = false;
@@ -224,7 +230,7 @@ export class Signup {
   /**
    * Validates and submits the signup form.
    *
-   * @returns A promise that resolves after registration and navigation.
+   * @returns A promise that resolves after registration feedback and navigation.
    */
   async onSubmit(): Promise<void> {
     this.submitted.set(true);
@@ -237,9 +243,11 @@ export class Signup {
 
     const success = await this.authService.signUp(this.buildCredentials());
 
-    if (success) {
-      await this.router.navigate(["/summary"]);
+    if (!success) {
+      return;
     }
+
+    await this.completeSuccessfulSignup();
   }
 
   /**
@@ -322,5 +330,32 @@ export class Signup {
       password: formValue.password,
       privacyAccepted: formValue.privacyAccepted,
     };
+  }
+
+  /**
+   * Ends the temporary signup session and returns the user to login.
+   */
+  private async completeSuccessfulSignup(): Promise<void> {
+    const signedOut = await this.authService.signOut();
+
+    if (!signedOut) {
+      return;
+    }
+
+    this.showSuccessMessage.set(true);
+    await this.waitForSuccessMessage();
+    this.showSuccessMessage.set(false);
+    await this.router.navigate(["/login"]);
+  }
+
+  /**
+   * Keeps the success feedback visible for its animation duration.
+   *
+   * @returns A promise that resolves when the feedback has finished.
+   */
+  private waitForSuccessMessage(): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, SUCCESS_MESSAGE_DURATION_MS);
+    });
   }
 }
