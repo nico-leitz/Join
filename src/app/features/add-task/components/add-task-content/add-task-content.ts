@@ -1,51 +1,30 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
-  Validators,
-} from '@angular/forms';
-import { Contact } from '../../../../core/models/contact.model';
-import { CreateTaskWithRelationsInput } from '../../../../core/models/task-persistence.model';
-import { Task, TaskCategory, TaskPriority, TaskStatus } from '../../../../core/models/task.model';
-import { ContactService } from '../../../../core/services/contact.service';
-import { TaskService } from '../../../../core/services/task.service';
 import { SlicePipe } from '@angular/common';
+import { Component, OnDestroy, OnInit, inject, input, output } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { Contact } from '../../../../core/models/contact.model';
+import { Task, TaskCategory, TaskPriority, TaskStatus } from '../../../../core/models/task.model';
+import { AddTaskContentState } from './add-task-content-state.service';
+import { AddTaskContentWorkflow } from './add-task-content-workflow.service';
+import {
+  AddTaskMode,
+  TASK_CATEGORY_OPTIONS,
+  createAddTaskForm,
+  createDateInputValue,
+  getCategoryErrorMessage,
+  getCategoryLabel,
+  getContactInitials,
+  getDueDateErrorMessage,
+  getTitleErrorMessage,
+  hasTouchedError,
+} from './add-task-content.utils';
 
+export { dateNotInPastValidator } from './add-task-content.utils';
 
-/** Defines the operational mode of the component. */
-type AddTaskMode = 'page' | 'dialog';
-
-/** Represents a subtask during the creation draft phase. */
-interface DraftSubtask {
-  title: string;
-}
-
-/**
- * Component for the task creation form.
- *
- * @remarks
- * This component handles the form logic for creating new tasks, including
- * managing subtask drafts, contact assignment, and category/priority selection.
- * It supports both page-based and dialog-based layouts.
- *
- * @public
- */
+/** Provides the task creation form for page and dialog layouts. */
 @Component({
   selector: 'app-add-task-content',
   imports: [ReactiveFormsModule, SlicePipe],
+  providers: [AddTaskContentState, AddTaskContentWorkflow],
   templateUrl: './add-task-content.html',
   styleUrl: './add-task-content.scss',
   host: {
@@ -54,180 +33,131 @@ interface DraftSubtask {
   },
 })
 export class AddTaskContent implements OnInit, OnDestroy {
-  /** @internal Service for handling task operations. */
-  private readonly taskService = inject(TaskService);
+  private readonly contentState = inject(AddTaskContentState);
+  private readonly taskWorkflow = inject(AddTaskContentWorkflow);
 
-  /** @internal Service for retrieving contact data. */
-  private readonly contactService = inject(ContactService);
-
-  /** @internal Timer ID for the success message display. */
-  private successTimerId: number | undefined;
-
-  /** The operational mode of the component. */
+  /** Operational layout mode. */
   readonly mode = input<AddTaskMode>('page');
 
-  /** The initial status assigned to the new task. */
+  /** Initial workflow status of the created task. */
   readonly status = input<TaskStatus>('todo');
 
-  /** Event emitted when the user cancels the operation. */
+  /** Emitted when dialog creation is cancelled. */
   readonly cancelled = output<void>();
 
-  /** Event emitted when a task is successfully created. */
+  /** Emitted after a task was created. */
   readonly taskCreated = output<Task>();
 
-  /** List of all available contacts. */
-  readonly allContacts = this.contactService.allContacts;
+  /** Contacts available for assignment. */
+  readonly allContacts = this.contentState.allContacts;
 
-  /** Signal indicating if data is currently being loaded. */
-  readonly isLoadingData = signal(false);
+  /** Whether initial form data is loading. */
+  readonly isLoadingData = this.taskWorkflow.isLoadingData;
 
-  /** Signal indicating if the form is currently being submitted. */
-  readonly isSubmitting = signal(false);
+  /** Whether task creation is running. */
+  readonly isSubmitting = this.taskWorkflow.isSubmitting;
 
-  /** Signal tracking visibility of the contact selection menu. */
-  readonly contactsMenuOpen = signal(false);
+  /** Whether the contact menu is open. */
+  readonly contactsMenuOpen = this.contentState.contactsMenuOpen;
 
-  /** Signal tracking visibility of the category selection menu. */
-  readonly categoryMenuOpen = signal(false);
+  /** Whether the category menu is open. */
+  readonly categoryMenuOpen = this.contentState.categoryMenuOpen;
 
-  /** Signal tracking IDs of currently selected contacts. */
-  readonly selectedContactIds = signal<string[]>([]);
+  /** Identifiers of selected contacts. */
+  readonly selectedContactIds = this.contentState.selectedContactIds;
 
-  /** Signal for the contact search input value. */
-  readonly contactSearch = signal('');
+  /** Current contact search term. */
+  readonly contactSearch = this.contentState.contactSearch;
 
-  /** Signal for the list of subtasks being drafted. */
-  readonly draftSubtasks = signal<DraftSubtask[]>([]);
+  /** Drafted subtasks. */
+  readonly draftSubtasks = this.contentState.draftSubtasks;
 
-  /** Signal for the title of the subtask being added. */
-  readonly newSubtaskTitle = signal('');
+  /** Title entered for a new subtask. */
+  readonly newSubtaskTitle = this.contentState.newSubtaskTitle;
 
-  /** Signal tracking index of the subtask being edited. */
-  readonly editingSubtaskIndex = signal<number | null>(null);
+  /** Index of the subtask being edited. */
+  readonly editingSubtaskIndex = this.contentState.editingSubtaskIndex;
 
-  /** Signal for the title of the subtask being edited. */
-  readonly editingSubtaskTitle = signal('');
+  /** Temporary edited subtask title. */
+  readonly editingSubtaskTitle = this.contentState.editingSubtaskTitle;
 
-  /** Signal for displaying error messages. */
-  readonly errorMessage = signal('');
+  /** Form-level error message. */
+  readonly errorMessage = this.taskWorkflow.errorMessage;
 
-  /** Signal for displaying success messages. */
-  readonly successMessage = signal('');
+  /** Temporary success message. */
+  readonly successMessage = this.taskWorkflow.successMessage;
 
-  /** Computed minimum allowed date for the due date input. */
+  /** Earliest selectable due date. */
   readonly minimumDueDate = createDateInputValue(new Date());
 
-  /** Tracks focus state of subtask input. */
-  isSubtaskFocused = signal(false);
+  /** Whether the new subtask input is focused. */
+  isSubtaskFocused = this.contentState.isSubtaskFocused;
 
-  /** @public Sets focus state to true. */
-  onInputFocus() {
-    this.isSubtaskFocused.set(true);
+  /** Categories available for selection. */
+  readonly categoryOptions = TASK_CATEGORY_OPTIONS;
+
+  /** Reactive task creation form. */
+  readonly taskForm = createAddTaskForm();
+
+  /** Contacts matching the search term. */
+  readonly filteredContacts = this.contentState.filteredContacts;
+
+  /** Full contacts matching the selected identifiers. */
+  readonly selectedContacts = this.contentState.selectedContacts;
+
+  /** Placeholder describing the current contact selection. */
+  readonly contactPlaceholder = this.contentState.contactPlaceholder;
+
+  /** Loads initial form data. */
+  async ngOnInit(): Promise<void> {
+    await this.taskWorkflow.loadInitialData();
   }
 
-  /** @public Sets focus state to false. */
-  onInputBlur() {
-    this.isSubtaskFocused.set(false);
+  /** Clears the success timer. */
+  ngOnDestroy(): void {
+    this.taskWorkflow.destroy();
+  }
+
+  /** Marks the subtask input as focused. */
+  onInputFocus(): void {
+    this.contentState.focusSubtaskInput();
+  }
+
+  /** Marks the subtask input as blurred. */
+  onInputBlur(): void {
+    this.contentState.blurSubtaskInput();
   }
 
   /**
-   * Clears the new subtask title and blurs the input.
-   * @param inputElement - The HTML input element to clear.
+   * Clears and blurs the new subtask input.
+   * @param inputElement - Input element to clear.
    */
-  clearInput(inputElement: HTMLInputElement) {
-    this.newSubtaskTitle.set('');
-    inputElement.blur();
+  clearInput(inputElement: HTMLInputElement): void {
+    this.contentState.clearSubtaskInput(inputElement);
   }
 
-  /** Configuration for available task categories. */
-  readonly categoryOptions: {
-    value: TaskCategory;
-    label: string;
-  }[] = [
-    { value: 'technical_task', label: 'Technical Task' },
-    { value: 'user_story', label: 'User Story' },
-  ];
-
-  /** Reactive form group for task creation. */
-  readonly taskForm = new FormGroup({
-    title: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.pattern(/\S/), Validators.maxLength(120)],
-    }),
-    description: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.maxLength(1000)],
-    }),
-    dueDate: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, dateNotInPastValidator()],
-    }),
-    priority: new FormControl<TaskPriority>('medium', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-    category: new FormControl<TaskCategory | ''>('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
-  });
-
-  /** Computed list of contacts filtered by the search term. */
-  readonly filteredContacts = computed(() => {
-    const searchValue = this.contactSearch().trim().toLowerCase();
-    if (!searchValue) return this.allContacts();
-    return this.allContacts().filter((contact) =>
-      getContactSearchValue(contact).includes(searchValue),
-    );
-  });
-
-  /** Computed list of full contact objects based on selected IDs. */
-  readonly selectedContacts = computed(() => {
-    const selectedIds = new Set(this.selectedContactIds());
-    return this.allContacts().filter((contact) => selectedIds.has(contact.id));
-  });
-
-  /** Computed placeholder text for the contact selector. */
-  readonly contactPlaceholder = computed(() => {
-    const selectedAmount = this.selectedContactIds().length;
-    if (selectedAmount === 0) return 'Select contacts to assign';
-    if (selectedAmount === 1) return '1 contact selected';
-    return `${selectedAmount} contacts selected`;
-  });
-
-  /** @public Lifecycle hook: Loads initial data. */
-  async ngOnInit(): Promise<void> {
-    await this.loadInitialData();
-  }
-
-  /** @public Lifecycle hook: Cleans up resources. */
-  ngOnDestroy(): void {
-    this.clearSuccessTimer();
-  }
-
-  /** @protected Handles clicks within the component to manage menu state. */
+  /**
+   * Handles clicks inside the task form.
+   * @param event - Click event originating inside the component.
+   */
   protected handleContentClick(event: MouseEvent): void {
-    event.stopPropagation();
-    const target = event.target;
-    if (!(target instanceof Element)) {
-      this.closeMenus();
-      return;
-    }
-    this.closeUnrelatedMenus(target);
+    this.contentState.handleContentClick(event);
   }
 
-  /** @protected Handles document-wide clicks to close menus. */
+  /** Closes menus after a document click. */
   protected handleDocumentClick(): void {
     this.closeMenus();
   }
 
-  /** @protected Closes all open interaction menus. */
+  /** Closes every selection menu. */
   protected closeMenus(): void {
-    this.contactsMenuOpen.set(false);
-    this.categoryMenuOpen.set(false);
+    this.contentState.closeMenus();
   }
 
-  /** Updates the task priority. */
+  /**
+   * Selects a task priority.
+   * @param priority - Priority to select.
+   */
   setPriority(priority: TaskPriority): void {
     this.taskForm.controls.priority.setValue(priority);
     this.taskForm.controls.priority.markAsDirty();
@@ -235,355 +165,181 @@ export class AddTaskContent implements OnInit, OnDestroy {
 
   /** Toggles the contact selection menu. */
   toggleContactsMenu(): void {
-    this.categoryMenuOpen.set(false);
-    this.contactsMenuOpen.update((isOpen) => !isOpen);
+    this.contentState.toggleContactsMenu();
   }
 
   /** Opens the contact selection menu. */
   openContactsMenu(): void {
-    this.categoryMenuOpen.set(false);
-    this.contactsMenuOpen.set(true);
+    this.contentState.openContactsMenu();
   }
 
-  /** Updates search term and opens the contact menu. */
+  /**
+   * Updates the contact search term.
+   * @param event - Input event containing the search value.
+   */
   updateContactSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.contactSearch.set(input.value);
-    this.openContactsMenu();
+    this.contentState.updateContactSearch(event);
   }
 
-  /** Checks if a contact is currently selected. */
+  /**
+   * Checks whether a contact is selected.
+   * @param contactId - Contact identifier to inspect.
+   * @returns Whether the contact is selected.
+   */
   isContactSelected(contactId: string): boolean {
-    return this.selectedContactIds().includes(contactId);
+    return this.contentState.isContactSelected(contactId);
   }
 
-  /** Toggles selection state of a specific contact. */
+  /**
+   * Toggles one contact selection.
+   * @param contactId - Contact identifier to toggle.
+   */
   toggleContactSelection(contactId: string): void {
-    this.selectedContactIds.update((contactIds) => {
-      if (contactIds.includes(contactId)) {
-        return contactIds.filter((id) => id !== contactId);
-      }
-      return [...contactIds, contactId];
-    });
+    this.contentState.toggleContactSelection(contactId);
   }
 
   /** Toggles the category selection menu. */
   toggleCategoryMenu(): void {
-    this.contactsMenuOpen.set(false);
-    this.categoryMenuOpen.update((isOpen) => !isOpen);
+    this.contentState.toggleCategoryMenu();
     this.taskForm.controls.category.markAsTouched();
   }
 
-  /** Selects a category and closes the menu. */
+  /**
+   * Selects a task category.
+   * @param category - Category to select.
+   */
   selectCategory(category: TaskCategory): void {
     this.taskForm.controls.category.setValue(category);
     this.taskForm.controls.category.markAsDirty();
-    this.categoryMenuOpen.set(false);
+    this.contentState.closeCategoryMenu();
   }
 
-  /** Returns the label for the currently selected category. */
+  /**
+   * Returns the selected category label.
+   * @returns Selected label or an empty string.
+   */
   getCategoryLabel(): string {
-    const category = this.taskForm.controls.category.value;
-    return this.categoryOptions.find((option) => option.value === category)?.label ?? '';
+    return getCategoryLabel(this.taskForm.controls.category.value);
   }
 
-  /** Updates the title signal for a new subtask. */
+  /**
+   * Updates the title for a new subtask.
+   * @param event - Input event containing the new title.
+   */
   updateNewSubtaskTitle(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.newSubtaskTitle.set(input.value);
+    this.contentState.updateNewSubtaskTitle(event);
   }
 
-  /** Adds a new subtask to the draft list. */
+  /** Adds a non-empty subtask to the draft. */
   addSubtask(): void {
-    const title = this.newSubtaskTitle().trim();
-    if (!title) return;
-    this.draftSubtasks.update((subtasks) => [...subtasks, { title }]);
-    this.newSubtaskTitle.set('');
+    this.contentState.addSubtask();
   }
 
-  /** Initiates editing for a subtask at a specific index. */
+  /**
+   * Starts editing one draft subtask.
+   * @param index - Index of the subtask to edit.
+   */
   startEditingSubtask(index: number): void {
-    const subtask = this.draftSubtasks()[index];
-    if (!subtask) return;
-    this.editingSubtaskIndex.set(index);
-    this.editingSubtaskTitle.set(subtask.title);
+    this.contentState.startEditingSubtask(index);
   }
 
-  /** Updates the temporary title for an editing subtask. */
+  /**
+   * Updates the temporary subtask edit title.
+   * @param event - Input event containing the edited title.
+   */
   updateEditingSubtaskTitle(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.editingSubtaskTitle.set(input.value);
+    this.contentState.updateEditingSubtaskTitle(event);
   }
 
-  /** Saves the edited subtask. */
+  /** Saves a valid subtask title edit. */
   saveSubtaskEdit(): void {
-    const index = this.editingSubtaskIndex();
-    const title = this.editingSubtaskTitle().trim();
-    if (index === null || !title) return;
-    this.replaceSubtaskTitle(index, title);
-    this.cancelSubtaskEdit();
+    this.contentState.saveSubtaskEdit();
   }
 
-  /** Cancels the subtask editing state. */
+  /** Cancels subtask editing. */
   cancelSubtaskEdit(): void {
-    this.editingSubtaskIndex.set(null);
-    this.editingSubtaskTitle.set('');
+    this.contentState.cancelSubtaskEdit();
   }
 
-  /** Removes a subtask from the list. */
+  /**
+   * Removes one draft subtask.
+   * @param index - Index of the subtask to remove.
+   */
   removeSubtask(index: number): void {
-    this.draftSubtasks.update((subtasks) =>
-      subtasks.filter((_, currentIndex) => currentIndex !== index),
-    );
-    this.cancelSubtaskEdit();
+    this.contentState.removeSubtask(index);
   }
 
-  /** Generates initials for a contact. */
+  /**
+   * Generates initials for a contact.
+   * @param contact - Contact whose initials are requested.
+   * @returns Two-character contact initials.
+   */
   getInitials(contact: Contact): string {
-    return (contact.firstName.charAt(0) + contact.lastName.charAt(0)).toUpperCase();
+    return getContactInitials(contact);
   }
 
-  /** Checks if the title control has validation errors. */
+  /**
+   * Checks whether the title has a visible error.
+   * @returns Whether a title error is visible.
+   */
   hasTitleError(): boolean {
     return hasTouchedError(this.taskForm.controls.title);
   }
 
-  /** Checks if the due date control has validation errors. */
+  /**
+   * Checks whether the due date has a visible error.
+   * @returns Whether a due date error is visible.
+   */
   hasDueDateError(): boolean {
     return hasTouchedError(this.taskForm.controls.dueDate);
   }
 
-  /** Checks if the category control has validation errors. */
+  /**
+   * Checks whether the category has a visible error.
+   * @returns Whether a category error is visible.
+   */
   hasCategoryError(): boolean {
     return hasTouchedError(this.taskForm.controls.category);
   }
 
-  /** Gets the error message for the title control. */
+  /**
+   * Returns the title validation message.
+   * @returns Visible validation message or an empty string.
+   */
   getTitleErrorMessage(): string {
-    const control = this.taskForm.controls.title;
-    if (!control.touched) return '';
-    return control.invalid ? 'This field is required' : '';
+    return getTitleErrorMessage(this.taskForm.controls.title);
   }
 
-  /** Gets the error message for the due date control. */
+  /**
+   * Returns the due date validation message.
+   * @returns Visible validation message or an empty string.
+   */
   getDueDateErrorMessage(): string {
-    const control = this.taskForm.controls.dueDate;
-    if (!control.touched) return '';
-    if (control.hasError('required')) return 'This field is required';
-    if (control.hasError('dateInPast')) return 'Due date cannot be in the past';
-    return '';
+    return getDueDateErrorMessage(this.taskForm.controls.dueDate);
   }
 
-  /** Gets the error message for the category control. */
+  /**
+   * Returns the category validation message.
+   * @returns Visible validation message or an empty string.
+   */
   getCategoryErrorMessage(): string {
-    const control = this.taskForm.controls.category;
-    if (!control.touched) return '';
-    return control.invalid ? 'This field is required' : '';
+    return getCategoryErrorMessage(this.taskForm.controls.category);
   }
 
-  /** Handles secondary action (cancel or reset). */
+  /** Handles cancellation in a dialog or resets a page form. */
   handleSecondaryAction(): void {
     if (this.isSubmitting()) return;
     if (this.mode() === 'dialog') {
       this.cancelled.emit();
       return;
     }
-    this.resetForm();
+    this.taskWorkflow.resetForm(this.taskForm);
   }
 
-  /** Submits the task creation form. */
+  /** Validates and submits the task creation form. */
   async submitTask(): Promise<void> {
-    if (this.isSubmitting()) return;
-    this.taskForm.markAllAsTouched();
-    this.errorMessage.set('');
-
-    if (this.taskForm.invalid) {
-      this.errorMessage.set('Please complete all required fields.');
-      return;
-    }
-    await this.executeTaskCreation();
-  }
-
-  /** @internal Loads initial application data. */
-  private async loadInitialData(): Promise<void> {
-    this.isLoadingData.set(true);
-    try {
-      await Promise.all([this.loadContacts(), this.loadTasks()]);
-    } catch {
-      this.errorMessage.set('Form data could not be loaded completely.');
-    } finally {
-      this.isLoadingData.set(false);
-    }
-  }
-
-  /** @internal Loads contacts if not already loaded. */
-  private async loadContacts(): Promise<void> {
-    if (this.allContacts().length > 0) return;
-    const contacts = await this.contactService.getContacts();
-    this.allContacts.set(contacts);
-  }
-
-  /** @internal Loads tasks if not already loaded. */
-  private async loadTasks(): Promise<void> {
-    if (this.taskService.allTasks().length > 0) return;
-    await this.taskService.getTasks();
-  }
-
-  /** @internal Closes menus that are not related to the clicked target. */
-  private closeUnrelatedMenus(target: Element): void {
-    if (!target.closest('.add-task__contact-select')) this.contactsMenuOpen.set(false);
-    if (!target.closest('.add-task__category-select')) this.categoryMenuOpen.set(false);
-  }
-
-  /** @internal Updates a subtask's title in the draft list. */
-  private replaceSubtaskTitle(index: number, title: string): void {
-    this.draftSubtasks.update((subtasks) =>
-      subtasks.map((subtask, currentIndex) => (currentIndex === index ? { title } : subtask)),
-    );
-  }
-
-  /** @internal Executes the task creation process. */
-  private async executeTaskCreation(): Promise<void> {
-    this.isSubmitting.set(true);
-    try {
-      const task = await this.taskService.createTaskWithRelations(this.createTaskInput());
-      this.handleCreationSuccess(task);
-    } catch {
-      this.errorMessage.set('Task could not be created.');
-    } finally {
-      this.isSubmitting.set(false);
-    }
-  }
-
-  /** @internal Formats the form data into the API payload structure. */
-  private createTaskInput(): CreateTaskWithRelationsInput {
-    const formValue = this.taskForm.getRawValue();
-    return {
-      task: {
-        title: formValue.title.trim(),
-        description: formValue.description.trim(),
-        dueDate: formValue.dueDate,
-        priority: formValue.priority,
-        category: formValue.category as TaskCategory,
-        status: this.status(),
-        sortOrder: this.getNextSortOrder(),
-      },
-      subtasks: this.createSubtaskPayload(),
-      contactIds: [...this.selectedContactIds()],
-    };
-  }
-
-  /** @internal Creates the subtask payload for the API. */
-  private createSubtaskPayload() {
-    return this.draftSubtasks().map((subtask, index) => ({
-      title: subtask.title.trim(),
-      sortOrder: index,
-    }));
-  }
-
-  /** @internal Calculates the sort order for the new task. */
-  private getNextSortOrder(): number {
-    const statusTasks = this.taskService.allTasks().filter((task) => task.status === this.status());
-    return statusTasks.length;
-  }
-
-  /** @internal Handles successful task creation. */
-  private handleCreationSuccess(task: Task): void {
-    this.resetForm();
-    this.showSuccessMessage('Task successfully created');
-    this.taskCreated.emit(task);
-  }
-
-  /** @internal Displays a temporary success message. */
-  private showSuccessMessage(message: string): void {
-    this.clearSuccessTimer();
-    this.successMessage.set(message);
-    this.successTimerId = window.setTimeout(() => {
-      this.successMessage.set('');
-    }, 2200);
-  }
-
-  /** @internal Resets the form to initial state. */
-  private resetForm(): void {
-    this.taskForm.reset({
-      title: '',
-      description: '',
-      dueDate: '',
-      priority: 'medium',
-      category: '',
+    await this.taskWorkflow.submitTask(this.taskForm, this.status(), (task) => {
+      this.taskCreated.emit(task);
     });
-    this.resetAdditionalFields();
-  }
-
-  /** @internal Resets non-form state fields. */
-  private resetAdditionalFields(): void {
-    this.selectedContactIds.set([]);
-    this.contactSearch.set('');
-    this.draftSubtasks.set([]);
-    this.newSubtaskTitle.set('');
-    this.cancelSubtaskEdit();
-    this.closeMenus();
-    this.errorMessage.set('');
-  }
-
-  /** @internal Clears the success message timer. */
-  private clearSuccessTimer(): void {
-    if (this.successTimerId === undefined) return;
-    window.clearTimeout(this.successTimerId);
   }
 }
-
-/**
- * Helper: Checks if a form control is touched and invalid.
- * @internal
- */
-function hasTouchedError(control: AbstractControl): boolean {
-  return control.touched && control.invalid;
-}
-
-/**
- * Helper: Combines contact fields into a searchable string.
- * @internal
- */
-function getContactSearchValue(contact: Contact): string {
-  return (`${contact.firstName} ` + `${contact.lastName} ` + contact.email).toLowerCase();
-}
-
-/**
- * Helper: Formats a Date object to a YYYY-MM-DD string.
- * @internal
- */
-function createDateInputValue(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-/**
- * Validator: Ensures the selected date is not in the past.
- * @public
- */
-export function dateNotInPastValidator(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value;
-    if (!value) return null;
-    const selectedDate = new Date(`${value}T00:00:00`);
-    const today = createStartOfToday();
-    return selectedDate < today ? { dateInPast: true } : null;
-  };
-}
-
-/**
- * Helper: Creates a Date object representing the start of today.
- * @internal
- */
-function createStartOfToday(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
-
-
-
-
