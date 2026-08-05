@@ -22,14 +22,32 @@
       width: 100%;
       height: 56px;
       flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
       gap: 16px;
       margin-bottom: 24px;
       padding: 12px 16px;
-      border: 1px solid var(--color-primary);
+      border: 1px solid #2a3647;
       border-radius: var(--radius-md);
+      background-color: #2a3647;
+      color: #ffffff;
       font-size: var(--font-size-lg);
       font-weight: 700;
       line-height: var(--line-height-base);
+      cursor: pointer;
+      transition: 
+        background-color 0.15s ease, 
+        border-color 0.15s ease;
+
+      &:hover {
+        background-color: #29abe2;
+        border-color: #29abe2;
+      }
+
+      &:active {
+        background-color: #091931;
+        border-color: #091931;
+      }
     }
   }
 
@@ -50,16 +68,24 @@
     align-items: center;
     justify-content: center;
     padding: 12px;
-    border: 1px solid var(--color-primary);
+    border: 1px solid #2a3647;
     border-radius: 46px;
-    background-color: var(--color-primary);
+    background-color: #2a3647;
     box-shadow: var(--shadow-fab);
+    cursor: pointer;
     transition:
       background-color var(--transition-fast),
+      border-color var(--transition-fast),
       box-shadow var(--transition-fast);
 
     &:hover {
-      background-color: var(--color-primary-hover);
+      background-color: #29abe2;
+      border-color: #29abe2;
+    }
+
+    &:active {
+      background-color: #091931;
+      border-color: #091931;
     }
 
     @media (min-width: #{bp.$breakpoint-tablet-xl + 1px}) {
