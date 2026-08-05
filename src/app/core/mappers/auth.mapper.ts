@@ -28,13 +28,10 @@ export interface AuthUserMetadata {
 
 /**
  * Creates normalized user metadata for a Supabase sign-up request.
- *
  * @param fullName - Full name entered during registration.
  * @returns Metadata containing normalized full and separated names.
  */
-export function createAuthUserMetadata(
-  fullName: string
-): AuthUserMetadata {
+export function createAuthUserMetadata(fullName: string): AuthUserMetadata {
   const normalizedName = normalizeFullName(fullName);
   const nameParts = splitFullName(normalizedName);
 
@@ -47,7 +44,6 @@ export function createAuthUserMetadata(
 
 /**
  * Maps a Supabase user to the application's authentication user model.
- *
  * @param user - Supabase user to transform.
  * @returns Application authentication user.
  */
@@ -62,7 +58,6 @@ export function mapAuthUser(user: User): AuthUser {
 
 /**
  * Trims a full name and reduces consecutive whitespace.
- *
  * @param fullName - Full name to normalize.
  * @returns Normalized full name.
  */
@@ -72,7 +67,6 @@ function normalizeFullName(fullName: string): string {
 
 /**
  * Splits a normalized full name into contact-compatible name values.
- *
  * @param fullName - Normalized full name to split.
  * @returns Separated first and last names with safe fallback values.
  */
@@ -87,7 +81,6 @@ function splitFullName(fullName: string): NameParts {
 
 /**
  * Resolves the best available display name from user metadata.
- *
  * @param user - Supabase user containing the metadata.
  * @returns Normalized display name.
  */
@@ -103,7 +96,6 @@ function resolveUserFullName(user: User): string {
 
 /**
  * Combines separate metadata name values or returns a user-type fallback.
- *
  * @param user - Supabase user containing the metadata.
  * @returns Combined name or the appropriate fallback name.
  */
@@ -117,7 +109,6 @@ function resolveNameParts(user: User): string {
 
 /**
  * Safely reads and trims a string value from user metadata.
- *
  * @param user - Supabase user containing the metadata.
  * @param key - Metadata property to read.
  * @returns Trimmed metadata value or an empty string.
