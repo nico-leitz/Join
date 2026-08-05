@@ -1,459 +1,348 @@
-/**
- * @fileoverview Unit tests for the Board component.
- * Verifies initialization loading states, task filtering, subtask/contact mapping,
- * drag-and-drop operations, context menu actions, and dialog interactions.
- */
-
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { signal } from '@angular/core';
-import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
-import { Board } from './board';
-import { TaskService } from '../../../../core/services/task.service';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Task, TaskStatus } from '../../../../core/models/task.model';
 import { ContactService } from '../../../../core/services/contact.service';
-import { BoardHorizontalScrollService } from '../../services/board-horizontal-scroll.service';
-import { Task } from '../../../../core/models/task.model';
-import { Contact } from '../../../../core/models/contact.model';
-import { Subtask } from '../../../../core/models/subtask.model';
-import { TaskAssignmentRow } from '../../../../core/models/task-assignment.model';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { TaskService } from '../../../../core/services/task.service';
 import { TaskDialogUpdate } from '../../components/board-cards-dialog/board-cards-dialog';
+import { BoardHorizontalScrollService } from '../../services/board-horizontal-scroll.service';
+import { Board } from './board';
+import {
+  ContactServiceMock,
+  MOCK_SUBTASKS,
+  MOCK_TASKS,
+  ScrollServiceMock,
+  TaskServiceMock,
+  createContactServiceMock,
+  createDropEvent,
+  createScrollServiceMock,
+  createTaskServiceMock,
+} from './board-test.utils';
 
-describe('Board Component', () => {
-  let component: Board;
-  let fixture: ComponentFixture<Board>;
-  let router: Router;
-  let mockTaskService: any;
-  let mockContactService: any;
-  let mockScrollService: any;
+/** Protected board surface exercised by focused unit tests. */
+interface BoardTestAccess {
+  /** Marks a task drag as active. */
+  startDragging(): void;
 
-  /** Mock task data spanning different statuses. */
-  const MOCK_TASKS: Task[] = [
-    {
-      id: 'task-1',
-      title: 'Setup Environment',
-      description: 'Install dependencies',
-      category: 'technical_task',
-      priority: 'urgent',
-      status: 'todo',
-      dueDate: '2026-07-30',
-      sortOrder: 0,
-      createdAt: '',
-      updatedAt: ''
-    },
-    {
-      id: 'task-2',
-      title: 'Design UI',
-      description: 'Create Figma prototypes',
-      category: 'user_story',
-      priority: 'medium',
-      status: 'in_progress',
-      dueDate: '2026-08-01',
-      sortOrder: 1,
-      createdAt: '',
-      updatedAt: ''
-    }
-  ];
+  /** Marks a task drag as finished. */
+  stopDragging(): void;
 
-  /** Mock contacts data for assignment mapping. */
-  const MOCK_CONTACTS: Contact[] = [
-    {
-      id: 'c-1',
-      firstName: 'Alice',
-      lastName: 'Adams',
-      email: 'alice@example.com',
-      phone: '',
-      badgeColor: '#ff0000',
-      authUserId: '',
-      createdAt: '',
-      updatedAt: ''
-    }
-  ];
+  /** Moves a task through the context menu workflow. */
+  moveTaskToStatus(task: Task, targetStatus: TaskStatus): Promise<void>;
+}
 
-  /** Mock subtasks data. */
-  const MOCK_SUBTASKS: Subtask[] = [
-    {
-      id: 'sub-1',
-      taskId: 'task-1',
-      title: 'NPM Install',
-      isCompleted: true,
-      sortOrder: 0,
-      createdAt: '',
-      updatedAt: ''
-    }
-  ];
+let component: Board;
+let fixture: ComponentFixture<Board>;
+let router: Router;
+let taskService: TaskServiceMock;
+let contactService: ContactServiceMock;
+let scrollService: ScrollServiceMock;
 
-  /** Mock relational assignments linking tasks and contacts. */
-  const MOCK_ASSIGNMENTS: TaskAssignmentRow[] = [
-    {
-      task_id: 'task-1',
-      contact_id: 'c-1',
-      created_at: ''
-    }
-  ];
-
-  beforeEach(async () => {
-    mockTaskService = {
-      allTasks: signal([...MOCK_TASKS]),
-      selectedTask: signal<Task | null>(null),
-      selectedSubtasks: signal<Subtask[]>([]),
-      assignedContacts: signal<Contact[]>([]),
-      getTasks: vi.fn().mockResolvedValue([...MOCK_TASKS]),
-      loadAllBoardData: vi.fn().mockResolvedValue({
-        subtasks: [...MOCK_SUBTASKS],
-        assignments: [...MOCK_ASSIGNMENTS]
-      }),
-      updateTaskPositions: vi.fn().mockResolvedValue(true)
-    };
-
-    mockContactService = {
-      allContacts: signal([...MOCK_CONTACTS]),
-      getContacts: vi.fn().mockResolvedValue([...MOCK_CONTACTS])
-    };
-
-    mockScrollService = {
-      isMobileViewport: signal(false),
-      dropListOrientation: signal('horizontal'),
-      start: vi.fn(),
-      move: vi.fn(),
-      end: vi.fn(),
-      updateViewport: vi.fn(),
-      consumeSuppressedCardClick: vi.fn().mockReturnValue(false)
-    };
-
-    await TestBed.configureTestingModule({
-      imports: [Board],
-      providers: [
-        provideRouter([]),
-        { provide: TaskService, useValue: mockTaskService },
-        { provide: ContactService, useValue: mockContactService }
-      ]
-    })
+/** Configures the board testing module and scroll-service override. */
+async function configureTestBed(): Promise<void> {
+  // prettier-ignore
+  const providers = [provideRouter([]), { provide: TaskService, useValue: taskService }, { provide: ContactService, useValue: contactService }];
+  await TestBed.configureTestingModule({
+    imports: [Board],
+    providers,
+  })
     .overrideComponent(Board, {
       remove: { providers: [BoardHorizontalScrollService] },
-      add: { providers: [{ provide: BoardHorizontalScrollService, useValue: mockScrollService }] }
+      add: { providers: [{ provide: BoardHorizontalScrollService, useValue: scrollService }] },
     })
     .compileComponents();
+}
 
-    router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+/** Creates fresh mocks and a rendered board fixture. */
+async function setupComponent(): Promise<void> {
+  taskService = createTaskServiceMock();
+  contactService = createContactServiceMock();
+  scrollService = createScrollServiceMock();
+  await configureTestBed();
+  router = TestBed.inject(Router);
+  vi.spyOn(router, 'navigate').mockResolvedValue(true);
+  fixture = TestBed.createComponent(Board);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+}
 
-    fixture = TestBed.createComponent(Board);
-    component = fixture.componentInstance;
-    
-    fixture.detectChanges();
+/** Restores all spies after each board test. */
+function cleanUpComponent(): void {
+  vi.restoreAllMocks();
+}
+
+/**
+ * Exposes protected board handlers for focused tests.
+ * @returns Test-accessible board surface.
+ */
+function getTestAccess(): BoardTestAccess {
+  return component as unknown as BoardTestAccess;
+}
+
+/** Verifies creation and initial board-data loading. */
+function shouldCreateAndLoadBoard(): void {
+  expect(component).toBeTruthy();
+  expect(taskService.getTasks).toHaveBeenCalled();
+  expect(taskService.loadAllBoardData).toHaveBeenCalled();
+  expect(contactService.getContacts).toHaveBeenCalled();
+  expect(component.allSubtasks()).toHaveLength(1);
+  expect(component.allAssignments()).toHaveLength(1);
+}
+
+/** Verifies the board error state after initial loading fails. */
+async function shouldHandleLoadFailure(): Promise<void> {
+  taskService.getTasks.mockRejectedValueOnce(new Error('Network Error'));
+  await component.loadBoard();
+  expect(component.boardError()).toBe('Board data could not be loaded.');
+  expect(component.isBoardLoading()).toBe(false);
+}
+
+/** Verifies task grouping by board status. */
+function shouldComputeTaskColumns(): void {
+  expect(component.todo()).toHaveLength(1);
+  expect(component.todo()[0].title).toBe('Setup Environment');
+  expect(component.inProgress()).toHaveLength(1);
+  expect(component.inProgress()[0].title).toBe('Design UI');
+  expect(component.awaitFeedback()).toHaveLength(0);
+  expect(component.done()).toHaveLength(0);
+}
+
+/** Verifies global task filtering from the search input. */
+function shouldFilterTasks(): void {
+  const event = { target: { value: 'Design' } } as unknown as Event;
+  component.updateSearchTerm(event);
+  expect(component.searchTerm()).toBe('Design');
+  expect(component.todo()).toHaveLength(0);
+  expect(component.inProgress()).toHaveLength(1);
+  expect(component.isSearchActive()).toBe(true);
+}
+
+/** Verifies subtask lookup for known and unknown tasks. */
+function shouldResolveSubtasks(): void {
+  const subtasks = component.getSubtasksForTask('task-1');
+  expect(subtasks).toHaveLength(1);
+  expect(subtasks[0].title).toBe('NPM Install');
+  expect(component.getSubtasksForTask('unknown-task')).toHaveLength(0);
+}
+
+/** Verifies contact lookup for assigned and unassigned tasks. */
+function shouldResolveContacts(): void {
+  const contacts = component.getContactsForTask('task-1');
+  expect(contacts).toHaveLength(1);
+  expect(contacts[0].firstName).toBe('Alice');
+  expect(component.getContactsForTask('task-2')).toHaveLength(0);
+}
+
+/** Verifies opening task creation in the desktop dialog. */
+function shouldOpenDesktopAddTaskDialog(): void {
+  scrollService.isMobileViewport.set(false);
+  component.openAddTaskDialog('in_progress');
+  expect(component.addTaskStatus()).toBe('in_progress');
+  expect(component.isAddTaskDialogOpen()).toBe(true);
+  expect(router.navigate).not.toHaveBeenCalled();
+}
+
+/** Verifies routing task creation to the mobile page. */
+function shouldNavigateToMobileAddTask(): void {
+  scrollService.isMobileViewport.set(true);
+  component.openAddTaskDialog('done');
+  expect(router.navigate).toHaveBeenCalledWith(['/add-task'], {
+    queryParams: { status: 'done' },
   });
+  expect(component.isAddTaskDialogOpen()).toBe(false);
+}
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+/** Verifies that board updates block task creation. */
+function shouldBlockAddTaskWhileUpdating(): void {
+  component.isBoardUpdating.set(true);
+  component.openAddTaskDialog('todo');
+  expect(component.isAddTaskDialogOpen()).toBe(false);
+}
 
-  /**
-   * @test Ensures the component creates successfully and loads initial board data.
-   */
-  it('should create the component and load board data on init', () => {
-    expect(component).toBeTruthy();
-    expect(mockTaskService.getTasks).toHaveBeenCalled();
-    expect(mockTaskService.loadAllBoardData).toHaveBeenCalled();
-    expect(mockContactService.getContacts).toHaveBeenCalled();
-    expect(component.allSubtasks().length).toBe(1);
-    expect(component.allAssignments().length).toBe(1);
-  });
+/** Verifies closing task creation and clearing selection state. */
+function shouldCloseAddTaskDialog(): void {
+  component.isAddTaskDialogOpen.set(true);
+  taskService.selectedTask.set(MOCK_TASKS[0]);
+  component.closeAddTaskDialog();
+  expect(component.isAddTaskDialogOpen()).toBe(false);
+  expect(taskService.selectedTask()).toBeNull();
+}
 
-  /**
-   * @test Verifies error handling when the initial data load fails.
-   */
-  it('should set an error message if loading board data fails', async () => {
-    mockTaskService.getTasks.mockRejectedValueOnce(new Error('Network Error'));
-    
-    await component.loadBoard();
+/** Verifies relation refresh after successful task creation. */
+async function shouldRefreshAfterTaskCreation(): Promise<void> {
+  component.isAddTaskDialogOpen.set(true);
+  await component.handleTaskCreated();
+  expect(component.isAddTaskDialogOpen()).toBe(false);
+  expect(taskService.loadAllBoardData).toHaveBeenCalledTimes(2);
+  expect(taskService.selectedTask()).toBeNull();
+}
 
-    expect(component.boardError()).toBe('Board data could not be loaded.');
-    expect(component.isBoardLoading()).toBe(false);
-  });
+/** Verifies opening a task with its complete relation state. */
+function shouldOpenTaskDialog(): void {
+  component.openDialog(MOCK_TASKS[0]);
+  expect(component.isDialogOpen()).toBe(true);
+  expect(component.dialogTask()).toEqual(MOCK_TASKS[0]);
+  expect(component.dialogSubtasks()).toHaveLength(1);
+  expect(component.dialogContacts()).toHaveLength(1);
+  expect(taskService.selectedTask()).toEqual(MOCK_TASKS[0]);
+}
 
-  /**
-   * @test Validates the computed task status categories reflect the underlying data.
-   */
-  it('should compute task columns correctly based on status', () => {
-    expect(component.todo().length).toBe(1);
-    expect(component.todo()[0].title).toBe('Setup Environment');
-    
-    expect(component.inProgress().length).toBe(1);
-    expect(component.inProgress()[0].title).toBe('Design UI');
-    
-    expect(component.awaitFeedback().length).toBe(0);
-    expect(component.done().length).toBe(0);
-  });
+/** Verifies suppression of task clicks caused by horizontal scrolling. */
+function shouldSuppressTaskDialog(): void {
+  scrollService.consumeSuppressedCardClick.mockReturnValue(true);
+  component.openDialog(MOCK_TASKS[0]);
+  expect(component.isDialogOpen()).toBe(false);
+  expect(component.dialogTask()).toBeNull();
+}
 
-  /**
-   * @test Verifies that the search term filters tasks appropriately across all columns.
-   */
-  it('should filter tasks globally when search term is updated', () => {
-    const mockInputEvent = { target: { value: 'Design' } } as unknown as Event;
-    
-    component.updateSearchTerm(mockInputEvent);
-    
-    expect(component.searchTerm()).toBe('Design');
-    expect(component.todo().length).toBe(0);
-    expect(component.inProgress().length).toBe(1);
-    expect(component.isSearchActive()).toBe(true);
-  });
+/** Verifies local synchronization of a changed subtask. */
+function shouldUpdateSubtaskLocally(): void {
+  const updated = { ...MOCK_SUBTASKS[0], title: 'Yarn Install', isCompleted: false };
+  component.dialogSubtasks.set([...MOCK_SUBTASKS]);
+  component.handleSubtaskUpdated(updated);
+  const allSubtask = component.allSubtasks().find(({ id }) => id === 'sub-1');
+  const dialogSubtask = component.dialogSubtasks().find(({ id }) => id === 'sub-1');
+  expect(allSubtask?.title).toBe('Yarn Install');
+  expect(allSubtask?.isCompleted).toBe(false);
+  expect(dialogSubtask?.title).toBe('Yarn Install');
+}
 
-  /**
-   * @test Ensures that the relationship mapping resolves the correct subtasks for a given task ID.
-   */
-  it('should resolve mapped subtasks for a given task ID', () => {
-    const subtasks = component.getSubtasksForTask('task-1');
-    expect(subtasks.length).toBe(1);
-    expect(subtasks[0].title).toBe('NPM Install');
-    
-    const emptySubtasks = component.getSubtasksForTask('unknown-task');
-    expect(emptySubtasks.length).toBe(0);
-  });
+/** Verifies removal of local relations after task deletion. */
+function shouldRemoveDeletedTaskRelations(): void {
+  component.handleTaskDeleted('task-1');
+  expect(component.allSubtasks().some(({ taskId }) => taskId === 'task-1')).toBe(false);
+  expect(component.allAssignments().some(({ task_id }) => task_id === 'task-1')).toBe(false);
+}
 
-  /**
-   * @test Ensures that the relationship mapping resolves the assigned contacts for a given task ID.
-   */
-  it('should resolve mapped assigned contacts for a given task ID', () => {
-    const contacts = component.getContactsForTask('task-1');
-    expect(contacts.length).toBe(1);
-    expect(contacts[0].firstName).toBe('Alice');
-    
-    const emptyContacts = component.getContactsForTask('task-2');
-    expect(emptyContacts.length).toBe(0);
-  });
+/** Verifies dialog synchronization and relation refresh after an update. */
+async function shouldHandleTaskUpdate(): Promise<void> {
+  const update = createDialogUpdate({ ...MOCK_TASKS[0], title: 'Refactored' });
+  await component.handleTaskUpdated(update);
+  expect(component.dialogTask()?.title).toBe('Refactored');
+  expect(component.dialogSubtasks()).toHaveLength(0);
+  expect(component.dialogContacts()).toHaveLength(0);
+  expect(taskService.loadAllBoardData).toHaveBeenCalledTimes(2);
+  expect(component.boardError()).toBe('');
+}
 
-  /**
-   * @test Verifies opening the add task dialog strictly sets states in desktop mode.
-   */
-  it('should open the Add Task dialog on desktop viewports', () => {
-    mockScrollService.isMobileViewport.set(false);
-    
-    component.openAddTaskDialog('in_progress');
-    
-    expect(component.addTaskStatus()).toBe('in_progress');
-    expect(component.isAddTaskDialogOpen()).toBe(true);
-    expect(router.navigate).not.toHaveBeenCalled();
-  });
+/** Verifies the error state when relation refresh after an update fails. */
+async function shouldHandleTaskRefreshFailure(): Promise<void> {
+  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  taskService.loadAllBoardData.mockRejectedValueOnce(new Error('Fail'));
+  await component.handleTaskUpdated(createDialogUpdate(MOCK_TASKS[0]));
+  expect(component.boardError()).toBe(
+    'Task was saved, but the board could not be refreshed completely.',
+  );
+  consoleSpy.mockRestore();
+}
 
-  /**
-   * @test Verifies routing to the standalone add task page in mobile viewports.
-   */
-  it('should navigate to the add-task route on mobile viewports', () => {
-    mockScrollService.isMobileViewport.set(true);
-    
-    component.openAddTaskDialog('done');
-    
-    expect(router.navigate).toHaveBeenCalledWith(['/add-task'], { queryParams: { status: 'done' } });
-    expect(component.isAddTaskDialogOpen()).toBe(false);
-  });
+/** Verifies active and inactive task-drag state. */
+function shouldToggleDraggingState(): void {
+  getTestAccess().startDragging();
+  expect(component.isDragging()).toBe(true);
+  getTestAccess().stopDragging();
+  expect(component.isDragging()).toBe(false);
+}
 
-  /**
-   * @test Blocks opening the add task dialog if the board is actively updating to prevent state conflicts.
-   */
-  it('should not open Add Task dialog if board is updating', () => {
-    (component as any).isBoardUpdating.set(true);
-    
-    component.openAddTaskDialog('todo');
-    
-    expect(component.isAddTaskDialogOpen()).toBe(false);
-  });
+/** Verifies task movement through the context menu workflow. */
+async function shouldMoveTaskFromContextMenu(): Promise<void> {
+  await getTestAccess().moveTaskToStatus(MOCK_TASKS[0], 'done');
+  expect(taskService.updateTaskPositions).toHaveBeenCalled();
+  expect(component.isBoardUpdating()).toBe(false);
+}
 
-  /**
-   * @test Validates cleanup operations upon closing the Add Task dialog.
-   */
-  it('should close the Add Task dialog and clear selected task states', () => {
-    (component as any).isAddTaskDialogOpen.set(true);
-    mockTaskService.selectedTask.set(MOCK_TASKS[0]);
-    
-    component.closeAddTaskDialog();
-    
-    expect(component.isAddTaskDialogOpen()).toBe(false);
-    expect(mockTaskService.selectedTask()).toBeNull();
-  });
+/** Verifies that an active board update blocks context-menu movement. */
+async function shouldBlockContextMoveWhileUpdating(): Promise<void> {
+  component.isBoardUpdating.set(true);
+  await getTestAccess().moveTaskToStatus(MOCK_TASKS[0], 'done');
+  expect(taskService.updateTaskPositions).not.toHaveBeenCalled();
+}
 
-  /**
-   * @test Ensures that a successful task creation trigger refetches relational board data.
-   */
-  it('should refresh board relations when a task is created', async () => {
-    (component as any).isAddTaskDialogOpen.set(true);
-    
-    await component.handleTaskCreated();
-    
-    expect(component.isAddTaskDialogOpen()).toBe(false);
-    expect(mockTaskService.loadAllBoardData).toHaveBeenCalledTimes(2);
-    expect(mockTaskService.selectedTask()).toBeNull();
-  });
+/** Verifies persistence of a valid drag-and-drop operation. */
+async function shouldProcessDrop(): Promise<void> {
+  await component.drop(createDropEvent());
+  expect(taskService.updateTaskPositions).toHaveBeenCalled();
+}
 
-  /**
-   * @test Verifies that the task dialog opens and binds all related state globally and locally.
-   */
-  it('should open the task dialog and set current state if not suppressed by scroll service', () => {
-    component.openDialog(MOCK_TASKS[0]);
-    
-    expect(component.isDialogOpen()).toBe(true);
-    expect(component.dialogTask()).toEqual(MOCK_TASKS[0]);
-    expect(component.dialogSubtasks().length).toBe(1);
-    expect(component.dialogContacts().length).toBe(1);
-    expect(mockTaskService.selectedTask()).toEqual(MOCK_TASKS[0]);
-  });
+/** Verifies that active search disables drag-and-drop persistence. */
+async function shouldBlockDisabledDrop(): Promise<void> {
+  component.searchTerm.set('Design');
+  await component.drop({} as CdkDragDrop<Task[]>);
+  expect(taskService.updateTaskPositions).not.toHaveBeenCalled();
+}
 
-  /**
-   * @test Verifies scroll service integration correctly suppresses unintended dialog opens during swipe gestures.
-   */
-  it('should abort opening the task dialog if suppressed by horizontal scroll service', () => {
-    mockScrollService.consumeSuppressedCardClick.mockReturnValue(true);
-    
-    component.openDialog(MOCK_TASKS[0]);
-    
-    expect(component.isDialogOpen()).toBe(false);
-    expect(component.dialogTask()).toBeNull();
-  });
+/** Verifies recovery after drag-and-drop persistence fails. */
+async function shouldRecoverFromDropFailure(): Promise<void> {
+  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  taskService.updateTaskPositions.mockRejectedValueOnce(new Error('Update Failed'));
+  await component.drop(createDropEvent());
+  expect(component.boardError()).toBe('Task positions could not be saved.');
+  expect(taskService.getTasks).toHaveBeenCalledTimes(2);
+  expect(component.isBoardUpdating()).toBe(false);
+  consoleSpy.mockRestore();
+}
 
-  /**
-   * @test Verifies the internal subtask array updating logic handles changes correctly without a full reload.
-   */
-  it('should cleanly replace an updated subtask in local arrays without refetching', () => {
-    const updatedSubtask: Subtask = { ...MOCK_SUBTASKS[0], title: 'Yarn Install', isCompleted: false };
-    
-    component.dialogSubtasks.set([...MOCK_SUBTASKS]);
-    
-    component.handleSubtaskUpdated(updatedSubtask);
-    
-    const localAll = component.allSubtasks().find(s => s.id === 'sub-1');
-    const localDialog = component.dialogSubtasks().find(s => s.id === 'sub-1');
-    
-    expect(localAll?.title).toBe('Yarn Install');
-    expect(localAll?.isCompleted).toBe(false);
-    expect(localDialog?.title).toBe('Yarn Install');
-  });
+/**
+ * Creates a task dialog update without relation entries.
+ * @param task - Task included in the dialog update.
+ * @returns Complete dialog update used by board tests.
+ */
+function createDialogUpdate(task: Task): TaskDialogUpdate {
+  return { task, subtasks: [], assignedContacts: [] };
+}
 
-  /**
-   * @test Ensures task deletion filters out orphans in the local relational stores.
-   */
-  it('should wipe orphans from local arrays when a task is deleted', () => {
-    component.handleTaskDeleted('task-1');
-    
-    expect(component.allSubtasks().some(s => s.taskId === 'task-1')).toBe(false);
-    expect(component.allAssignments().some(a => a.task_id === 'task-1')).toBe(false);
-  });
+/** Registers initialization, filtering and relation lookup tests. */
+// prettier-ignore
+function registerDataTests(): void {
+  it('should create the component and load board data on init', shouldCreateAndLoadBoard);
+  it('should set an error message if loading board data fails', shouldHandleLoadFailure);
+  it('should compute task columns correctly based on status', shouldComputeTaskColumns);
+  it('should filter tasks globally when search term is updated', shouldFilterTasks);
+  it('should resolve mapped subtasks for a given task ID', shouldResolveSubtasks);
+  it('should resolve mapped assigned contacts for a given task ID', shouldResolveContacts);
+}
 
-  /**
-   * @test Tests successful relational data refresh upon a task being updated inside the dialog.
-   */
-  it('should handle a dialog task update, set local signals, and refresh relationships', async () => {
-    const dialogUpdate: TaskDialogUpdate = {
-      task: { ...MOCK_TASKS[0], title: 'Refactored' },
-      subtasks: [],
-      assignedContacts: []
-    };
-    
-    await component.handleTaskUpdated(dialogUpdate);
-    
-    expect(component.dialogTask()?.title).toBe('Refactored');
-    expect(component.dialogSubtasks().length).toBe(0);
-    expect(component.dialogContacts().length).toBe(0);
-    expect(mockTaskService.loadAllBoardData).toHaveBeenCalledTimes(2); 
-    expect(component.boardError()).toBe('');
-  });
+/** Registers add-task and task-dialog interaction tests. */
+// prettier-ignore
+function registerDialogTests(): void {
+  it('should open the Add Task dialog on desktop viewports', shouldOpenDesktopAddTaskDialog);
+  it('should navigate to the add-task route on mobile viewports', shouldNavigateToMobileAddTask);
+  it('should not open Add Task dialog if board is updating', shouldBlockAddTaskWhileUpdating);
+  it('should close the Add Task dialog and clear selected task states', shouldCloseAddTaskDialog);
+  it('should refresh board relations when a task is created', shouldRefreshAfterTaskCreation);
+  it('should open the task dialog and set current state if not suppressed by scroll service', shouldOpenTaskDialog);
+  it('should abort opening the task dialog if suppressed by horizontal scroll service', shouldSuppressTaskDialog);
+}
 
-  /**
-   * @test Asserts that failing to refresh relations after an update displays the correct error.
-   */
-  it('should show an error if refreshing relations fails after a task update', async () => {
-    const dialogUpdate: TaskDialogUpdate = { task: MOCK_TASKS[0], subtasks: [], assignedContacts: [] };
-    
-    mockTaskService.loadAllBoardData.mockRejectedValueOnce(new Error('Fail'));
-    
-    await component.handleTaskUpdated(dialogUpdate);
-    
-    expect(component.boardError()).toBe('Task was saved, but the board could not be refreshed completely.');
-  });
+/** Registers local relation and task-update tests. */
+// prettier-ignore
+function registerUpdateTests(): void {
+  it('should cleanly replace an updated subtask in local arrays without refetching', shouldUpdateSubtaskLocally);
+  it('should wipe orphans from local arrays when a task is deleted', shouldRemoveDeletedTaskRelations);
+  it('should handle a dialog task update, set local signals, and refresh relationships', shouldHandleTaskUpdate);
+  it('should show an error if refreshing relations fails after a task update', shouldHandleTaskRefreshFailure);
+}
 
-  /**
-   * @test Ensures that the drag state indicators function correctly.
-   */
-  it('should correctly set isDragging boolean states', () => {
-    (component as any).startDragging();
-    expect(component.isDragging()).toBe(true);
+/** Registers drag state, context-menu and CDK drop tests. */
+// prettier-ignore
+function registerPositionTests(): void {
+  it('should correctly set isDragging boolean states', shouldToggleDraggingState);
+  it('should generate position updates and trigger persistence when a task is moved via context menu', shouldMoveTaskFromContextMenu);
+  it('should abort context menu move if the board is already updating', shouldBlockContextMoveWhileUpdating);
+  it('should process cdkDragDrop events successfully', shouldProcessDrop);
+  it('should abort drop event if dragging is disabled', shouldBlockDisabledDrop);
+  it('should gracefully handle update errors during drag and drop by triggering a reload', shouldRecoverFromDropFailure);
+}
 
-    (component as any).stopDragging();
-    expect(component.isDragging()).toBe(false);
-  });
+/** Registers the complete board component test suite. */
+function registerBoardTests(): void {
+  beforeEach(setupComponent);
+  afterEach(cleanUpComponent);
+  registerDataTests();
+  registerDialogTests();
+  registerUpdateTests();
+  registerPositionTests();
+}
 
-  /**
-   * @test Tests context menu triggered status move workflow.
-   */
-  it('should generate position updates and trigger persistence when a task is moved via context menu', async () => {
-    await (component as any).moveTaskToStatus(MOCK_TASKS[0], 'done');
-    
-    expect(mockTaskService.updateTaskPositions).toHaveBeenCalled();
-    expect(component.isBoardUpdating()).toBe(false);
-  });
-
-  /**
-   * @test Blocks context menu moves while the board is already processing an update.
-   */
-  it('should abort context menu move if the board is already updating', async () => {
-    (component as any).isBoardUpdating.set(true);
-    
-    await (component as any).moveTaskToStatus(MOCK_TASKS[0], 'done');
-    
-    expect(mockTaskService.updateTaskPositions).not.toHaveBeenCalled();
-  });
-
-  /**
-   * @test Verifies that drag and drop events create updates and trigger backend synchronization.
-   */
-  it('should process cdkDragDrop events successfully', async () => {
-    const mockDropEvent = {
-      previousContainer: { id: 'todo' },
-      container: { id: 'in_progress' },
-      previousIndex: 0,
-      currentIndex: 0
-    } as CdkDragDrop<Task[]>;
-
-    await component.drop(mockDropEvent);
-
-    expect(mockTaskService.updateTaskPositions).toHaveBeenCalled();
-  });
-
-  /**
-   * @test Aborts drop operations immediately if dragging is functionally disabled (e.g., active search).
-   */
-  it('should abort drop event if dragging is disabled', async () => {
-    component.searchTerm.set('Design');
-    
-    const mockDropEvent = {} as CdkDragDrop<Task[]>;
-    await component.drop(mockDropEvent);
-
-    expect(mockTaskService.updateTaskPositions).not.toHaveBeenCalled();
-  });
-
-  /**
-   * @test Ensures that a persistence failure during drag/drop logs an error and attempts to resync from the backend.
-   */
-  it('should gracefully handle update errors during drag and drop by triggering a reload', async () => {
-    // 💡 HIER FANGEN WIR DEN CONSOLE-FEHLER AB, DAMIT ER NICHT IM TERMINAL AUFTAUCHT
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    const mockDropEvent = {
-      previousContainer: { id: 'todo' },
-      container: { id: 'in_progress' },
-      previousIndex: 0,
-      currentIndex: 0
-    } as CdkDragDrop<Task[]>;
-
-    mockTaskService.updateTaskPositions.mockRejectedValueOnce(new Error('Update Failed'));
-
-    await component.drop(mockDropEvent);
-
-    expect(component.boardError()).toBe('Task positions could not be saved.');
-    expect(mockTaskService.getTasks).toHaveBeenCalledTimes(2); 
-    expect(component.isBoardUpdating()).toBe(false);
-
-    // Spy wieder aufräumen
-    consoleSpy.mockRestore();
-  });
-});
+describe('Board Component', registerBoardTests);
