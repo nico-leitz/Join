@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+/** Provides the shared page shell layout. */
 @Component({
   selector: 'app-page-shell',
   imports: [],

@@ -1,10 +1,8 @@
 import { Component, inject } from '@angular/core';
-import {
-  RouterLink,
-  RouterLinkActive,
-} from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
+/** Displays the primary navigation and adapts its links to the authentication state. */
 @Component({
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive],
@@ -14,6 +12,5 @@ import { AuthService } from '../../core/services/auth.service';
 export class Sidebar {
   private readonly authService = inject(AuthService);
 
-  protected readonly isAuthenticated =
-    this.authService.isAuthenticated;
+  protected readonly isAuthenticated = this.authService.isAuthenticated;
 }

@@ -1,7 +1,7 @@
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
 /** Minimum number of alphabetic characters required in a name. */
-const MINIMUM_NAME_LETTERS = 6;
+const MINIMUM_NAME_LETTERS = 3;
 
 /** Permits Unicode letters separated by spaces, hyphens or apostrophes. */
 const FULL_NAME_PATTERN = /^\p{L}[\p{L}\p{M}]*(?:[ '\u2019-]\p{L}[\p{L}\p{M}]*)*$/u;

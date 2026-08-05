@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
+/** Displays the application header and manages its user menu. */
 @Component({
   selector: 'app-header',
   imports: [NgOptimizedImage, RouterLink],
@@ -27,8 +28,7 @@ export class Header {
   private readonly authService = inject(AuthService);
 
   protected readonly menuOpen = signal(false);
-  protected readonly isAuthenticated =
-    this.authService.isAuthenticated;
+  protected readonly isAuthenticated = this.authService.isAuthenticated;
 
   protected readonly profileInitials = computed(() => {
     const user = this.authService.currentUser();
@@ -73,6 +73,7 @@ export class Header {
 
   /**
    * Closes the menu after a click outside the header.
+   * @param event - Document click event used to identify the target.
    */
   protected onDocumentClick(event: Event): void {
     const target = event.target;
@@ -88,22 +89,15 @@ export class Header {
 
   /**
    * Creates initials from the first and last name.
+   * @param fullName - Full name used to derive the initials.
+   * @returns Uppercase initials or the default user initial.
    */
   private createInitials(fullName: string): string {
-    const nameParts = fullName
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
+    const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
 
     const firstName = nameParts.at(0) ?? '';
-    const lastName =
-      nameParts.length > 1
-        ? nameParts.at(-1) ?? ''
-        : '';
+    const lastName = nameParts.length > 1 ? (nameParts.at(-1) ?? '') : '';
 
-    return (
-      `${firstName.charAt(0)}${lastName.charAt(0)}`
-        .toUpperCase() || 'U'
-    );
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
   }
 }

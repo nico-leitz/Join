@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+/** Displays the shared user avatar. */
 @Component({
   selector: 'app-user-avatar',
   imports: [],

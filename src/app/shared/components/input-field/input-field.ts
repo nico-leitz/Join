@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+/** Renders the shared input field. */
 @Component({
   selector: 'app-input-field',
   imports: [],

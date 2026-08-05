@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
+/** Displays the primary navigation on mobile devices. */
 @Component({
   selector: 'app-mobile-nav',
   imports: [RouterLink, RouterLinkActive],
