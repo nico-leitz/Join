@@ -13,14 +13,10 @@ const AUTH_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   email_not_confirmed: 'Please confirm your email before logging in.',
   email_exists: 'An account with this email already exists.',
   user_already_exists: 'An account with this email already exists.',
-  weak_password:
-    'Use at least 8 characters, including one uppercase letter and one number.',
-  email_address_invalid:
-    'Enter a valid email address such as name@provider.com.',
-  email_address_not_authorized:
-    'Confirmation emails cannot be sent to this address.',
-  over_email_send_rate_limit:
-    'Too many emails were sent. Please try again later.',
+  weak_password: 'Use at least 8 characters, including one uppercase letter and one number.',
+  email_address_invalid: 'Enter a valid email address such as name@provider.com.',
+  email_address_not_authorized: 'Confirmation emails cannot be sent to this address.',
+  over_email_send_rate_limit: 'Too many emails were sent. Please try again later.',
   over_request_rate_limit: 'Too many requests. Please try again later.',
   anonymous_provider_disabled: 'Guest login is currently unavailable.',
   signup_disabled: 'Registration is currently unavailable.',
@@ -34,7 +30,6 @@ const AUTH_ERROR_MESSAGES: Readonly<Record<string, string>> = {
 
 /**
  * Maps a Supabase authentication error to a safe UI message.
- *
  * @param error - Unknown error returned by an authentication request.
  * @returns Matching user-facing message or the default error message.
  */
