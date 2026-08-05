@@ -35,7 +35,6 @@ export class ContactList implements OnInit {
 
   /**
    * Loads contacts when the component initializes.
-   *
    * @returns A promise that resolves after the initial loading attempt.
    */
   async ngOnInit(): Promise<void> {
@@ -44,7 +43,6 @@ export class ContactList implements OnInit {
 
   /**
    * Loads the contact collection and exposes loading or error state.
-   *
    * @returns A promise that resolves after the loading attempt.
    */
   async loadContacts(): Promise<void> {
@@ -69,7 +67,6 @@ export class ContactList implements OnInit {
 
   /**
    * Stores a contact as the current shared selection.
-   *
    * @param contact - Contact selected by the user.
    */
   getContact(contact: Contact): void {
@@ -78,7 +75,6 @@ export class ContactList implements OnInit {
 
   /**
    * Creates the initials displayed in a contact badge.
-   *
    * @param firstName - The first name of the contact.
    * @param lastName - The last name of the contact.
    * @returns The contact's initials.
@@ -89,7 +85,6 @@ export class ContactList implements OnInit {
 
   /**
    * Checks whether a new alphabetical group begins at an index.
-   *
    * @param index - Index of the contact to inspect.
    * @returns True when a letter header should be rendered.
    */
@@ -103,7 +98,6 @@ export class ContactList implements OnInit {
 
   /**
    * Resolves the uppercase first-name initial used for grouping.
-   *
    * @param index - Index of the requested contact.
    * @returns Uppercase first letter of the contact's first name.
    */

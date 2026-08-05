@@ -1,21 +1,23 @@
-/**
- * @fileoverview Test suite for the ContactList component.
- * This file contains both the mock data and the test logic for component testing.
- */
-
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ContactList } from './contact-list';
-import { ContactService } from '../../../../core/services/contact.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { Contact } from '../../../../core/models/contact.model';
+import { ContactService } from '../../../../core/services/contact.service';
+import { ContactList } from './contact-list';
 
-/**
- * @constant MOCK_CONTACTS
- * @description Example data for tests to cover various scenarios (e.g., missing phone numbers).
- */
-const MOCK_CONTACTS: Contact[] = [
+/** Contact-service surface required by the component tests. */
+interface ContactServiceMock {
+  selectedContact: WritableSignal<Contact | null>;
+  allContacts: WritableSignal<Contact[]>;
+  getContacts: Mock<() => Promise<Contact[]>>;
+  getInitials: Mock<(firstName: string, lastName: string) => string>;
+}
+
+/** Contacts used to verify loading and rendering behavior. */
+const mockContacts: Contact[] = [
   {
     id: '1',
     authUserId: 'user-123',
@@ -70,89 +72,73 @@ const MOCK_CONTACTS: Contact[] = [
     badgeColor: '#880088',
     createdAt: '2023-05-05T08:00:00Z',
     updatedAt: '2023-05-05T08:00:00Z',
-  }
+  },
 ];
 
+let component: ContactList;
+let fixture: ComponentFixture<ContactList>;
+let mockContactService: ContactServiceMock;
+
 /**
- * @description Test suite for the ContactList component.
- * Tests component initialization, data loading, and user interactions.
+ * Creates the contact-service mock used by the test module.
+ * @returns A fresh contact-service mock.
  */
-describe('ContactList Component', () => {
-  let component: ContactList;
-  let fixture: ComponentFixture<ContactList>;
-  let mockContactService: any;
+function createContactServiceMock(): ContactServiceMock {
+  return {
+    selectedContact: signal<Contact | null>(null),
+    allContacts: signal<Contact[]>([]),
+    getContacts: vi.fn<() => Promise<Contact[]>>().mockResolvedValue(mockContacts),
+    getInitials: vi.fn((firstName, lastName) => {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    }),
+  };
+}
 
-  /**
-   * Prepares the test environment before each test.
-   * Configures the test module, injects mocks, and compiles resources.
-   */
-  beforeEach(async () => {
-    // Mock service definition using Vitest spies
-    mockContactService = {
-      selectedContact: signal(null),
-      allContacts: signal([]),
-      getContacts: vi.fn(),
-      getInitials: vi.fn(function(f: string, l: string) {
-        const firstLetter = f[0];
-        const lastLetter = l[0];
-        const combined = firstLetter + lastLetter;
-        
-        return combined.toUpperCase();
-      }),
-      contacts: signal(MOCK_CONTACTS) 
-    };
+/** Configures the standalone contact-list testing module. */
+async function configureTestBed(): Promise<void> {
+  await TestBed.configureTestingModule({
+    imports: [ContactList],
+    providers: [{ provide: ContactService, useValue: mockContactService }],
+  }).compileComponents();
+}
 
-    await TestBed.resetTestingModule();
+/** Creates and renders a contact-list fixture. */
+async function setupComponent(): Promise<void> {
+  mockContactService = createContactServiceMock();
+  await configureTestBed();
+  fixture = TestBed.createComponent(ContactList);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+}
 
-    await TestBed.configureTestingModule({
-      imports: [ContactList],
-      providers: [
-        { provide: ContactService, useValue: mockContactService }
-      ],
-    })
-    // compileComponents() forces the resolution of external templates/styles (JIT mode)
-    .compileComponents();
+/** Verifies successful component creation. */
+function shouldCreateComponent(): void {
+  expect(component).toBeTruthy();
+}
 
-    fixture = TestBed.createComponent(ContactList);
-    component = fixture.componentInstance;
-    
-    fixture.detectChanges();
-  });
+/** Verifies loading contacts into the component state. */
+async function shouldLoadContacts(): Promise<void> {
+  await component.loadContacts();
+  fixture.detectChanges();
+  expect(component.contacts()).toEqual(mockContacts);
+  expect(component.isLoading()).toBe(false);
+}
 
-  /**
-   * @test Checks if the component was successfully instantiated.
-   */
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
+/** Verifies the create-contact output emitted by the desktop button. */
+function shouldRequestContactCreation(): void {
+  const emitSpy = vi.spyOn(component.createContactRequested, 'emit');
+  const button = fixture.debugElement.query(By.css('.contact__button'));
+  expect(button).toBeTruthy();
+  button.triggerEventHandler('click', null);
+  expect(emitSpy).toHaveBeenCalled();
+}
 
-  /**
-   * @test Validates that the component correctly loads contacts from the service.
-   * @async
-   */
-  it('should call loadContacts and populate the list', async () => {
-    mockContactService.getContacts.mockResolvedValue(MOCK_CONTACTS);
-    
-    await component.loadContacts();
-    fixture.detectChanges();
+/** Registers all contact-list component tests. */
+function registerContactListTests(): void {
+  beforeEach(setupComponent);
+  it('should create the component', shouldCreateComponent);
+  it('should call loadContacts and populate the list', shouldLoadContacts);
+  it('should emit createContactRequested when the button is clicked', shouldRequestContactCreation);
+}
 
-    expect(component.contacts()).toEqual(MOCK_CONTACTS);
-    expect(component.isLoading()).toBe(false);
-  });
-
-  /**
-   * @test Checks if the 'createContactRequested' event is emitted when the button is clicked.
-   */
-  it('should emit createContactRequested when the button is clicked', () => {
-    const emitSpy = vi.spyOn(component.createContactRequested, 'emit');
-
-    const button = fixture.debugElement.query(By.css('.contact__button'));
-    
-    if (button) {
-      button.triggerEventHandler('click', null);
-      expect(emitSpy).toHaveBeenCalled();
-    } else {
-      throw new Error('Button .contact__button was not found in the template.');
-    }
-  });
-});
+describe('ContactList Component', registerContactListTests);

@@ -1,10 +1,4 @@
-import {
-  Component,
-  OnInit,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, OnInit, input, output, signal } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -13,10 +7,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import {
-  Contact,
-  UpdateContact,
-} from '../../../../core/models/contact.model';
+import { Contact, UpdateContact } from '../../../../core/models/contact.model';
 
 /**
  * Collects and validates changes to an existing contact.
@@ -62,24 +53,15 @@ export class ContactEditDialog implements OnInit {
   readonly contactForm = new FormGroup({
     fullName: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        this.validateName.bind(this),
-      ],
+      validators: [Validators.required, this.validateName.bind(this)],
     }),
     email: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.email,
-      ],
+      validators: [Validators.required, Validators.email],
     }),
     phone: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.pattern(this.phonePattern),
-      ],
+      validators: [Validators.required, Validators.pattern(this.phonePattern)],
     }),
   });
 
@@ -145,7 +127,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Checks whether the touched full-name field is invalid.
-   *
    * @returns True when the full-name field should display an error.
    */
   hasNameError(): boolean {
@@ -154,7 +135,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Checks whether the touched email field is invalid.
-   *
    * @returns True when the email field should display an error.
    */
   hasEmailError(): boolean {
@@ -163,7 +143,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Checks whether the touched phone field is invalid.
-   *
    * @returns True when the phone field should display an error.
    */
   hasPhoneError(): boolean {
@@ -172,7 +151,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Resolves the current full-name validation message.
-   *
    * @returns A user-facing validation message or an empty string.
    */
   getNameErrorMessage(): string {
@@ -182,6 +160,15 @@ export class ContactEditDialog implements OnInit {
       return '';
     }
 
+    return this.resolveNameErrorMessage(control);
+  }
+
+  /**
+   * Resolves the matching error message for a touched full-name control.
+   * @param control - Full-name control whose validation errors are inspected.
+   * @returns Matching validation message or an empty string.
+   */
+  private resolveNameErrorMessage(control: AbstractControl<string>): string {
     if (control.hasError('required')) {
       return 'Name is required.';
     }
@@ -199,7 +186,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Resolves the current email validation message.
-   *
    * @returns A user-facing validation message or an empty string.
    */
   getEmailErrorMessage(): string {
@@ -222,7 +208,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Resolves the current phone validation message.
-   *
    * @returns A user-facing validation message or an empty string.
    */
   getPhoneErrorMessage(): string {
@@ -245,16 +230,12 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Creates the initials displayed in the edited contact's badge.
-   *
    * @returns Uppercase first-name and last-name initials.
    */
   getInitials(): string {
     const contact = this.contact();
 
-    return (
-      contact.firstName.charAt(0) +
-      contact.lastName.charAt(0)
-    ).toUpperCase();
+    return (contact.firstName.charAt(0) + contact.lastName.charAt(0)).toUpperCase();
   }
 
   /**
@@ -272,7 +253,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Validates the supported characters of a non-empty full name.
-   *
    * @param control - Full-name form control to validate.
    * @returns A matching validation error or null for a valid value.
    */
@@ -284,15 +264,11 @@ export class ContactEditDialog implements OnInit {
     }
 
     if (/\d/.test(fullName)) {
-      return {
-        nameHasNumber: true,
-      };
+      return { nameHasNumber: true };
     }
 
     if (!this.namePattern.test(fullName)) {
-      return {
-        invalidName: true,
-      };
+      return { invalidName: true };
     }
 
     return null;
@@ -300,7 +276,6 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Checks whether a form control was touched and remains invalid.
-   *
    * @param control - Form control whose state should be inspected.
    * @returns True when the control is touched and invalid.
    */
@@ -310,13 +285,10 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Maps the normalized form values to a contact update payload.
-   *
    * @returns Contact changes ready for persistence.
    */
   private createContactPayload(): UpdateContact {
-    const fullNameParts = this.contactForm.controls.fullName.value
-      .trim()
-      .split(/\s+/);
+    const fullNameParts = this.contactForm.controls.fullName.value.trim().split(/\s+/);
 
     const firstName = fullNameParts.shift() ?? '';
 
@@ -330,21 +302,17 @@ export class ContactEditDialog implements OnInit {
 
   /**
    * Removes unsupported phone characters and collapses repeated spaces.
-   *
    * @param phone - Raw phone value entered by the user.
    * @returns Sanitized phone value.
    */
   private createSanitizedPhone(phone: string): string {
-    const validCharactersOnly = phone
-      .replace(/[^\d+\s]/g, '')
-      .replace(/\s+/g, ' ');
+    const validCharactersOnly = phone.replace(/[^\d+\s]/g, '').replace(/\s+/g, ' ');
 
     return this.normalizePhonePlus(validCharactersOnly.trimStart());
   }
 
   /**
    * Keeps one leading plus sign and removes every other plus sign.
-   *
    * @param phone - Phone value whose plus signs should be normalized.
    * @returns Phone value containing at most one leading plus sign.
    */

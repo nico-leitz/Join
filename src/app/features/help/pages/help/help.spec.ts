@@ -1,98 +1,116 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
-import { provideRouter } from '@angular/router';
-import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
-import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest';
-import { Help } from './help';
+import type { WritableSignal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { AuthService } from '../../../../core/services/auth.service';
+import { Help } from './help';
+
+/** Browser-location surface required by the component tests. */
+interface LocationMock {
+  back: Mock<() => void>;
+}
+
+/** Authentication surface required by the shared layout components. */
+interface AuthServiceMock {
+  currentUser: WritableSignal<null>;
+  isAuthenticated: WritableSignal<boolean>;
+  signOut: Mock<() => Promise<boolean>>;
+}
+
+let component: Help;
+let fixture: ComponentFixture<Help>;
+let mockLocation: LocationMock;
+let mockAuthService: AuthServiceMock;
 
 /**
- * @description Unit tests for the Help component.
- * Verifies static content rendering, DOM structure, and the integration
- * of the Angular Location service for backwards navigation.
+ * Creates the browser-location mock used by the test module.
+ * @returns A fresh browser-location mock.
  */
-describe('Help Component', () => {
-  let component: Help;
-  let fixture: ComponentFixture<Help>;
-  let mockLocation: any;
-  let mockAuthService: any;
+function createLocationMock(): LocationMock {
+  return { back: vi.fn() };
+}
 
-  beforeEach(async () => {
-    mockLocation = {
-      back: vi.fn()
-    };
+/**
+ * Creates the authentication mock used by the shared layout.
+ * @returns A fresh authentication-service mock.
+ */
+function createAuthServiceMock(): AuthServiceMock {
+  return {
+    currentUser: signal(null),
+    isAuthenticated: signal(true),
+    signOut: vi.fn<() => Promise<boolean>>().mockResolvedValue(true),
+  };
+}
 
-    /** Mocking AuthService to satisfy dependency requirements of the nested Header and Sidebar components. */
-    mockAuthService = {
-      currentUser: signal(null),
-      isAuthenticated: vi.fn().mockReturnValue(true),
-      logOut: vi.fn()
-    };
+/** Configures the standalone help-page testing module. */
+async function configureTestBed(): Promise<void> {
+  await TestBed.configureTestingModule({
+    imports: [Help],
+    providers: [
+      provideRouter([]),
+      { provide: Location, useValue: mockLocation },
+      { provide: AuthService, useValue: mockAuthService },
+    ],
+  }).compileComponents();
+}
 
-    await TestBed.configureTestingModule({
-      imports: [Help],
-      providers: [
-        provideRouter([]),
-        { provide: Location, useValue: mockLocation },
-        { provide: AuthService, useValue: mockAuthService }
-      ]
-    }).compileComponents();
+/** Creates and renders a help-page fixture. */
+async function setupComponent(): Promise<void> {
+  mockLocation = createLocationMock();
+  mockAuthService = createAuthServiceMock();
+  await configureTestBed();
+  fixture = TestBed.createComponent(Help);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+}
 
-    fixture = TestBed.createComponent(Help);
-    component = fixture.componentInstance;
-    
-    fixture.detectChanges();
+/** Verifies successful component creation. */
+function shouldCreateComponent(): void {
+  expect(component).toBeTruthy();
+}
+
+/** Verifies the rendered help-page title. */
+function shouldRenderTitle(): void {
+  const title = fixture.debugElement.query(By.css('.help-page__title'))
+    .nativeElement as HTMLElement;
+  expect(title.textContent?.trim()).toBe('Help');
+}
+
+/** Verifies programmatic backward navigation. */
+function shouldNavigateBackProgrammatically(): void {
+  component['goBack']();
+  expect(mockLocation.back).toHaveBeenCalled();
+}
+
+/** Verifies backward navigation from the template button. */
+function shouldNavigateBackFromButton(): void {
+  const backButton = fixture.debugElement.query(By.css('.help-page__back'));
+  backButton.triggerEventHandler('click', null);
+  expect(mockLocation.back).toHaveBeenCalled();
+}
+
+/** Verifies the rendered informational section headings. */
+function shouldRenderSectionHeadings(): void {
+  const headings = fixture.debugElement.queryAll(By.css('.help-page__section h2'));
+  const texts = headings.map((heading) => {
+    return (heading.nativeElement as HTMLElement).textContent?.trim();
   });
+  expect(texts).toEqual(['What is Join?', 'How to use it']);
+}
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+/** Registers all help-page component tests. */
+function registerHelpTests(): void {
+  beforeEach(setupComponent);
+  afterEach(() => vi.clearAllMocks());
+  it('should create the component', shouldCreateComponent);
+  it('should render the Help title', shouldRenderTitle);
+  it('should call location.back when goBack is executed', shouldNavigateBackProgrammatically);
+  it('should trigger goBack when the back button is clicked', shouldNavigateBackFromButton);
+  it('should display the informational sections', shouldRenderSectionHeadings);
+}
 
-  /**
-   * @test Ensures the component creates successfully.
-   */
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
-
-  /**
-   * @test Verifies that the hero title is rendered correctly in the DOM.
-   */
-  it('should render the Help title', () => {
-    const titleElement = fixture.debugElement.query(By.css('.help-page__title')).nativeElement;
-    
-    expect(titleElement.textContent.trim()).toBe('Help');
-  });
-
-  /**
-   * @test Verifies that the programmatic navigation method triggers the Location service correctly.
-   */
-  it('should call location.back when goBack is executed programmatically', () => {
-    /** Accessing protected method via bracket notation for testing purposes. */
-    component['goBack']();
-    
-    expect(mockLocation.back).toHaveBeenCalled();
-  });
-
-  /**
-   * @test Ensures that the UI back button is properly bound and triggers the location back navigation.
-   */
-  it('should trigger goBack when the back button is clicked in the template', () => {
-    const backButton = fixture.debugElement.query(By.css('.help-page__back'));
-    backButton.triggerEventHandler('click', null);
-
-    expect(mockLocation.back).toHaveBeenCalled();
-  });
-
-  /**
-   * @test Verifies that key informational sections and their headings are present in the DOM.
-   */
-  it('should display the "What is Join?" and "How to use it" sections', () => {
-    const sectionHeaders = fixture.debugElement.queryAll(By.css('.help-page__section h2'));
-    
-    expect(sectionHeaders.length).toBe(2);
-    expect(sectionHeaders[0].nativeElement.textContent.trim()).toBe('What is Join?');
-    expect(sectionHeaders[1].nativeElement.textContent.trim()).toBe('How to use it');
-  });
-});
+describe('Help Component', registerHelpTests);

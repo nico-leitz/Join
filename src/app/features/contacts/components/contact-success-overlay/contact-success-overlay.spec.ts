@@ -1,55 +1,61 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, expect, it, beforeEach } from 'vitest';
-import { ContactSuccessOverlay } from './contact-success-overlay';
 import { By } from '@angular/platform-browser';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ContactSuccessOverlay } from './contact-success-overlay';
+
+let component: ContactSuccessOverlay;
+let fixture: ComponentFixture<ContactSuccessOverlay>;
+
+/** Configures the standalone success-overlay testing module. */
+async function configureTestBed(): Promise<void> {
+  await TestBed.configureTestingModule({
+    imports: [ContactSuccessOverlay],
+  }).compileComponents();
+}
+
+/** Creates a rendered success-overlay fixture with its required input. */
+async function setupComponent(): Promise<void> {
+  await configureTestBed();
+  fixture = TestBed.createComponent(ContactSuccessOverlay);
+  component = fixture.componentInstance;
+  fixture.componentRef.setInput('message', 'Contact successfully created');
+  fixture.detectChanges();
+}
 
 /**
- * @description Unit tests for the ContactSuccessOverlay component.
- * This suite verifies that the component correctly initializes and 
- * displays the required message input in the DOM.
+ * Returns the rendered overlay element.
+ * @returns The rendered overlay element.
  */
-describe('ContactSuccessOverlay Component', () => {
-  let component: ContactSuccessOverlay;
-  let fixture: ComponentFixture<ContactSuccessOverlay>;
+function getOverlayElement(): HTMLElement {
+  return fixture.debugElement.query(By.css('.contact-success-overlay')).nativeElement;
+}
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [ContactSuccessOverlay],
-    }).compileComponents();
+/** Verifies successful component creation. */
+function shouldCreateComponent(): void {
+  expect(component).toBeTruthy();
+}
 
-    fixture = TestBed.createComponent(ContactSuccessOverlay);
-    component = fixture.componentInstance;
+/** Verifies rendering of the provided message input. */
+function shouldDisplayProvidedMessage(): void {
+  expect(getOverlayElement().textContent?.trim()).toBe('Contact successfully created');
+}
 
-    // A required input must be set before the first detectChanges() call.
-    fixture.componentRef.setInput('message', 'Contact successfully created');
-    fixture.detectChanges();
-  });
+/** Verifies reactive rendering after the message input changes. */
+function shouldUpdateDisplayedMessage(): void {
+  fixture.componentRef.setInput('message', 'Another success message');
+  fixture.detectChanges();
+  expect(getOverlayElement().textContent?.trim()).toBe('Another success message');
+}
 
-  /**
-   * @test Ensures the component creates successfully with the required input.
-   */
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
+/** Registers all success-overlay component tests. */
+function registerContactSuccessOverlayTests(): void {
+  beforeEach(setupComponent);
+  it('should create the component', shouldCreateComponent);
+  it('should display the provided message in the overlay', shouldDisplayProvidedMessage);
+  it(
+    'should update the displayed text when the message input changes',
+    shouldUpdateDisplayedMessage,
+  );
+}
 
-  /**
-   * @test Verifies that the provided message input is correctly rendered in the template.
-   */
-  it('should display the provided message in the overlay', () => {
-    const overlayElement = fixture.debugElement.query(By.css('.contact-success-overlay')).nativeElement;
-    
-    expect(overlayElement.textContent.trim()).toBe('Contact successfully created');
-  });
-
-  /**
-   * @test Ensures the template updates reactively when the input signal changes.
-   */
-  it('should update the displayed text when the message input changes', () => {
-    fixture.componentRef.setInput('message', 'Another success message');
-    fixture.detectChanges();
-
-    const overlayElement = fixture.debugElement.query(By.css('.contact-success-overlay')).nativeElement;
-    
-    expect(overlayElement.textContent.trim()).toBe('Another success message');
-  });
-});
+describe('ContactSuccessOverlay Component', registerContactSuccessOverlayTests);

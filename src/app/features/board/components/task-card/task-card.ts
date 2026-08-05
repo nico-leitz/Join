@@ -1,20 +1,9 @@
 import { SlicePipe } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
 import { TASK_STATUS_OPTIONS } from '../../../../core/constants/task-status.constants';
 import { Contact } from '../../../../core/models/contact.model';
 import { Subtask } from '../../../../core/models/subtask.model';
-import {
-  Task,
-  TaskStatus,
-} from '../../../../core/models/task.model';
+import { Task, TaskStatus } from '../../../../core/models/task.model';
 import { calculateSubtaskProgress } from '../../../../core/utils/subtask-progress.utils';
 
 /**
@@ -36,55 +25,38 @@ import { calculateSubtaskProgress } from '../../../../core/utils/subtask-progres
 })
 export class TaskCard {
   /** Host element used to detect clicks outside the task card. */
-  private readonly elementRef =
-    inject(
-      ElementRef<HTMLElement>,
-    );
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   /** Task represented by the card. */
-  readonly task =
-    input.required<Task>();
+  readonly task = input.required<Task>();
 
   /** Subtasks belonging to the represented task. */
-  readonly subtasks =
-    input<Subtask[]>([]);
+  readonly subtasks = input<Subtask[]>([]);
 
   /** Contacts assigned to the represented task. */
-  readonly assignedContacts =
-    input<Contact[]>([]);
+  readonly assignedContacts = input<Contact[]>([]);
 
   /** Emits when the task detail dialog should be opened. */
-  readonly cardClick =
-    output<void>();
+  readonly cardClick = output<void>();
 
   /** Emits a status selected through the mobile move menu. */
-  readonly moveRequested =
-    output<TaskStatus>();
+  readonly moveRequested = output<TaskStatus>();
 
   /** Completion progress derived from the current subtasks. */
-  readonly progress =
-    computed(() => {
-      return calculateSubtaskProgress(
-        this.subtasks(),
-      );
-    });
+  readonly progress = computed(() => {
+    return calculateSubtaskProgress(this.subtasks());
+  });
 
   /** Human-readable category of the represented task. */
-  readonly categoryLabel =
-    computed(() => {
-      return this.task().category ===
-        'technical_task'
-        ? 'Technical Task'
-        : 'User Story';
-    });
+  readonly categoryLabel = computed(() => {
+    return this.task().category === 'technical_task' ? 'Technical Task' : 'User Story';
+  });
 
   /** Indicates whether the mobile task move menu is open. */
-  protected readonly moveMenuOpen =
-    signal(false);
+  protected readonly moveMenuOpen = signal(false);
 
   /** Status options rendered in the mobile task move menu. */
-  protected readonly taskStatusOptions =
-    TASK_STATUS_OPTIONS;
+  protected readonly taskStatusOptions = TASK_STATUS_OPTIONS;
 
   /**
    * Requests opening the represented task.
@@ -95,32 +67,21 @@ export class TaskCard {
 
   /**
    * Creates uppercase initials for a contact badge.
-   *
    * @param contact - Contact whose initials should be created.
    * @returns Combined first and last name initials.
    */
-  getInitials(
-    contact: Contact,
-  ): string {
-    return (
-      contact.firstName.charAt(0) +
-      contact.lastName.charAt(0)
-    ).toUpperCase();
+  getInitials(contact: Contact): string {
+    return (contact.firstName.charAt(0) + contact.lastName.charAt(0)).toUpperCase();
   }
 
   /**
    * Toggles the mobile move menu without opening the task card.
-   *
    * @param event - Trigger event whose propagation should be stopped.
    */
-  protected toggleMoveMenu(
-    event: Event,
-  ): void {
+  protected toggleMoveMenu(event: Event): void {
     event.stopPropagation();
 
-    this.moveMenuOpen.update(
-      (isOpen) => !isOpen,
-    );
+    this.moveMenuOpen.update((isOpen) => !isOpen);
   }
 
   /**
@@ -132,39 +93,25 @@ export class TaskCard {
 
   /**
    * Emits a requested status move and closes the move menu.
-   *
    * @param event - Trigger event whose propagation should be stopped.
    * @param status - Target board status selected by the user.
    */
-  protected requestMove(
-    event: Event,
-    status: TaskStatus,
-  ): void {
+  protected requestMove(event: Event, status: TaskStatus): void {
     event.stopPropagation();
 
-    this.moveRequested.emit(
-      status,
-    );
+    this.moveRequested.emit(status);
 
     this.closeMoveMenu();
   }
 
   /**
    * Closes the move menu after a click outside the card.
-   *
    * @param event - Document click event to inspect.
    */
-  protected onDocumentClick(
-    event: Event,
-  ): void {
+  protected onDocumentClick(event: Event): void {
     const target = event.target;
 
-    if (
-      target instanceof Node &&
-      !this.elementRef
-        .nativeElement
-        .contains(target)
-    ) {
+    if (target instanceof Node && !this.elementRef.nativeElement.contains(target)) {
       this.closeMoveMenu();
     }
   }

@@ -1,6 +1,6 @@
 /**
- * @fileoverview Logic for the login component.
- * Handles user authentication, guest login, splash screen timing, and password visibility.
+ * Logic for the login component.
+ * Handles authentication, splash timing, and password visibility.
  */
 
 import {
@@ -11,23 +11,18 @@ import {
   OnDestroy,
   signal,
   viewChild,
-} from "@angular/core";
-import {
-  AbstractControl,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
-import { LoginCredentials } from "../../../../core/models/auth.model";
-import { AuthService } from "../../../../core/services/auth.service";
+} from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { LoginCredentials } from '../../../../core/models/auth.model';
+import { AuthService } from '../../../../core/services/auth.service';
+import { strictEmailValidator } from './login.utils';
 
 /** Names of controls belonging to the login form. */
-type LoginControlName = "email" | "password";
+type LoginControlName = 'email' | 'password';
 
 /** Identifies the active login request or an idle state. */
-type LoginMode = "user" | "guest" | null;
+type LoginMode = 'user' | 'guest' | null;
 
 /** Pixel values used as the final splash-logo destination. */
 interface SplashTarget {
@@ -36,70 +31,16 @@ interface SplashTarget {
   width: string;
 }
 
-/** Permits the RFC-compatible characters supported in the local email part. */
-const EMAIL_LOCAL_PART_PATTERN =
-  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*$/;
-
-/** Permits valid provider and subdomain labels. */
-const EMAIL_DOMAIN_LABEL_PATTERN =
-  /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/;
-
-/** Requires an alphabetic top-level domain containing at least two letters. */
-const EMAIL_TOP_LEVEL_DOMAIN_PATTERN = /^[A-Za-z]{2,63}$/;
-
 /**
- * Validates the complete syntactic structure of an email address.
- *
- * @param control - Email control to validate.
- * @returns A strict email error or null when the structure is valid.
- */
-function strictEmailValidator(
-  control: AbstractControl,
-): ValidationErrors | null {
-  const email = String(control.value ?? "").trim();
-
-  if (!email) {
-    return null;
-  }
-
-  const parts = email.split("@");
-
-  if (parts.length !== 2) {
-    return { strictEmail: true };
-  }
-
-  const [localPart, domain] = parts;
-  const domainLabels = domain.split(".");
-  const topLevelDomain = domainLabels.at(-1) ?? "";
-  const providerLabels = domainLabels.slice(0, -1);
-
-  const hasValidLength = email.length <= 254 && localPart.length <= 64;
-  const hasValidLocalPart = EMAIL_LOCAL_PART_PATTERN.test(localPart);
-  const hasValidDomain =
-    providerLabels.length > 0 &&
-    providerLabels.every((label) => EMAIL_DOMAIN_LABEL_PATTERN.test(label));
-  const hasValidTopLevelDomain =
-    EMAIL_TOP_LEVEL_DOMAIN_PATTERN.test(topLevelDomain);
-
-  return hasValidLength &&
-    hasValidLocalPart &&
-    hasValidDomain &&
-    hasValidTopLevelDomain
-    ? null
-    : { strictEmail: true };
-}
-
-/**
- * @description Provides email and anonymous guest authentication.
- *
+ * Provides email and anonymous guest authentication.
  * Manages form validation, authentication requests, splash visibility,
  * password visibility toggling, and navigation to the protected summary page.
  */
 @Component({
-  selector: "app-login",
+  selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: "./login.html",
-  styleUrl: "./login.scss",
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
 })
 export class Login implements OnDestroy {
   /** Tracks whether the splash screen was already displayed. */
@@ -118,8 +59,7 @@ export class Login implements OnDestroy {
   private readonly router = inject(Router);
 
   /** Visible header logo used as the exact splash-animation target. */
-  private readonly headerLogo =
-    viewChild<ElementRef<HTMLImageElement>>("headerLogo");
+  private readonly headerLogo = viewChild<ElementRef<HTMLImageElement>>('headerLogo');
 
   /** Authentication service exposed to the login template. */
   readonly authService = inject(AuthService);
@@ -141,9 +81,9 @@ export class Login implements OnDestroy {
 
   /** Exact viewport position and width of the visible header logo. */
   readonly splashTarget = signal<SplashTarget>({
-    top: "3rem",
-    left: "5rem",
-    width: "5.5rem",
+    top: '3rem',
+    left: '5rem',
+    width: '5.5rem',
   });
 
   /** Indicates whether the password text is currently visible. */
@@ -166,8 +106,8 @@ export class Login implements OnDestroy {
 
   /** Reactive form containing the email login credentials. */
   readonly loginForm = this.formBuilder.group({
-    email: ["", [Validators.required, strictEmailValidator]],
-    password: ["", Validators.required],
+    email: ['', [Validators.required, strictEmailValidator]],
+    password: ['', Validators.required],
   });
 
   /**
@@ -177,7 +117,7 @@ export class Login implements OnDestroy {
     this.authService.clearError();
     this.onResize();
 
-    window.addEventListener("resize", this.onResize);
+    window.addEventListener('resize', this.onResize);
 
     if (Login.hasShownSplash) {
       this.showSplash.set(false);
@@ -206,23 +146,20 @@ export class Login implements OnDestroy {
       window.clearTimeout(this.splashTimer);
     }
 
-    window.removeEventListener("resize", this.onResize);
+    window.removeEventListener('resize', this.onResize);
   }
 
   /**
    * Determines the appropriate icon path for password fields.
-   *
    * @param isFocused - Indicates whether the input field currently holds focus.
    * @param isVisible - Indicates whether the password text is currently unmasked.
    * @returns The relative path to the correct SVG asset.
    */
   getIconSrc(isFocused: boolean, isVisible: boolean): string {
     if (!isFocused && !isVisible) {
-      return "assets/sign-up/lock.svg";
+      return 'assets/sign-up/lock.svg';
     }
-    return isVisible
-      ? "assets/sign-up/visibility.svg"
-      : "assets/sign-up/visibility_off.svg";
+    return isVisible ? 'assets/sign-up/visibility.svg' : 'assets/sign-up/visibility_off.svg';
   }
 
   /**
@@ -234,7 +171,6 @@ export class Login implements OnDestroy {
 
   /**
    * Validates and submits the email login.
-   *
    * @returns A promise that resolves after the login attempt.
    */
   async onSubmit(): Promise<void> {
@@ -250,18 +186,17 @@ export class Login implements OnDestroy {
 
   /**
    * Starts an anonymous guest session.
-   *
    * @returns A promise that resolves after the guest login attempt.
    */
   async onGuestLogin(): Promise<void> {
-    this.activeLogin.set("guest");
+    this.activeLogin.set('guest');
 
     const success = await this.authService.signInAsGuest();
 
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary("guest");
+      await this.navigateToSummary('guest');
     }
   }
 
@@ -276,7 +211,6 @@ export class Login implements OnDestroy {
 
   /**
    * Determines whether a form control error should be displayed.
-   *
    * @param controlName - Name of the control to inspect.
    * @returns True when the control is invalid and should show an error.
    */
@@ -288,24 +222,22 @@ export class Login implements OnDestroy {
 
   /**
    * Sends normalized login credentials to the authentication service.
-   *
    * @returns A promise that resolves after authentication and navigation.
    */
   private async performLogin(): Promise<void> {
-    this.activeLogin.set("user");
+    this.activeLogin.set('user');
 
     const success = await this.authService.signIn(this.buildCredentials());
 
     this.activeLogin.set(null);
 
     if (success) {
-      await this.navigateToSummary("user");
+      await this.navigateToSummary('user');
     }
   }
 
   /**
    * Creates normalized credentials from the current form values.
-   *
    * @returns Credentials accepted by the authentication service.
    */
   private buildCredentials(): LoginCredentials {
@@ -347,13 +279,12 @@ export class Login implements OnDestroy {
     );
   }
 
-  /** Returns whether a splash animation can still be scheduled. */
+  /**
+   * Returns whether a splash animation can still be scheduled.
+   * @returns True when no splash animation is active or queued.
+   */
   private canQueueSplashAnimation(): boolean {
-    return (
-      this.showSplash() &&
-      !this.splashAnimating() &&
-      this.splashStartTimer === undefined
-    );
+    return this.showSplash() && !this.splashAnimating() && this.splashStartTimer === undefined;
   }
 
   /** Refreshes the destination immediately before starting the movement. */
@@ -378,13 +309,12 @@ export class Login implements OnDestroy {
 
   /**
    * Queues the appropriate greeting and navigates to the summary page.
-   *
    * @param mode - Successful user or guest login mode.
    * @returns A promise containing the router navigation result.
    */
   private navigateToSummary(mode: Exclude<LoginMode, null>): Promise<boolean> {
     this.authService.queueSummaryGreeting(mode);
 
-    return this.router.navigate(["/summary"]);
+    return this.router.navigate(['/summary']);
   }
 }
