@@ -9,18 +9,14 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { Task } from '../../../../core/models/task.model';
-import { TaskStatus } from '../../../../core/models/task.model';
+import { Task, TaskStatus } from '../../../../core/models/task.model';
 import { AddTaskContent } from '../add-task-content/add-task-content';
 
 /**
- * Component for a modal dialog that handles the creation of a new task.
- * 
- * @remarks
- * This component manages the lifecycle of the task creation process, including
- * scroll locking, animation timing for closing, and handling success states after task creation.
- * 
- * @public
+ * Manages the modal workflow for creating a task.
+ *
+ * The component controls page scroll locking, close animations, and the
+ * success state shown after a task has been created.
  */
 @Component({
   selector: 'app-add-task-dialog',
@@ -29,73 +25,69 @@ import { AddTaskContent } from '../add-task-content/add-task-content';
   styleUrl: './add-task-dialog.scss',
 })
 export class AddTaskDialog implements OnInit, OnDestroy {
-  /** @internal Duration of the dialog closing animation in milliseconds. */
+  /** Duration of the dialog closing animation in milliseconds. */
   private readonly closeAnimationMs = 200;
 
-  /** @internal Duration to display the success state before closing in milliseconds. */
+  /** Duration of the success state before closing in milliseconds. */
   private readonly successDisplayMs = 800;
 
-  /** @internal Reference to the browser document object. */
+  /** Browser document used to control page scrolling. */
   private readonly document = inject(DOCUMENT);
 
-  /** @internal Stores original body scroll state to restore after dialog closure. */
+  /** Original body overflow value restored after closing. */
   private previousBodyOverflow = '';
-  
-  /** @internal Stores original html scroll state to restore after dialog closure. */
+
+  /** Original document overflow value restored after closing. */
   private previousHtmlOverflow = '';
 
-  /** @internal ID for the dialog close timeout. */
+  /** Identifier of the active close timeout. */
   private closeTimerId: number | undefined;
 
-  /** @internal ID for the success state timeout. */
+  /** Identifier of the active success timeout. */
   private successTimerId: number | undefined;
 
-  /** @internal Holds the reference to the newly created task. */
+  /** Task waiting to be emitted after the dialog closes. */
   private createdTask: Task | null = null;
 
-  /** @internal Reference to the AddTaskContent child component. */
+  /** Child component used to inspect the submission state. */
   @ViewChild(AddTaskContent)
   private addTaskContent?: AddTaskContent;
 
-  /** The initial status for the new task. Defaults to 'todo'. */
+  /** Initial status assigned to the new task. */
   readonly status = input<TaskStatus>('todo');
 
-  /** Event emitted when the dialog is closed. */
+  /** Emits when the dialog closes without a created task. */
   readonly dialogClosed = output<void>();
 
-  /** Event emitted when a new task has been successfully created. */
+  /** Emits the created task after the success sequence finishes. */
   readonly taskCreated = output<Task>();
 
-  /** Signal tracking if the dialog is currently animating to close. */
+  /** Indicates whether the closing animation is active. */
   readonly isClosing = signal(false);
 
-  /** Signal tracking if a task has been successfully created. */
+  /** Indicates whether task creation has completed. */
   readonly hasCreatedTask = signal(false);
 
-  /** @public Lifecycle hook: Initializes page scroll locking. */
+  /** Locks page scrolling when the dialog initializes. */
   ngOnInit(): void {
     this.lockPageScroll();
   }
 
-  /** @public Lifecycle hook: Cleans up timers and restores page scrolling. */
+  /** Clears timers and restores page scrolling during destruction. */
   ngOnDestroy(): void {
     this.clearTimers();
     this.restorePageScroll();
   }
 
   /**
-   * Prevents click propagation from the dialog container.
-   * @param event - The click mouse event.
-   * @protected
+   * Prevents a click inside the dialog from reaching its overlay.
+   * @param event - Click event raised by the dialog element.
    */
   protected handleDialogClick(event: MouseEvent): void {
     event.stopPropagation();
   }
 
-  /**
-   * Closes the dialog if the state allows it.
-   * @protected
-   */
+  /** Closes the dialog when its current state permits it. */
   protected closeDialog(): void {
     if (!this.canCloseDialog()) {
       return;
@@ -107,9 +99,8 @@ export class AddTaskDialog implements OnInit, OnDestroy {
   }
 
   /**
-   * Handles the successful creation of a task, triggering the success display timer.
-   * @param task - The newly created task object.
-   * @protected
+   * Starts the success sequence for a newly created task.
+   * @param task - Newly created task to emit after closing.
    */
   protected handleTaskCreated(task: Task): void {
     if (this.hasCreatedTask()) {
@@ -118,29 +109,20 @@ export class AddTaskDialog implements OnInit, OnDestroy {
 
     this.createdTask = task;
     this.hasCreatedTask.set(true);
-
     this.successTimerId = window.setTimeout(() => {
       this.finishSuccessfulCreation();
     }, this.successDisplayMs);
   }
 
   /**
-   * Checks if the dialog is in a state that allows closing.
-   * @returns True if the dialog can be closed, false otherwise.
-   * @private
+   * Checks whether the dialog may begin closing.
+   * @returns Whether no close, success, or submission flow is active.
    */
   private canCloseDialog(): boolean {
-    return (
-      !this.isClosing() &&
-      !this.hasCreatedTask() &&
-      !this.addTaskContent?.isSubmitting()
-    );
+    return !this.isClosing() && !this.hasCreatedTask() && !this.addTaskContent?.isSubmitting();
   }
 
-  /**
-   * Triggers the close animation after a successful task creation.
-   * @private
-   */
+  /** Completes the success sequence and emits its resulting event. */
   private finishSuccessfulCreation(): void {
     this.startCloseAnimation(() => {
       if (!this.createdTask) {
@@ -153,9 +135,8 @@ export class AddTaskDialog implements OnInit, OnDestroy {
   }
 
   /**
-   * Starts the closing animation and executes the callback upon completion.
-   * @param finished - Callback to execute when the animation completes.
-   * @private
+   * Starts the closing animation and schedules its completion.
+   * @param finished - Callback invoked when the animation finishes.
    */
   private startCloseAnimation(finished: () => void): void {
     if (this.isClosing()) {
@@ -163,26 +144,24 @@ export class AddTaskDialog implements OnInit, OnDestroy {
     }
 
     this.isClosing.set(true);
-
     this.closeTimerId = window.setTimeout(finished, this.closeAnimationMs);
   }
 
-  /** @internal Prevents scrolling on the underlying page. */
+  /** Locks scrolling on the underlying page. */
   private lockPageScroll(): void {
     this.previousBodyOverflow = this.document.body.style.overflow;
     this.previousHtmlOverflow = this.document.documentElement.style.overflow;
-
     this.document.body.style.overflow = 'hidden';
     this.document.documentElement.style.overflow = 'hidden';
   }
 
-  /** @internal Restores previous page scroll state. */
+  /** Restores the page scroll values captured during initialization. */
   private restorePageScroll(): void {
     this.document.body.style.overflow = this.previousBodyOverflow;
     this.document.documentElement.style.overflow = this.previousHtmlOverflow;
   }
 
-  /** @internal Clears all active dialog timers. */
+  /** Clears every timer owned by the dialog. */
   private clearTimers(): void {
     if (this.closeTimerId !== undefined) {
       window.clearTimeout(this.closeTimerId);
