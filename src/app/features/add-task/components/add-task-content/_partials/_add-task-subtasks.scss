@@ -68,7 +68,7 @@
     border-radius: var(--radius-sm);
 
     &::before {
-      content: '•';
+      content: "•";
       flex-shrink: 0;
     }
 
@@ -85,9 +85,22 @@
   &__subtask-title {
     min-width: 0;
     flex: 1;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
+
+    &:focus-visible {
+      border-radius: 2px;
+      outline: 2px solid #29abe2;
+      outline-offset: 2px;
+    }
   }
 
   &__subtask-actions {
@@ -117,7 +130,7 @@
       object-fit: contain;
     }
 
-    img[alt='Save'] {
+    img[alt="Save"] {
       filter: brightness(0) saturate(100%) invert(22%) sepia(10%)
         saturate(2256%) hue-rotate(158deg) brightness(96%) contrast(92%);
     }
