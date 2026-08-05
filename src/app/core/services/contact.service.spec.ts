@@ -1,18 +1,9 @@
-/**
- * @fileoverview Unit tests for the ContactService.
- * Validates data fetching, state management, and contact data mapping.
- */
-
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ContactService } from './contact.service';
-import { SupabaseService } from '../supabase/supabase';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Contact, ContactRow } from '../models/contact.model';
+import { SupabaseService } from '../supabase/supabase';
+import { ContactService } from './contact.service';
 
-/**
- * @constant MOCK_DB_ROWS
- * @description Mock data representing raw database response in snake_case.
- */
 const MOCK_DB_ROWS: ContactRow[] = [
   {
     id: '1',
@@ -35,13 +26,9 @@ const MOCK_DB_ROWS: ContactRow[] = [
     badge_color: '#00ff00',
     created_at: '2023-02-01T12:00:00Z',
     updated_at: '2023-02-01T12:00:00Z',
-  }
+  },
 ];
 
-/**
- * @constant MOCK_APP_CONTACTS
- * @description Mock data representing application state in camelCase.
- */
 const MOCK_APP_CONTACTS: Contact[] = [
   {
     id: '1',
@@ -64,108 +51,93 @@ const MOCK_APP_CONTACTS: Contact[] = [
     badgeColor: '#00ff00',
     createdAt: '2023-02-01T12:00:00Z',
     updatedAt: '2023-02-01T12:00:00Z',
-  }
+  },
 ];
 
-/**
- * @description Test suite for the ContactService.
- */
+const createQueryResolution = (data: unknown, error: Error | null = null) => {
+  return vi.fn((resolve: (value: unknown) => unknown) => resolve({ data, error }));
+};
+
+const createQueryChain = () => ({
+  select: vi.fn().mockReturnThis(),
+  order: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  insert: vi.fn().mockReturnThis(),
+  update: vi.fn().mockReturnThis(),
+  delete: vi.fn().mockReturnThis(),
+  maybeSingle: vi.fn().mockReturnThis(),
+  single: vi.fn().mockReturnThis(),
+  then: createQueryResolution([]),
+});
+
+let service: ContactService;
+let mockQueryChain: ReturnType<typeof createQueryChain>;
+
+const configureTestBed = (): void => {
+  mockQueryChain = createQueryChain();
+  const client = { from: vi.fn().mockReturnValue(mockQueryChain) };
+  TestBed.configureTestingModule({
+    providers: [ContactService, { provide: SupabaseService, useValue: { client } }],
+  });
+  service = TestBed.inject(ContactService);
+};
+
+const shouldCreateService = (): void => {
+  expect(service).toBeTruthy();
+};
+
+const shouldGetInitials = (): void => {
+  expect(service.getInitials('Max ', ' Mustermann')).toBe('MM');
+  expect(service.getInitials(' anna', 'müller ')).toBe('AM');
+};
+
+const shouldLoadContacts = async (): Promise<void> => {
+  mockQueryChain.then = createQueryResolution(MOCK_DB_ROWS);
+  const result = await service.getContacts();
+  expect(result.length).toBe(2);
+  expect(result[0].firstName).toBe('Anna');
+  expect(result[0].authUserId).toBe('user-456');
+};
+
+const shouldRejectLoadingError = async (): Promise<void> => {
+  mockQueryChain.then = createQueryResolution(null, new Error('Database is down'));
+  await expect(service.getContacts()).rejects.toThrow('Database is down');
+};
+
+const shouldLoadContactById = async (): Promise<void> => {
+  mockQueryChain.then = createQueryResolution(MOCK_DB_ROWS[0]);
+  const result = await service.getContactById('1');
+  expect(result?.firstName).toBe('Max');
+};
+
+const shouldReturnNullForMissingContact = async (): Promise<void> => {
+  mockQueryChain.then = createQueryResolution(null);
+  expect(await service.getContactById('999')).toBeNull();
+};
+
+const shouldDeleteContact = async (): Promise<void> => {
+  service.allContacts.set([...MOCK_APP_CONTACTS]);
+  service.selectedContact.set(MOCK_APP_CONTACTS[0]);
+  mockQueryChain.then = createQueryResolution({ id: '1' });
+  await service.deleteContact('1');
+  expect(service.allContacts().length).toBe(1);
+  expect(service.selectedContact()).toBeNull();
+};
+
+beforeEach(configureTestBed);
+
 describe('ContactService', () => {
-  let service: ContactService;
-  let mockQueryChain: any;
+  it('should be created', shouldCreateService);
+  it('should get initials correctly', shouldGetInitials);
+});
 
-  /**
-   * @description Sets up the test environment, mocking the Supabase query builder chain.
-   */
-  beforeEach(() => {
-    mockQueryChain = {
-      select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockReturnThis(),
-      single: vi.fn().mockReturnThis(),
-      then: vi.fn((resolve) => resolve({ data: [], error: null }))
-    };
+describe('contact queries', () => {
+  it('should load all contacts and map them correctly', shouldLoadContacts);
+  it('should throw an error if loading contacts fails', shouldRejectLoadingError);
+  it('should load a single contact by id', shouldLoadContactById);
+  it('should return null if contact is not found', shouldReturnNullForMissingContact);
+});
 
-    const mockSupabaseClient = { from: vi.fn().mockReturnValue(mockQueryChain) };
-
-    TestBed.configureTestingModule({
-      providers: [
-        ContactService,
-        { provide: SupabaseService, useValue: { client: mockSupabaseClient } }
-      ]
-    });
-
-    service = TestBed.inject(ContactService);
-  });
-
-  /**
-   * @test Verifies dependency injection and service instantiation.
-   */
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  /**
-   * @test Validates logic for initials generation.
-   */
-  it('should get initials correctly', () => {
-    expect(service.getInitials('Max ', ' Mustermann')).toBe('MM');
-    expect(service.getInitials(' anna', 'müller ')).toBe('AM');
-  });
-
-  /**
-   * @test Ensures contact data is loaded and mapped correctly, accounting for alphabetical sorting.
-   */
-  it('should load all contacts and map them correctly', async () => {
-    mockQueryChain.then = vi.fn((resolve) => resolve({ data: MOCK_DB_ROWS, error: null }));
-
-    const result = await service.getContacts();
-
-    expect(result.length).toBe(2);
-    // Anna (A) is sorted before Max (M)
-    expect(result[0].firstName).toBe('Anna');
-    expect(result[0].authUserId).toBe('user-456');
-  });
-
-  /**
-   * @test Ensures proper error handling when service request fails.
-   */
-  it('should throw an error if loading contacts fails', async () => {
-    mockQueryChain.then = vi.fn((resolve) => resolve({ data: null, error: new Error('Database is down') }));
-    await expect(service.getContacts()).rejects.toThrow('Database is down');
-  });
-
-  /**
-   * @test Validates single contact retrieval.
-   */
-  it('should load a single contact by id', async () => {
-    mockQueryChain.then = vi.fn((resolve) => resolve({ data: MOCK_DB_ROWS[0], error: null }));
-    const result = await service.getContactById('1');
-    expect(result?.firstName).toBe('Max');
-  });
-
-  /**
-   * @test Validates behavior when a contact is not found.
-   */
-  it('should return null if contact is not found', async () => {
-    mockQueryChain.then = vi.fn((resolve) => resolve({ data: null, error: null }));
-    expect(await service.getContactById('999')).toBeNull();
-  });
-
-  /**
-   * @test Validates contact deletion and state update.
-   */
-  it('should delete a contact and update the local state', async () => {
-    service.allContacts.set([...MOCK_APP_CONTACTS]);
-    service.selectedContact.set(MOCK_APP_CONTACTS[0]);
-    mockQueryChain.then = vi.fn((resolve) => resolve({ data: { id: '1' }, error: null }));
-
-    await service.deleteContact('1');
-    expect(service.allContacts().length).toBe(1);
-    expect(service.selectedContact()).toBeNull();
-  });
+describe('contact mutations', () => {
+  it('should delete a contact and update the local state', shouldDeleteContact);
 });

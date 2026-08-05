@@ -1,33 +1,27 @@
-import { computed, Injectable, inject, OnDestroy, signal } from "@angular/core";
-import { Session } from "@supabase/supabase-js";
-import { mapAuthErrorMessage } from "../mappers/auth-error.mapper";
-import { mapAuthUser } from "../mappers/auth.mapper";
-import { LoginCredentials, SignUpCredentials } from "../models/auth.model";
-import {
-  AuthRepository,
-  AuthSessionData,
-  AuthSubscription,
-} from "../repositories/auth.repository";
+import { computed, Injectable, inject, OnDestroy, signal } from '@angular/core';
+import { Session } from '@supabase/supabase-js';
+import { mapAuthErrorMessage } from '../mappers/auth-error.mapper';
+import { mapAuthUser } from '../mappers/auth.mapper';
+import { LoginCredentials, SignUpCredentials } from '../models/auth.model';
+import { AuthRepository, AuthSessionData, AuthSubscription } from '../repositories/auth.repository';
 
 /**
  * Defines the greeting variants that can be shown after summary navigation.
  */
-type SummaryGreetingMode = "user" | "guest";
+type SummaryGreetingMode = 'user' | 'guest';
 
 /**
  * Manages authentication requests and exposes the current session state.
  */
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class AuthService implements OnDestroy {
   /** Repository used for Supabase authentication operations. */
   private readonly authRepository = inject(AuthRepository);
 
   /** Internal state containing the authenticated application user. */
-  private readonly currentUserState = signal(
-    null as ReturnType<typeof mapAuthUser> | null,
-  );
+  private readonly currentUserState = signal(null as ReturnType<typeof mapAuthUser> | null);
 
   /** Internal state indicating whether an authentication request is running. */
   private readonly loadingState = signal(false);
@@ -39,8 +33,7 @@ export class AuthService implements OnDestroy {
   private readonly errorState = signal<string | null>(null);
 
   /** Internal state containing a queued one-time summary greeting. */
-  private readonly summaryGreetingModeState =
-    signal<SummaryGreetingMode | null>(null);
+  private readonly summaryGreetingModeState = signal<SummaryGreetingMode | null>(null);
 
   /** Active authentication listener subscription. */
   private authSubscription: AuthSubscription | null = null;
@@ -72,7 +65,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Restores the persisted session and starts the auth listener.
-   *
    * @returns Shared promise that resolves when initialization is complete.
    */
   initialize(): Promise<void> {
@@ -83,13 +75,12 @@ export class AuthService implements OnDestroy {
 
   /**
    * Registers a permanent user after privacy acceptance.
-   *
    * @param credentials - Registration credentials and privacy acceptance state.
    * @returns True when registration creates an authenticated session.
    */
   async signUp(credentials: SignUpCredentials): Promise<boolean> {
     if (!credentials.privacyAccepted) {
-      this.errorState.set("Please accept the Privacy Policy.");
+      this.errorState.set('Please accept the Privacy Policy.');
       return false;
     }
 
@@ -98,7 +89,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Signs in with email and password.
-   *
    * @param credentials - Credentials used for the login request.
    * @returns True when an authenticated session was established.
    */
@@ -108,7 +98,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Creates and activates an anonymous guest session.
-   *
    * @returns True when an anonymous session was established.
    */
   signInAsGuest(): Promise<boolean> {
@@ -117,7 +106,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Signs out the active user.
-   *
    * @returns True when the active session was signed out successfully.
    */
   signOut(): Promise<boolean> {
@@ -133,7 +121,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Queues a one-time mobile greeting for the next summary navigation.
-   *
    * @param mode - Greeting variant to queue.
    */
   queueSummaryGreeting(mode: SummaryGreetingMode): void {
@@ -142,7 +129,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Consumes and clears the queued summary greeting mode.
-   *
    * @returns Queued greeting mode or null when no greeting is pending.
    */
   consumeSummaryGreeting(): SummaryGreetingMode | null {
@@ -161,7 +147,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Initializes session state exactly once.
-   *
    * @returns A promise that resolves after session restoration finishes.
    */
   private async initializeAuth(): Promise<void> {
@@ -185,24 +170,19 @@ export class AuthService implements OnDestroy {
       return;
     }
 
-    this.authSubscription = this.authRepository.onAuthStateChange(
-      (_event, session) => {
-        this.setUserFromSession(session);
-      },
-    );
+    this.authSubscription = this.authRepository.onAuthStateChange((_event, session) => {
+      this.setUserFromSession(session);
+    });
   }
 
   /**
    * Completes the registration operation.
-   *
    * @param credentials - Validated registration credentials.
    * @returns True when the registration response contains an active session.
    * @throws The authentication error returned by the repository.
    * @throws An error when the response does not contain a session.
    */
-  private async performSignUp(
-    credentials: SignUpCredentials,
-  ): Promise<boolean> {
+  private async performSignUp(credentials: SignUpCredentials): Promise<boolean> {
     const sessionData = await this.authRepository.signUp(credentials);
 
     return this.applyAuthenticatedSession(sessionData);
@@ -210,7 +190,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Completes the password sign-in operation.
-   *
    * @param credentials - Credentials used for the login request.
    * @returns True when an authenticated session was applied.
    * @throws The authentication error returned by the repository.
@@ -224,7 +203,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Completes the anonymous sign-in operation.
-   *
    * @returns True when an authenticated guest session was applied.
    * @throws The authentication error returned by the repository.
    * @throws An error when the response does not contain a session.
@@ -237,7 +215,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Completes the sign-out operation.
-   *
    * @returns True when the repository signs out successfully.
    * @throws The authentication error returned by the repository.
    */
@@ -250,14 +227,13 @@ export class AuthService implements OnDestroy {
 
   /**
    * Applies a successful authentication response.
-   *
    * @param sessionData - User and session returned by authentication.
    * @returns True after the authenticated user state is updated.
    * @throws An error when the response does not contain a session.
    */
   private applyAuthenticatedSession(sessionData: AuthSessionData): boolean {
     if (!sessionData.session) {
-      throw new Error("Authentication response did not contain a session.");
+      throw new Error('Authentication response did not contain a session.');
     }
 
     this.currentUserState.set(mapAuthUser(sessionData.user));
@@ -267,7 +243,6 @@ export class AuthService implements OnDestroy {
 
   /**
    * Updates the current user from a Supabase session.
-   *
    * @param session - Active Supabase session or null after sign-out.
    */
   private setUserFromSession(session: Session | null): void {
@@ -278,15 +253,11 @@ export class AuthService implements OnDestroy {
 
   /**
    * Executes one authentication request at a time.
-   *
    * @param request - Authentication operation to execute.
    * @param fallback - Value returned when the request is blocked or fails.
    * @returns Request result or the provided fallback value.
    */
-  private async runRequest<T>(
-    request: () => Promise<T>,
-    fallback: T,
-  ): Promise<T> {
+  private async runRequest<T>(request: () => Promise<T>, fallback: T): Promise<T> {
     if (this.loadingState()) {
       return fallback;
     }
