@@ -273,12 +273,18 @@
     white-space: nowrap;
 
     &--primary {
-      background-color: var(--color-text-dark);
+      background-color: #2a3647;
+      border-color: #2a3647;
       color: #ffffff;
 
-      &:hover {
-        background-color: var(--color-cyan);
-        border-color: var(--color-cyan);
+      &:hover:not(:disabled) {
+        background-color: #124658;
+        border-color: #124658;
+      }
+      
+      &:active:not(:disabled) {
+        background-color: #091931;
+        border-color: #091931;
       }
     }
 
