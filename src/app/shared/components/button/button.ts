@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+/** Renders the shared button component. */
 @Component({
   selector: 'app-button',
   imports: [],

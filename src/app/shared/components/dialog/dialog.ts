@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+/** Provides the shared dialog container. */
 @Component({
   selector: 'app-dialog',
   imports: [],
