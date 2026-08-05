@@ -11,11 +11,7 @@ export type TaskCategory = 'technical_task' | 'user_story';
 /**
  * Defines the supported task workflow states.
  */
-export type TaskStatus =
-  | 'todo'
-  | 'in_progress'
-  | 'awaiting_feedback'
-  | 'done';
+export type TaskStatus = 'todo' | 'in_progress' | 'awaiting_feedback' | 'done';
 
 /**
  * Represents a task row returned by the database.
