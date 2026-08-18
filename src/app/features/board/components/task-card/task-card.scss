@@ -290,3 +290,9 @@
     transform: rotate(4deg) scale(1.025);
   }
 }
+
+:host(.cdk-drag-animating) {
+  .task_card {
+    transition: none !important;
+  }
+}

@@ -1,4 +1,11 @@
-import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDropList,
+  CdkDropListGroup,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Contact } from '../../../../core/models/contact.model';
@@ -339,7 +346,8 @@ export class Board implements OnInit {
   }
 
   /**
-   * Persists a task position produced by CDK drag-and-drop.
+   * Instantly updates local data for smooth optimistic UI drag-and-drop animation,
+   * then persists the new task position to the backend.
    * @param event - Drop event containing source and target positions.
    * @returns A promise that resolves after the persistence attempt.
    */
@@ -349,6 +357,17 @@ export class Board implements OnInit {
     }
 
     this.boardError.set('');
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+    }
 
     const error = await this.taskPosition.moveFromDrop(event);
 

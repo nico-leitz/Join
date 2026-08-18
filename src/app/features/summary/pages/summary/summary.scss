@@ -44,7 +44,11 @@ app-header {
 }
 
 app-sidebar {
-  flex: 0 0 auto;
+  position: static;
+  display: block;
+  width: var(--contact-sidebar-width, 232px);
+  height: 100%;
+  flex: 0 0 var(--contact-sidebar-width, 232px);
 }
 
 .summary {
