@@ -66,7 +66,7 @@ app-header {
 
 app-task-card {
   display: block;
-  width: 100%;
+  width: fit-content;
   min-width: 0;
   height: max-content;
   margin: 0;
@@ -672,4 +672,12 @@ app-task-card {
       0.2,
       1
     );
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.2 !important;
+  background: #bfd7f0;
+  border: 4px dotted #999;
+  border-radius: var(--radius-lg, 1.5rem);
+  margin-bottom: 12px;
 }
